@@ -1,0 +1,142 @@
+/* Reset básico: remove margens e preenchimentos padrão */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Layout geral em altura total */
+html, body {
+    height: 100%;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+}
+
+/* Cabeçalho */
+header {
+    background-color: #807f7f;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 auto;
+    height: 60px;
+}
+
+/* Logo */
+.logo img {
+    width: 55px; transform: translateX(-710px);
+}
+.logo2 img {
+    width: 70px; transform: translateX(-710px);
+}
+
+/* Menu */
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+}
+nav ul li a {
+    color: #000;
+    padding: 10px;
+    text-decoration: none;
+}
+nav ul li a:hover {
+    background-color: #444;
+    border-radius: 5px;
+}
+
+/* Slider ocupa espaço entre header e footer */
+.slider {
+    flex: 1 1 auto;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    /*Borda temporaria*/
+    border: 5px solid black;
+}
+
+/* Slides */
+.slides {
+    display: flex;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+}
+.slide {
+    flex: 0 0 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Controles */
+.controls {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+.prev, .next {
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: none;
+    font-size: 30px;
+    padding: 10px;
+    cursor: pointer;
+}
+.prev:hover, .next:hover {
+    background: rgba(0,0,0,0.7);
+}
+
+/* Dots de indicador */
+.indicators {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+.indicators span {
+    width: 10px;
+    height: 10px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+/* Estado ativo */
+.indicators span.active {
+    background-color: #fff;
+    border-color: #fff;
+}
+
+.meio{
+    width: 500px;
+    height: 500px;
+}
+
+/* Rodapé */
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    flex: 0 0 auto;
+    height: 40px;
+}
