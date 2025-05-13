@@ -1,0 +1,263 @@
+/* Importa a fonte Montserrat do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+/* Aplica a todos os elementos: zera margens e padding, define box-sizing e fonte padrão */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Estiliza o corpo da página */
+body {
+    background-image: linear-gradient(90deg, rgba(0, 212, 255, 1) 0%, rgba(2, 115, 214, 1) 56%, rgba(7, 57, 133, 1) 100%);
+    display: flex; /* Centraliza o conteúdo */
+    align-items: center; /* Centraliza os itens verticalmente */
+    justify-content: center; /* Centraliza os itens horizontalmente */
+    flex-direction: column; /* Organiza os itens verticalmente */
+    position: relative; /* Permite o uso de 'top', 'left', etc., para ajustar o elemento */
+    z-index: 0; /* nível de empilhamento padrão */
+    height: 100vh; /* Altura total da tela */
+}
+
+/* Container da imagem do estudante fixado na tela */
+.imagem-estudante {
+    position: fixed; /* Fica fixo na pagina e nao se move quando rola a pagina para cima ou para baixo */
+    top: 10%; /* O elemento será posicionado 10% da altura da janela de visualização a partir do topo. */
+    left: 0; /*Define a distância da borda esquerda do elemento em relação à borda esquerda da janela de visualização.*/
+    transform: translateX(-30%); /* Move o elemento 30% da sua propria largura para esquerda */
+    z-index: 2; /* Fica acima do restante */
+    pointer-events: none; /* A imagem não interfere nos cliques */
+}
+
+/* Define tamanho e ajuste da imagem */
+.imagem-estudante img {
+    max-height: 100vh; /* Altura máxima da imagem é 100% da altura da tela */
+    width: auto;  /* Largura automática */
+    object-fit: contain; /* A imagem será redimensionada para caber no contêiner sem cortar */
+}
+
+/* Define tamanho do logo */
+.logo img {
+    height: 50px; /* Altura */
+    width: 50px;  /* Largura  */
+    margin-bottom: 10px;  /* margem para baixo */
+}
+
+/* Estiliza o container principal do formulário */
+.container {
+    background-color: #fff;
+    border-radius: 30px;   /* arredondar os cantos de um elemento */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35); /* Sombra ao redor */
+    position: relative;
+    overflow: hidden; /* o conteúdo extra que ultrapassar os limites do elemento será ocultado */
+    width: 768px;
+    max-width: 100%;
+    min-height: 480px;
+    margin: auto;
+    transform: translate(250px, 0); /* Desloca para a direita */
+}
+
+/* Estiliza parágrafos dentro do container */
+.container p {
+    font-size: 14px;
+    line-height: 20px;  /* define que a altura de cada linha de texto será 20 pixels. */
+    letter-spacing: 0.3px;   /* aumenta o espaço entre as letras em 0.3 pixels */
+    margin: 20px 0;
+}
+
+/* Estiliza spans dentro do container */
+.container span {
+    font-size: 12px;
+}
+
+/* Estiliza links dentro do container */
+.container a {
+    color: #333;
+    font-size: 13px;
+    text-decoration: none; /* remove o sublinhado do texto */
+    margin: 15px 0 10px;
+}
+
+/* Estiliza botões */
+.container button {
+    background-color: #0273D6;
+    color: #fff;
+    font-size: 12px;
+    padding: 10px 45px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase; /* transforma o texto em maiúsculas */
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+/* Botões ocultos (modo alternar entre login/cadastro) */
+.container button.hidden {
+    background-color: transparent;
+    border-color: #fff;
+}
+
+/* Estiliza os formulários */
+.container form {
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    height: 100%;
+}
+
+/* Estiliza os inputs (campos de entrada) */
+.container input {
+    background-color: #eee;
+    border: none;
+    margin: 8px 0;
+    padding: 10px 15px;
+    font-size: 13px;
+    border-radius: 8px;
+    width: 100%;
+    outline: none;  /* 	Remover a borda de foco de elementos interativos (botões, inputs etc). */
+}
+
+/* Containers de login e cadastro */
+.cadastro-container,
+.login-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;  /* Ocorre uma transiçao suave ao longo de 0.6s, começando devagar e acelerando */
+}
+
+/* Login visível por padrão */
+.logar {
+    left: 0;
+    width: 50%;
+    z-index: 2;
+}
+
+/* Quando o container estiver ativo, move o login */
+.container.active .logar {
+    transform: translateX(100%);
+}
+
+/* Cadastro oculto por padrão */
+.cadastrar {
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 1;
+}
+
+/* Quando o container estiver ativo, mostra o cadastro */
+.container.active .cadastrar {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: move 0.6s; /* aplica a animaçao definida pelo keyframe por 0.6s */
+}
+
+/* Animação de transição entre painéis */
+@keyframes move {
+    0%, 49.99% {
+        opacity: 0;
+        z-index: 1;
+    }
+    50%, 100% {
+        opacity: 1;
+        z-index: 5;
+    }
+}
+
+/* Estiliza os ícones sociais */
+.social-icons {
+    margin: 20px 0;
+}
+
+.social-icons a {
+    border: 1px solid #ccc;
+    border-radius: 20%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 3px;
+    width: 40px;
+    height: 40px;
+}
+
+/* Container do painel de alternância */
+.alternar-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: all 0.6s ease-in-out;
+    border-radius: 150px 0 0 100px;
+    z-index: 1000;
+}
+
+/* Quando ativo, move o painel para a esquerda */
+.container.active .alternar-container {
+    transform: translateX(-100%);
+    border-radius: 0 150px 100px 0;
+}
+
+/* Estiliza a área de transição colorida */
+.alternar {
+    background: linear-gradient(to right, #00D4FF, rgba(7, 57, 133, 1));
+    color: #fff;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+/* Move a transição quando ativo */
+.container.active .alternar {
+    transform: translateX(50%);
+}
+
+/* Estiliza os painéis dentro do alternar */
+.alternar-painel {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 30px;
+    text-align: center;
+    top: 0;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+/* Painel da esquerda inicialmente oculto */
+.alternar-esquerda {
+    transform: translateX(-200%);
+}
+
+/* Quando ativo, exibe o painel esquerdo */
+.container.active .alternar-esquerda {
+    transform: translateX(0);
+}
+
+/* Painel da direita visível por padrão */
+.alternar-direita {
+    right: 0;
+    transform: translateX(0);
+}
+
+/* Quando ativo, oculta o painel da direita */
+.container.active .alternar-direita {
+    transform: translateX(200%);
+}
