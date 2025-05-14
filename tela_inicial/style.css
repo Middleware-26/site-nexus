@@ -29,26 +29,21 @@ header {
     height: 60px;
 }
 
+
 /* Estilo da área de logo (imagem + nome) */
 .logo{
     display: flex;
     align-items: center;         /* alinha verticalmente */
     justify-content: flex-start; /* alinha à esquerda */
-}
 
-/* Estilo do texto "NEXUS" */
-.logo h1{
-    font-size: 20px;
-    color: blue;
-    margin-left: 10px; /* espaçamento entre imagem e texto */
+    margin-left: 5px;
 }
 
 /* Estilo da imagem da logo */
 .logo img{
     max-width: 100%;
-    width: 35px;
+    width: 150px;
     height: auto;
-    display: block;
 }
 
 /* ----------- MENU DE NAVEGAÇÃO ----------- */
