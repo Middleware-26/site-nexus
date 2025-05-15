@@ -1,107 +1,75 @@
-<!DOCTYPE html> <!-- Define o tipo de documento como HTML5 -->
-<html lang="pt-br"> <!-- Define o idioma da página como português do Brasil -->
+<!DOCTYPE html>
+<html lang="pt-br">
 
 <head>
-    <meta charset="UTF-8"> <!-- Define a codificação de caracteres como UTF-8 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Torna a página responsiva -->
-    
-    <!-- Link para o Font Awesome (ícones) -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
-    <!-- Link para o arquivo de estilos CSS externo -->
     <link rel="stylesheet" href="style.css">
-    
-    <title>Nexus</title> <!-- Título da aba do navegador -->
 </head>
 
 <body>
-    <!-- Div com imagem de um estudante -->
     <div class="imagem-estudante">
-        <img src="/logo/estudante.png" alt="Estudante"> <!-- Imagem com texto alternativo -->
+        <img src="/logo/estudante.png" alt="Estudante">
     </div>
-    
-    <!-- Container principal da página -->
+
     <div class="container" id="container">
-        
-        <!-- Formulário de cadastro -->
+        <!-- Cadastro -->
         <div class="cadastro-container cadastrar">
-            <form>
-
-            <!-- Logo do sistema no topo do formulário -->
-            <div class="logo">
-                <a href="#">
-                    <img src="/logo/espiral sem fundo.png" alt="">
-                </a>
-            </div>
-
-                <h1>Crie sua conta!</h1> <!-- Título do formulário -->
-                <input type="text" placeholder="Nome"> <!-- Campo para nome -->
-                <input type="email" placeholder="Email"> <!-- Campo para email -->
-                <input type="password" placeholder="Senha"> <!-- Campo para senha -->
-                
-                <span>ou</span> <!-- Separador visual -->
-
-                <!-- Ícones de redes sociais -->
+            <form id="simpleForm" onsubmit="return validateForm(event)">
+                <div class="logo">
+                    <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
+                </div>
+                <h1>Crie sua conta!</h1>
+                <input type="text" id="name" placeholder="Nome" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Senha" required>
+                <span>ou</span>
                 <div class="social-icons">
                     <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
                     <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
-
-                <button>Registrar-se</button> <!-- Botão de registro -->
+                <button type="submit">Registrar-se</button>
             </form>
         </div>
 
-        <!-- Formulário de login -->
+        <!-- Login -->
         <div class="login-container logar">
             <form>
-
-            <!-- Logo do sistema no topo do formulário -->
-            <div class="logo">
-                <a href="#">
-                    <img src="/logo/espiral sem fundo.png" alt="">
-                </a>
-            </div>
-
-                <h1>Login</h1> <!-- Título do formulário -->
-                <input type="email" placeholder="Email"> <!-- Campo para email -->
-                <input type="password" placeholder="Senha"> <!-- Campo para senha -->
-
-                <span>ou</span> <!-- Separador visual -->
-
-                <!-- Ícones de redes sociais -->
+                <div class="logo">
+                    <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
+                </div>
+                <h1>Login</h1>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Senha" required>
+                <span>ou</span>
                 <div class="social-icons">
                     <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
                     <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
-
-                <button>Entrar</button> <!-- Botão de login -->
-                <a href="#">Esqueceu sua senha?</a> <!-- Link de recuperação de senha -->
+                <button type="submit">Entrar</button>
+                <a href="#">Esqueceu sua senha?</a>
             </form>
         </div>
 
-        <!-- Container para alternar entre login e cadastro -->
+        <!-- Alternância -->
         <div class="alternar-container">
             <div class="alternar">
-                <!-- Painel da esquerda (Login) -->
                 <div class="alternar-painel alternar-esquerda">
                     <h1>Bem-vindo de volta!</h1>
-                    <p>Insira seus dados pessoais 
-                    para acessar nossos recursos!</p>
-                    <button class="hidden" id="login">Login</button> <!-- Botão que ativa o painel de login -->
+                    <p>Insira seus dados pessoais para acessar nossos recursos!</p>
+                    <button class="hidden" id="login">Login</button>
                 </div>
-
-                <!-- Painel da direita (Cadastro) -->
                 <div class="alternar-painel alternar-direita">
                     <h1>Seja bem-vindo!</h1>
-                    <p>Cadastre-se com seus dados pessoais 
-                    para acessar nossos recursos!</p>
-                    <button class="hidden" id="register">Cadastro</button> <!-- Botão que ativa o painel de cadastro -->
+                    <p>Cadastre-se com seus dados pessoais para acessar nossos recursos!</p>
+                    <button class="hidden" id="register">Cadastro</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Link para o script JavaScript -->
     <script src="script.js"></script>
 </body>
 

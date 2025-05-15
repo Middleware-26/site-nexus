@@ -9,6 +9,7 @@
     font-family: 'Montserrat', sans-serif;
 }
 
+
 /* Estiliza o corpo da página */
 body {
     background-image: linear-gradient(90deg, rgba(0, 212, 255, 1) 0%, rgba(2, 115, 214, 1) 56%, rgba(7, 57, 133, 1) 100%);
@@ -57,6 +58,81 @@ body {
     min-height: 480px;
     margin: auto;
     transform: translate(250px, 0); /* Desloca para a direita */
+}
+
+/* Estiliza o container principal do formulário */
+.container2 {
+    background-color: #fff;
+    border-radius: 30px;   /* arredondar os cantos de um elemento */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35); /* Sombra ao redor */
+    position: relative;
+    overflow: hidden; /* o conteúdo extra que ultrapassar os limites do elemento será ocultado */
+    width: 700px;
+    max-width: 100%;
+    min-height: 600px;
+    margin: auto;
+}
+
+.logo2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+/* Define tamanho do logo */
+.logo2 img {
+    height: 100px; /* Altura */
+    width: 200px;  /* Largura  */
+}
+
+.oquetué {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 50px;
+}
+
+
+.oquetué h1 {
+    font-size: 25px;
+    display: flex;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}	
+
+
+.tué {
+    font-size: 25px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    
+}
+
+.container2 input {
+    background-color: #eee;
+    border: 1px solid black;
+    margin: 8px 0;
+    padding: 10px 15px;
+    font-size: 13px;
+    border-radius: 8px;
+    outline: none;  /* 	Remover a borda de foco de elementos interativos (botões, inputs etc). */
+}
+
+.container2 button {
+    background-color: #0273D6;
+    color: #fff;
+    font-size: 12px;
+    padding: 10px 45px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase; /* transforma o texto em maiúsculas */
+    margin-top: 10px;
+    cursor: pointer;
 }
 
 /* Estiliza parágrafos dentro do container */
