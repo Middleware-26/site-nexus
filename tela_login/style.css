@@ -12,7 +12,8 @@
 
 /* Estiliza o corpo da página */
 body {
-    background-image: linear-gradient(90deg, rgba(0, 212, 255, 1) 0%, rgba(2, 115, 214, 1) 56%, rgba(7, 57, 133, 1) 100%);
+    background-image: url(../logo/adolecenteepsicologo.jpg);
+    background-image: cover;
     display: flex; /* Centraliza o conteúdo */
     align-items: center; /* Centraliza os itens verticalmente */
     justify-content: center; /* Centraliza os itens horizontalmente */
@@ -20,24 +21,37 @@ body {
     position: relative; /* Permite o uso de 'top', 'left', etc., para ajustar o elemento */
     z-index: 0; /* nível de empilhamento padrão */
     height: 100vh; /* Altura total da tela */
+    background-repeat: no-repeat;
+}
+
+body::before{
+    content: '';
+     background-image: linear-gradient(90deg, rgba(0, 212, 255, 0.4) 0%, rgba(2, 115, 214, 0.4) 56%, rgba(7, 57, 133, 0.4) 100%);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 /* Container da imagem do estudante fixado na tela */
 .imagem-estudante {
     position: fixed; /* Fica fixo na pagina e nao se move quando rola a pagina para cima ou para baixo */
-    top: 10%; /* O elemento será posicionado 10% da altura da janela de visualização a partir do topo. */
-    left: 0; /*Define a distância da borda esquerda do elemento em relação à borda esquerda da janela de visualização.*/
-    transform: translateX(-30%); /* Move o elemento 30% da sua propria largura para esquerda */
-    z-index: 2; /* Fica acima do restante */
+    top: 0;
+    display: flex;
     pointer-events: none; /* A imagem não interfere nos cliques */
 }
 
 /* Define tamanho e ajuste da imagem */
 .imagem-estudante img {
-    max-height: 100vh; /* Altura máxima da imagem é 100% da altura da tela */
-    width: auto;  /* Largura automática */
+    width: 45vh;
+    transform: translateY(-20%);
+    align-items: center;
     object-fit: contain; /* A imagem será redimensionada para caber no contêiner sem cortar */
 }
+
 
 /* Define tamanho do logo */
 .logo img {
@@ -57,7 +71,6 @@ body {
     max-width: 100%;
     min-height: 480px;
     margin: auto;
-    transform: translate(250px, 0); /* Desloca para a direita */
 }
 
 /* Estiliza o container principal do formulário */
