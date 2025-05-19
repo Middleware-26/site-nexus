@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class', // Garante que o modo escuro usa a classe 'dark'
-    };
+    tailwind.config = { darkMode: 'class' };
   </script>
   <title>Dashboard</title>
   <style>
@@ -22,28 +20,31 @@
 <body class="relative bg-neutral-100 text-gray-800 dark:bg-neutral-900 dark:text-gray-100 transition-colors">
 
   <!-- Cabeçalho principal -->
-  <header id="main-header" class="bg-slate-900 p-6 flex items-center">
+  <header id="main-header" class="bg-slate-900 p-6 flex items-center justify-between h-16">
     <button class="flex flex-col gap-1.5 w-6 text-white" onclick="abrirMenu()">
       <span class="h-0.5 w-full bg-white"></span>
       <span class="h-0.5 w-full bg-white"></span>
       <span class="h-0.5 w-full bg-white"></span>
     </button>
+    <!-- Logo no canto direito -->
+    <img src="imagens/Sem nomeee.png" alt="Logo" class="h-10 object-contain" />
   </header>
 
   <!-- Sidebar: slide + fade -->
   <div id="sidebar"
        class="fixed left-0 top-0 h-full w-64 bg-neutral-700
-              transform -translate-x-full opacity-0 z-50">
+              transform -translate-x-full opacity-0 z-50"
+       onmouseleave="fecharMenu()">
     <div id="sidebar-header" class="bg-slate-600 p-6 rounded-b-lg">
-      <div class="flex justify-end">
-        <button onclick="abrirMenu()"
-                class="text-white text-lg hover:bg-slate-500 px-2 rounded">✕</button>
+      <div class="flex items-center justify-end gap-2">
+        <img src="imagens/seta_branca.png" alt="Seta" class="w-6 h-6 object-contain">
+        <span class="text-white text-sm">automático</span>
       </div>
     </div>
 
     <div class="p-6 flex flex-col items-center text-white">
       <img id="avatarPreview"
-           src="avatar/padrao.jpg"
+           src="imagens/padrao.jpg"
            alt="Foto de perfil"
            class="w-32 h-32 rounded-full border-4 border-gray-300 object-cover mb-4"/>
 
@@ -51,8 +52,7 @@
         <h2 id="userName" class="text-lg font-semibold text-center">
           Usuário Padrão
         </h2>
-        <h1 class="text-center text-sm text-gray-300">Colégio: xxxx
-        </h1>
+        <h1 class="text-center text-sm text-gray-300">Colégio: xxxx</h1>
       </div>
 
       <!-- Switch Claro/Escuro -->
@@ -65,38 +65,10 @@
       </div>
 
       <nav class="w-full space-y-2 mt-6">
-        <!-- Link direto à página de configuração -->
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">
-          Sobre
-        </a>
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">
-          Contato
-        </a>
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">
-         xxxx
-        </a>
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">
-          yyyy
-        </a>
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">
-          zzzz
-        </a>
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">
-          1111
-        </a>
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">
-          2222
-        </a>
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">
-          3333
-        </a>
-                <a href="configuracao.html"
-           class="block py-3 px-4 rounded-lg bg-gray-800 text-white
-                  text-center font-semibold shadow-md hover:bg-gray-700
-                  transform hover:scale-105 transition-all duration-300">
-          Configuração
-        </a>
-        
+        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">Sobre</a>
+        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">Contato</a>
+        <!-- Demais links -->
+        <a href="configuracao.html" class="block py-3 px-4 rounded-lg bg-gray-800 text-white text-center font-semibold shadow-md hover:bg-gray-700 transform hover:scale-105 transition-all duration-300">Configuração</a>
       </nav>
     </div>
   </div>
@@ -118,6 +90,13 @@
       sidebar.classList.toggle('opacity-0');
       sidebar.classList.toggle('translate-x-0');
       sidebar.classList.toggle('opacity-100');
+    }
+
+    function fecharMenu() {
+      sidebar.classList.add('-translate-x-full');
+      sidebar.classList.add('opacity-0');
+      sidebar.classList.remove('translate-x-0');
+      sidebar.classList.remove('opacity-100');
     }
 
     function syncSidebarHeaderHeight() {
