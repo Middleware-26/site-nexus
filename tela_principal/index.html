@@ -15,11 +15,29 @@
     #sidebar {
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
+
+    /*previno um flash de mudança de tema ao recarregar a página*/
+    html {
+      visibility: hidden;
+    }
   </style>
+  <script>
+    (function(){
+      const savedTheme = localStorage.getItem('theme');
+      const isDark = savedTheme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.classList.toggle('light', !isDark);
+      document.documentElement.style.visibility = 'visible';
+    })();
+  </script>
+
 </head>
 <body class="relative bg-neutral-100 text-gray-800 dark:bg-neutral-900 dark:text-gray-100 transition-colors">
 
   <!-- Cabeçalho principal -->
+   <!--Sem controle, os itens se organizam pela sua quantidade. 
+   Se quiser organizar, é preciso tirar o justify-between h-16 da primeira linha.
+   E adicionar: absolute, right-0, pr-2, na linha do src img. -->
   <header id="main-header" class="bg-slate-900 p-6 flex items-center justify-between h-16">
     <button class="flex flex-col gap-1.5 w-6 text-white" onclick="abrirMenu()">
       <span class="h-0.5 w-full bg-white"></span>
