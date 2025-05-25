@@ -2,138 +2,66 @@
 <html lang="pt-br">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexus</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
-
-  <style>
-    /* EFEITO DE RAIOS COLORIDOS (ORIGINAL) */
-    .background-rays {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 200%;
-      height: 200%;
-      background: conic-gradient(from 0deg, #00f0ff, #ff00ff, #00ffcc, #00f0ff);
-      filter: blur(120px);
-      z-index: -1;
-      animation: rotateBackground 8s linear infinite;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
-
-    @keyframes rotateBackground {
-      0% {
-        transform: translate(-50%, -50%) rotate(0deg);
-      }
-      100% {
-        transform: translate(-50%, -50%) rotate(360deg);
-      }
-    }
-
-    /* EFEITO PEQUENO E CENTRALIZADO */
-    .login-glow-effect {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 200px;  /* Tamanho reduzido */
-      height: 200px;
-      background: radial-gradient(
-        circle at center,
-        rgba(0, 240, 255, 0.6) 0%,
-        rgba(255, 0, 255, 0.6) 50%,
-        rgba(0, 255, 204, 0.6) 100%
-      );
-      filter: blur(40px);
-      z-index: 0;
-      border-radius: 50%;
-      pointer-events: none;
-      animation: 
-        rotateEffect 12s linear infinite,
-        pulseEffect 4s ease-in-out infinite alternate;
-    }
-
-    @keyframes rotateEffect {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    @keyframes pulseEffect {
-      0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.9) rotate(0deg); }
-      100% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.1) rotate(0deg); }
-    }
-
-    /* CONTAINER PRINCIPAL */
-    #container {
-      position: relative;
-      z-index: 1;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <!-- PLANO DE FUNDO ORIGINAL -->
-  <div class="background-rays"></div>
 
-  <!-- EFEITO PEQUENO E CENTRALIZADO -->
-  <div class="login-glow-effect"></div>
-
-  <div class="imagem-estudante">
-    <img src="/logo/Sem nomeee.png" alt="Estudante">
-  </div>
-
-  <div class="container" id="container">
-    <!-- Cadastro -->
-    <div class="cadastro-container cadastrar">
-      <form id="simpleForm" onsubmit="return validateForm(event)">
-        <div class="logo">
-          <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
-        </div>
-        <h1>Crie sua conta!</h1>
-        <input type="text" id="name" placeholder="Nome" required>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Senha" required>
-        <button type="submit">Registrar-se</button>
-      </form>
+    <div class="imagem-estudante">
+        <img src="/logo/Sem nomeee.png" alt="Estudante">
     </div>
 
-    <!-- Login -->
-    <div class="login-container logar">
-      <form>
-        <div class="logo">
-          <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
+    <div class="container" id="container">
+        <!-- Cadastro -->
+        <div class="cadastro-container cadastrar">
+            <form id="simpleForm" onsubmit="return validateForm(event)">
+                <div class="logo">
+                    <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
+                </div>
+                <h1>Crie sua conta!</h1>
+                <input type="text" id="name" placeholder="Nome" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Senha" required>
+                <button type="submit">Registrar-se</button>
+            </form>
         </div>
-        <h1>Login</h1>
-        <input type="email" placeholder="Email" required>
-        <input type="password" placeholder="Senha" required>
-        <button type="submit">Entrar</button>
-        <div class="login-links">
-          <a href="#">Esqueceu sua senha?</a>
-          <a href="#">Cadastre-se</a>
+
+        <!-- Login -->
+        <div class="login-container logar">
+            <form>
+                <div class="logo">
+                    <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
+                </div>
+                <h1>Login</h1>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+                <a href="#">Esqueceu sua senha?</a>
+            </form>
         </div>
-      </form>
+
+        <!-- Alternância -->
+        <div class="alternar-container">
+            <div class="alternar">
+                <div class="alternar-painel alternar-esquerda">
+                    <h1>Bem-vindo de volta!</h1>
+                    <p>Insira seus dados pessoais para acessar nossos recursos!</p>
+                    <button class="hidden" id="login">Login</button>
+                </div>
+                <div class="alternar-painel alternar-direita">
+                    <h1>Seja bem-vindo!</h1>
+                    <p>Cadastre-se com seus dados pessoais para acessar nossos recursos!</p>
+                    <button class="hidden" id="register">Cadastro</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Alternância -->
-    <div class="alternar-container">
-      <div class="alternar">
-        <div class="alternar-painel alternar-esquerda">
-          <h1>Bem-vindo de volta!</h1>
-          <p>Insira seus dados pessoais para acessar nossos recursos!</p>
-          <button class="hidden" id="login">Login</button>
-        </div>
-        <div class="alternar-painel alternar-direita">
-          <h1>Seja bem-vindo!</h1>
-          <p>Cadastre-se com seus dados pessoais para acessar nossos recursos!</p>
-          <button class="hidden" id="register">Cadastro</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>
