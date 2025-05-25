@@ -9,6 +9,19 @@
   </script>
   <title>Dashboard</title>
   <style>
+    #notifList {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#notifList.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
     #sidebar-header {
       transition: height 0.2s ease, background-color 0.3s ease;
     }
@@ -47,6 +60,46 @@
     <!-- Logo no canto direito -->
     <img src="imagens/Sem nomeee.png" alt="Logo" class="h-10 object-contain" />
   </header>
+
+  <!-- Botão de Notificações posicionado abaixo da logo Nexus-->
+  <div class="absolute top-20 right-6 z-40">
+    <button id="notifButton" class="relative p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 focus:outline-none transition-transform duration-150 ease-in-out hover:scale-110">
+      <!--desenho do botão, q bagui zuado viu--
+    esse "d" abbaido define o caminho de desenho de um ícone vetorial, esse tipo de código normalmente é usado com bibliotecsa de ícones como Heroicons, muito comum com Tailwind CSS-->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118
+                 14.158V11a6.002 6.002 0 00-4-5.659V5a2
+                 2 0 10-4 0v.341C7.67 6.165 6 8.388 6
+                 11v3.159c0 .538-.214 1.055-.595
+                 1.436L4 17h5m6 0v1a3 3 0 11-6
+                 0v-1m6 0H9" />
+      </svg>
+      <span id="notifCount" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold text-red-100 bg-red-600 rounded-full">3</span>
+    </button>
+    <div id="notifList" class="absolute right-0 mt-2 w-64 bg-white dark:bg-neutral-800 rounded-lg shadow-lg overflow-hidden z-50">
+      <div class="p-4 border-b dark:border-neutral-700">
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Notificações</h3>
+      </div>
+      <ul class="divide-y divide-gray-200 dark:divide-neutral-700 max-h-56 overflow-y-auto">
+        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
+          <p class="text-sm">🔔 Nova mensagem de Paulo</p>
+          <span class="text-xs text-gray-500">5 min atrás</span>
+        </li>
+        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
+          <p class="text-sm">🔔 Sistema atualizado</p>
+          <span class="text-xs text-gray-500">1 hora atrás</span>
+        </li>
+        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
+          <p class="text-sm">🔔 Lembrete: Reunião às 15h</p>
+          <span class="text-xs text-gray-500">Hoje, 08:00</span>
+        </li>
+      </ul>
+      <div class="p-2 text-center">
+        <a href="#" class="text-sm text-slate-600 dark:text-gray-400 hover:underline">Ver todas</a>
+      </div>
+    </div>
+  </div>
 
   <!-- Sidebar: slide + fade -->
   <div id="sidebar"
@@ -146,6 +199,38 @@
 
     themeToggle.addEventListener('change', toggleTheme);
     window.addEventListener('resize', syncSidebarHeaderHeight);
+    
+        // Funções de notificação
+function toggleNotifs() {
+  const list = document.getElementById('notifList');
+  list.classList.toggle('show');
+}
+
+
+document.addEventListener('click', (e) => {
+  const btn = document.getElementById('notifButton');
+  const list = document.getElementById('notifList');
+  if (!btn.contains(e.target) && !list.contains(e.target)) {
+    list.classList.remove('show');
+  }
+});
+
+
+    document.getElementById('notifButton').addEventListener('click', toggleNotifs);
+
+        // Seleciona o container do botão de notificação
+    const notifContainer = document.getElementById('notifButton').parentNode;
+    const notifList = document.getElementById('notifList');
+
+    // Abre ao passar o mouse sobre o container
+notifContainer.addEventListener('mouseenter', () => {
+  notifList.classList.add('show');
+});
+
+notifContainer.addEventListener('mouseleave', () => {
+  notifList.classList.remove('show');
+});
+
   </script>
 </body>
 </html>
