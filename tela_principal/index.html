@@ -3,234 +3,206 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = { darkMode: 'class' };
   </script>
-  <title>Dashboard</title>
+  <title>Aluno</title>
   <style>
-    #notifList {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  transform: translateY(-10px);
-  opacity: 0;
-  pointer-events: none;
-}
-
-#notifList.show {
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-
     #sidebar-header {
       transition: height 0.2s ease, background-color 0.3s ease;
     }
     #sidebar {
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
-
-    /*previno um flash de mudança de tema ao recarregar a página*/
+    /* previno flash de mudança de tema */
     html {
       visibility: hidden;
     }
   </style>
-  <script>
-    (function(){
-      const savedTheme = localStorage.getItem('theme');
-      const isDark = savedTheme === 'dark';
-      document.documentElement.classList.toggle('dark', isDark);
-      document.documentElement.classList.toggle('light', !isDark);
-      document.documentElement.style.visibility = 'visible';
-    })();
-  </script>
-
 </head>
-<body class="relative bg-neutral-100 text-gray-800 dark:bg-neutral-900 dark:text-gray-100 transition-colors">
+<body class="relative bg-neutral-200 text-gray-800 dark:bg-neutral-900 dark:text-gray-100 transition-colors">
 
   <!-- Cabeçalho principal -->
-   <!--Sem controle, os itens se organizam pela sua quantidade. 
-   Se quiser organizar, é preciso tirar o justify-between h-16 da primeira linha.
-   E adicionar: absolute, right-0, pr-2, na linha do src img. -->
-  <header id="main-header" class="bg-slate-900 p-6 flex items-center justify-between h-16">
+  <header id="main-header"
+          class="bg-blue-500 dark:bg-blue-800 p-6 flex items-center justify-between h-16">
     <button class="flex flex-col gap-1.5 w-6 text-white" onclick="abrirMenu()">
       <span class="h-0.5 w-full bg-white"></span>
       <span class="h-0.5 w-full bg-white"></span>
       <span class="h-0.5 w-full bg-white"></span>
     </button>
-    <!-- Logo no canto direito -->
     <img src="imagens/Sem nomeee.png" alt="Logo" class="h-10 object-contain" />
   </header>
 
-  <!-- Botão de Notificações posicionado abaixo da logo Nexus-->
-  <div class="absolute top-20 right-6 z-40">
-    <button id="notifButton" class="relative p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 focus:outline-none transition-transform duration-150 ease-in-out hover:scale-110">
-      <!--desenho do botão, q bagui zuado viu--
-    esse "d" abbaido define o caminho de desenho de um ícone vetorial, esse tipo de código normalmente é usado com bibliotecsa de ícones como Heroicons, muito comum com Tailwind CSS-->
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118
-                 14.158V11a6.002 6.002 0 00-4-5.659V5a2
-                 2 0 10-4 0v.341C7.67 6.165 6 8.388 6
-                 11v3.159c0 .538-.214 1.055-.595
-                 1.436L4 17h5m6 0v1a3 3 0 11-6
-                 0v-1m6 0H9" />
-      </svg>
-      <span id="notifCount" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold text-red-100 bg-red-600 rounded-full">3</span>
-    </button>
-    <div id="notifList" class="absolute right-0 mt-2 w-64 bg-white dark:bg-neutral-800 rounded-lg shadow-lg overflow-hidden z-50">
-      <div class="p-4 border-b dark:border-neutral-700">
-        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Notificações</h3>
-      </div>
-      <ul class="divide-y divide-gray-200 dark:divide-neutral-700 max-h-56 overflow-y-auto">
-        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
-          <p class="text-sm">🔔 Nova mensagem de Paulo</p>
-          <span class="text-xs text-gray-500">5 min atrás</span>
-        </li>
-        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
-          <p class="text-sm">🔔 Sistema atualizado</p>
-          <span class="text-xs text-gray-500">1 hora atrás</span>
-        </li>
-        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
-          <p class="text-sm">🔔 Lembrete: Reunião às 15h</p>
-          <span class="text-xs text-gray-500">Hoje, 08:00</span>
-        </li>
-      </ul>
-      <div class="p-2 text-center">
-        <a href="#" class="text-sm text-slate-600 dark:text-gray-400 hover:underline">Ver todas</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sidebar: slide + fade -->
+  <!-- Sidebar -->
   <div id="sidebar"
-       class="fixed left-0 top-0 h-full w-64 bg-neutral-700
+       class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-neutral-800
+              shadow-xl shadow-gray-500/30 dark:shadow-black/40
               transform -translate-x-full opacity-0 z-50"
        onmouseleave="fecharMenu()">
-    <div id="sidebar-header" class="bg-slate-600 p-6 rounded-b-lg">
-      <div class="flex items-center justify-end gap-2">
-        <img src="imagens/seta_branca.png" alt="Seta" class="w-6 h-6 object-contain">
-        <span class="text-white text-sm">automático</span>
-      </div>
+
+    <div id="sidebar-header" class="bg-blue-500 dark:bg-blue-800 p-6 flex justify-center items-center">
+      <img src="imagens/Sem nomeee.png" alt="Seta" class="w-20 h-20 object-contain">
     </div>
 
-    <div class="p-6 flex flex-col items-center text-white">
+    <div class="p-6 flex flex-col items-center text-black dark:text-gray-100">
       <img id="avatarPreview"
            src="imagens/padrao.jpg"
            alt="Foto de perfil"
-           class="w-32 h-32 rounded-full border-4 border-gray-300 object-cover mb-4"/>
+           class="w-32 h-32 rounded-full border-4 border-black dark:border-gray-300 object-cover mb-4"/>
 
       <div class="flex flex-col items-center mb-6">
-        <h2 id="userName" class="text-lg font-semibold text-center">
-          Usuário Padrão
-        </h2>
-        <h1 class="text-center text-sm text-gray-300">Colégio: xxxx</h1>
-      </div>
-
-      <!-- Switch Claro/Escuro -->
-      <div class="w-full flex items-center gap-2 mt-6">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" id="themeToggle" class="sr-only peer">
-          <div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-slate-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-        </label>
-        <span class="text-sm">Claro/Escuro</span>
+        <h2 id="userName" class="text-lg font-semibold text-center">Usuário Padrão</h2>
+        <h1 class="text-center text-sm text-black dark:text-gray-300">Colégio: xxxx</h1>
       </div>
 
       <nav class="w-full space-y-2 mt-6">
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">Sobre</a>
-        <a href="#" class="block py-3 px-4 rounded hover:bg-neutral-600 text-white text-center">Contato</a>
-        <!-- Demais links -->
-        <a href="configuracao.html" class="block py-3 px-4 rounded-lg bg-gray-800 text-white text-center font-semibold shadow-md hover:bg-gray-700 transform hover:scale-105 transition-all duration-300">Configuração</a>
+        <a href="#"
+           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
+          <span class="material-symbols-outlined">forum</span> Conversar
+        </a>
+        <a href="#"
+           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
+          <span class="material-symbols-outlined">calendar_month</span> Agendamentos
+        </a>
+        <a href="#"
+           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
+          <span class="material-symbols-outlined">notifications</span> Notificações
+        </a>
+        <a href="#"
+           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
+          <span class="material-symbols-outlined">calendar_month</span> Recursos
+        </a>
+
+        <div class="pt-4 border-t border-gray-300 dark:border-gray-600">
+          <!-- Switch Claro/Escuro -->
+          <div class="w-full flex gap-4 py-3 px-4">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="themeToggle" class="sr-only peer">
+              <div
+                class="w-11 h-6 bg-gray-200 dark:bg-gray-700
+                       peer-focus:ring-4 peer-focus:ring-slate-500
+                       rounded-full peer peer-checked:after:translate-x-full
+                       peer-checked:after:border-white
+                       after:content-[''] after:absolute after:top-0.5 after:left-[2px]
+                       after:bg-white after:border-gray-300 after:border after:rounded-full
+                       after:h-5 after:w-5 after:transition-all"></div>
+            </label>
+            <span id="themeLabel" class="text-sm text-black dark:text-gray-100">Claro</span>
+          </div>
+
+          <a href="configuracao.html"
+             class="block py-3 px-4 rounded-lg bg-blue-500 dark:bg-blue-700 text-white text-center font-semibold shadow-md hover:bg-blue-600 dark:hover:bg-blue-800 transform hover:scale-105 transition-all duration-300">
+            Configuração
+          </a>
+        </div>
       </nav>
     </div>
   </div>
 
-  <main class="ml-0 lg:ml-64 transition-all duration-300 p-6">
-    <p>Seu conteúdo aqui...</p>
+  <!-- Main Content -->
+  <main class="ml-0 lg:ml-0 transition-all duration-300 p-6">
+    <!-- Cabeçalho da página -->
+    <div class="w-full h-32 flex justify-center bg-blue-500 dark:bg-blue-800 rounded-xl shadow-xl shadow-gray-500/30 dark:shadow-black/40">
+      <div class="flex flex-col items-left justify-center">
+        <h1 class="text-3xl font-bold text-white">Olá, <span id="userName">Usuário Padrão</span></h1>
+        <p class="text-white">Tudo bem? Você gostaria de compartilhar o que está sentindo?
+           Às vezes, colocar pra fora o que está passando aí dentro pode ajudar muito.</p>
+      </div>
+    </div>
+
+    <!-- Estado Emocional -->
+    <div
+      class="flex flex-col items-start mt-4 pl-10 pr-10 p-6
+             bg-neutral-100 dark:bg-neutral-800
+             shadow-xl shadow-gray-500/30 dark:shadow-black/40
+             rounded-xl">
+      <h1 class="text-2xl font-bold text-center mb-4 mt-4 dark:text-gray-100">
+        Como você está se sentindo hoje?
+      </h1>
+
+      <div class="flex flex-nowrap gap-4 w-full mb-4 justify-center">
+        <!-- Cada card -->
+        <div
+          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
+                 transition-transform transform hover:scale-110
+                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
+                 hover:ring-2 hover:ring-red-800 dark:hover:ring-red-600
+                 hover:border-red-900 cursor-pointer" data-ring="ring-red-800 dark:ring-red-600">
+          <div class="rounded-full overflow-hidden w-24 h-24 mb-2 ">
+            <img src="imagens/Vermelho-Raiva.webp" alt="Péssimo" class="w-full h-full object-cover">
+          </div>
+          <h2 class="dark:text-gray-100">Péssimo</h2>
+        </div>
+
+        <div
+          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
+                 transition-transform transform hover:scale-110
+                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
+                 hover:ring-2 hover:ring-orange-500 dark:hover:ring-orange-400
+                 hover:border-orange-500 cursor-pointer" data-ring="ring-orange-500 dark:ring-orange-400">
+          <div class="rounded-full overflow-hidden w-24 h-24 mb-2">
+            <img src="imagens/Laranja-Ruim.webp" alt="Triste" class="w-full h-full object-cover">
+          </div>
+          <h2 class="dark:text-gray-100">Triste</h2>
+        </div>
+
+        <div
+          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
+                 transition-transform transform hover:scale-110
+                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
+                 hover:ring-2 hover:ring-yellow-500 dark:hover:ring-yellow-400
+                 hover:border-yellow-900 cursor-pointer" data-ring="ring-yellow-500 dark:ring-yellow-400">
+          <div class="rounded-full overflow-hidden w-24 h-24 mb-2">
+            <img src="imagens/Amarelo-Neutro.webp" alt="Normal" class="w-full h-full object-cover">
+          </div>
+          <h2 class="dark:text-gray-100">Normal</h2>
+        </div>
+
+        <div
+          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
+                 transition-transform transform hover:scale-110
+                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
+                 hover:ring-2 hover:ring-green-500 dark:hover:ring-green-400
+                 hover:border-green-500 cursor-pointer"  data-ring="ring-green-500 dark:ring-green-400">
+          <div class="rounded-full overflow-hidden w-24 h-24 mb-2">
+            <img src="imagens/Verde-Bom.webp" alt="Bem" class="w-full h-full object-cover">
+          </div>
+          <h2 class="dark:text-gray-100">Bem</h2>
+        </div>
+
+        <div
+          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
+                 transition-transform transform hover:scale-110
+                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
+                 hover:ring-2 hover:ring-green-900 dark:hover:ring-green-700
+                 hover;border-green-900 cursor-pointer" data-ring="ring-green-900 dark:ring-green-700">
+          <div class="rounded-full overflow-hidden w-24 h-24 mb-2">
+            <img src="imagens/Verde-Otimo.webp" alt="Ótimo" class="w-full h-full object-cover">
+          </div>
+          <h2 class="dark:text-gray-100">Ótimo</h2>
+        </div>
+      </div>
+
+      <p class="text-center text-gray-600 dark:text-gray-300 mt-5">
+        Quer compartilhar mais sobre como você está se sentindo?
+      </p>
+      <textarea
+        class="w-full mb-5 mt-2 p-3
+               bg-white dark:bg-neutral-700
+               border border-gray-300 dark:border-gray-600
+               rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        rows="3"
+        placeholder="Escreva aqui..."></textarea>
+      <button
+        class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium
+               hover:bg-blue-700 dark:hover:bg-blue-800 transition mb-5">
+        Enviar
+      </button>
+    </div>
   </main>
 
-  <script>
-    const sidebar = document.getElementById('sidebar');
-    const mainHdr = document.getElementById('main-header');
-    const sbHdr   = document.getElementById('sidebar-header');
-    const nameTag = document.getElementById('userName');
-    const preview = document.getElementById('avatarPreview');
-    const themeToggle = document.getElementById('themeToggle');
-
-    function abrirMenu() {
-      sidebar.classList.toggle('-translate-x-full');
-      sidebar.classList.toggle('opacity-0');
-      sidebar.classList.toggle('translate-x-0');
-      sidebar.classList.toggle('opacity-100');
-    }
-
-    function fecharMenu() {
-      sidebar.classList.add('-translate-x-full');
-      sidebar.classList.add('opacity-0');
-      sidebar.classList.remove('translate-x-0');
-      sidebar.classList.remove('opacity-100');
-    }
-
-    function syncSidebarHeaderHeight() {
-      if (!mainHdr || !sbHdr) return;
-      sbHdr.style.height = mainHdr.getBoundingClientRect().height + 'px';
-    }
-
-    function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    }
-
-    function loadTheme() {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-        themeToggle.checked = true;
-      }
-    }
-
-    window.addEventListener('load', () => {
-      loadTheme();
-      syncSidebarHeaderHeight();
-      const savedName   = localStorage.getItem('nomeUsuario');
-      const savedAvatar = localStorage.getItem('avatarUsuario');
-      if (savedName) nameTag.textContent = savedName;
-      if (savedAvatar) preview.src = savedAvatar;
-    });
-
-    themeToggle.addEventListener('change', toggleTheme);
-    window.addEventListener('resize', syncSidebarHeaderHeight);
-    
-        // Funções de notificação
-function toggleNotifs() {
-  const list = document.getElementById('notifList');
-  list.classList.toggle('show');
-}
-
-
-document.addEventListener('click', (e) => {
-  const btn = document.getElementById('notifButton');
-  const list = document.getElementById('notifList');
-  if (!btn.contains(e.target) && !list.contains(e.target)) {
-    list.classList.remove('show');
-  }
-});
-
-
-    document.getElementById('notifButton').addEventListener('click', toggleNotifs);
-
-        // Seleciona o container do botão de notificação
-    const notifContainer = document.getElementById('notifButton').parentNode;
-    const notifList = document.getElementById('notifList');
-
-    // Abre ao passar o mouse sobre o container
-notifContainer.addEventListener('mouseenter', () => {
-  notifList.classList.add('show');
-});
-
-notifContainer.addEventListener('mouseleave', () => {
-  notifList.classList.remove('show');
-});
-
-  </script>
+  <script src="script.js" defer></script>
 </body>
 </html>

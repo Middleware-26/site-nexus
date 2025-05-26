@@ -60,7 +60,28 @@ window.addEventListener('load', () => {
   const savedAvatar = localStorage.getItem('avatarUsuario');
   if (savedName)   nameTag.textContent = savedName;
   if (savedAvatar) preview.src = savedAvatar;
+
+   // --- início: lógica de seleção de cards ---
+  // seleção de cards com cor específica
+  const cards = document.querySelectorAll('.card');
+  let activeCard = null;
+
+ cards.forEach(card => {
+    card.addEventListener('click', () => {
+      // remove ring do anterior
+      if (activeCard) {
+        const prevRings = activeCard.dataset.ring.split(' ');
+        activeCard.classList.remove('ring-2', ...prevRings);
+      }
+      // adiciona ring no atual
+      const rings = card.dataset.ring.split(' ');
+      card.classList.add('ring-2', ...rings);
+      activeCard = card;
+    });
+  });
+  // --- fim: lógica de seleção de cards ---
 });
 
 themeToggle.addEventListener('change', toggleTheme);
 window.addEventListener('resize', syncSidebarHeaderHeight);
+
