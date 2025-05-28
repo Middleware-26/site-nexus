@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus - Tailwind</title>
+    <!-- Incluindo Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Importa a fonte Montserrat do Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        /* Aplica a todos os elementos: zera margens e padding, define box-sizing e fonte padrão */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Estilos customizados para a sobreposição de gradiente e animações dos raios */
+        body::before {
+            content: '';
+            background-image: linear-gradient(90deg, rgba(0, 212, 255, 0.4) 0%, rgba(2, 115, 214, 0.4) 56%, rgba(7, 57, 133, 0.4) 100%);
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1; /* Garante que fique atrás de todo o conteúdo */
+        }
+
+        /* Animações dos Raios - Movimento dinâmico */
+        @keyframes dynamicRay1 {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-48%, -52%) rotate(90deg) scale(1.05); }
+            50% { transform: translate(-45%, -55%) rotate(180deg) scale(1.1); }
+            75% { transform: translate(-47%, -53%) rotate(270deg) scale(1.05); }
+            100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
+        }
+        @keyframes dynamicRay2 {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-52%, -48%) rotate(-90deg) scale(0.95); }
+            50% { transform: translate(-55%, -45%) rotate(-180deg) scale(0.9); }
+            75% { transform: translate(-53%, -47%) rotate(-270deg) scale(0.95); }
+            100% { transform: translate(-50%, -50%) rotate(-360deg) scale(1); }
+        }
+        @keyframes dynamicRay3 {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-51%, -49%) rotate(120deg) scale(1.08); }
+            50% { transform: translate(-50%, -50%) rotate(240deg) scale(1.15); }
+            75% { transform: translate(-49%, -51%) rotate(300deg) scale(1.08); }
+            100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
+        }
+        
+        /* Ciclo de visibilidade: 1s fade-in, 10s visível, 1s fade-out, 5s pausa (Total 17s) */
+        @keyframes fadeInOutCyclePaused {
+            0% { opacity: 0; } /* Início invisível (pausa começa) */
+            29.4% { opacity: 0; } /* Fim da pausa de 5s (5/17), início do fade-in */
+            35.3% { opacity: 0.9; } /* Fim do fade-in de 1s (6/17), início dos 10s visível */
+            94.1% { opacity: 0.9; } /* Fim dos 10s visível (16/17), início do fade-out de 1s */
+            100% { opacity: 0; } /* Fim do fade-out de 1s (17/17) */
+        }
+        
+        .ray-1 { 
+            animation: 
+                dynamicRay1 15s ease-in-out infinite alternate, 
+                fadeInOutCyclePaused 17s linear infinite; /* Duração total do ciclo de visibilidade */
+        }
+        .ray-2 { 
+            animation: 
+                dynamicRay2 18s ease-in-out infinite alternate, 
+                fadeInOutCyclePaused 17s linear infinite 0.5s; /* Duração total + delay */
+        }
+        .ray-3 { 
+            animation: 
+                dynamicRay3 21s ease-in-out infinite alternate, 
+                fadeInOutCyclePaused 17s linear infinite 1s; /* Duração total + delay */
+        }
+
+        /* Estilos para a transição do container - Adaptado para Tailwind */
+        #container.active .logar {
+            transform: translateX(100%);
+            opacity: 0;
+            z-index: 1;
+        }
+        #container.active .cadastrar {
+            transform: translateX(100%);
+            opacity: 1;
+            z-index: 5;
+            animation: show 0.6s;
+        }
+        #container.active .alternar-container {
+            transform: translateX(-100%);
+        }
+        #container.active .alternar {
+            transform: translateX(50%);
+        }
+        #container.active .alternar-esquerda {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        #container.active .alternar-direita {
+            transform: translateX(20%); 
+            opacity: 0;
+        }
+
+        @keyframes show {
+            0%, 49.99% {
+                opacity: 0;
+                z-index: 1;
+            }
+            50%, 100% {
+                opacity: 1;
+                z-index: 5;
+            }
+        }
+
+        /* Estilos específicos para a tela de login */
+        .container form {
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            height: 100%;
+        }
+
+        .container input {
+            background-color: #eee;
+            border: none;
+            margin: 8px 0;
+            padding: 10px 15px;
+            font-size: 13px;
+            border-radius: 8px;
+            width: 100%;
+            outline: none;
+        }
+
+        .container button {
+            background-color: #0273D6;
+            color: #fff;
+            font-size: 12px;
+            padding: 10px 45px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .container a {
+            color: #333;
+            font-size: 13px;
+            text-decoration: none;
+            margin: 15px 0 10px;
+        }
+    </style>
+</head>
+<body class="bg-cover bg-center flex items-center justify-center flex-col min-h-screen relative z-0" style="background-image: url('../logo/adolecenteepsicologo.jpg');">
+
+    <!-- Logo Nexus Acima -->
+
+    <!-- Container dos raios animados -->
+    <div class="thin-rays-container absolute top-1/2 left-1/2 w-px h-px z-[1] pointer-events-none">
+        <div class="ray ray-1 absolute rounded-full border-solid border-[3px] border-blue-950 w-[550px] h-[550px] shadow-[0_0_20px_#172554,0_0_30px_#172554_inset] opacity-0" style="transform: translate(-50%, -50%);"></div>
+        <div class="ray ray-2 absolute rounded-full border-solid border-[3px] border-sky-950 w-[600px] h-[600px] shadow-[0_0_20px_#082f49,0_0_30px_#082f49_inset] opacity-0" style="transform: translate(-50%, -50%);"></div>
+        <div class="ray ray-3 absolute rounded-full border-solid border-[3px] border-slate-900 w-[650px] h-[650px] shadow-[0_0_20px_#1e293b,0_0_30px_#1e293b_inset] opacity-0" style="transform: translate(-50%, -50%);"></div>
+    </div>
+
+    <div class="container bg-white rounded-[30px] shadow-[0_5px_15px_rgba(0,0,0,0.35)] relative overflow-hidden w-[768px] max-w-full min-h-[480px] z-10" id="container">
+        <!-- Cadastro -->
+        <div class="cadastro-container cadastrar absolute top-0 h-full transition-all duration-600 ease-in-out left-0 w-1/2 opacity-0 z-[1]">
+            <form id="simpleForm" class="bg-white flex items-center justify-center flex-col px-10 h-full text-center" onsubmit="return validateForm(event)">
+                <div class="logo mb-2.5">
+                    <a href="#"><img src="../logo/Sem nomeee.png" alt="Logo Nexus Form" class="h-[50px] w-auto"></a>
+                </div>
+                <h1 class="text-2xl font-bold mb-3">Crie sua conta!</h1>
+                <input type="text" id="name" placeholder="Nome" required class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="email" id="email" placeholder="Email" required class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="password" id="password" placeholder="Senha" required class="bg-white border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none shadow-[inset_0_0_5px_rgba(0,0,0,0.2)]">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 px-11 border border-transparent rounded-lg tracking-wide uppercase mt-2.5 cursor-pointer transition-transform duration-75 active:scale-95">Registrar-se</button>
+            </form>
+        </div>
+
+        <!-- Login -->
+        <div class="login-container logar absolute top-0 h-full transition-all duration-600 ease-in-out left-0 w-1/2 z-[2]">
+            <form class="bg-white flex items-center justify-center flex-col px-10 h-full text-center">
+                <div class="logo mb-2.5">
+                    <a href="#"><img src="../logo/Sem nomeee.png" alt="Logo Nexus Form" class="h-[50px] w-auto"></a>
+                </div>
+                <h1 class="text-2xl font-bold mb-3">Login</h1>
+                <input type="email" placeholder="Email" required class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="password" placeholder="Senha" required class="bg-white border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none shadow-[inset_0_0_5px_rgba(0,0,0,0.2)]">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 px-11 border border-transparent rounded-lg tracking-wide uppercase mt-2.5 cursor-pointer transition-transform duration-75 active:scale-95">Entrar</button>
+                <a href="#" class="text-gray-700 text-xs no-underline my-4">Esqueceu sua senha?</a>
+            </form>
+        </div>
+
+        <!-- Alternância -->
+        <div class="alternar-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-600 ease-in-out z-[100]">
+            <div class="alternar bg-gradient-to-r from-cyan-400 to-blue-900 text-white relative -left-full h-full w-[200%] transform transition-transform duration-600 ease-in-out">
+                <div class="alternar-painel alternar-esquerda absolute w-1/2 h-full flex items-center justify-center flex-col px-8 text-center top-0 transform transition-transform duration-600 ease-in-out translate-x-0">
+                    <h1 class="text-2xl font-bold mb-3">Bem-vindo de volta!</h1>
+                    <p class="text-sm leading-tight tracking-wide my-5">Insira seus dados pessoais para acessar nossos recursos!</p>
+                    <button class="bg-transparent border border-white text-white text-xs font-semibold py-2.5 px-11 rounded-lg tracking-wide uppercase mt-2.5 cursor-pointer transition-transform duration-75 active:scale-95" id="login">Login</button>
+                </div>
+                <div class="alternar-painel alternar-direita absolute w-1/2 h-full flex items-center justify-center flex-col px-8 text-center top-0 right-0 transform transition-transform duration-600 ease-in-out translate-x-0">
+                    <h1 class="text-2xl font-bold mb-3">Seja bem-vindo!</h1>
+                    <p class="text-sm leading-tight tracking-wide my-5">Cadastre-se com seus dados pessoais para acessar nossos recursos!</p>
+                    <button class="bg-transparent border border-white text-white text-xs font-semibold py-2.5 px-11 rounded-lg tracking-wide uppercase mt-2.5 cursor-pointer transition-transform duration-75 active:scale-95" id="register">Cadastro</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
