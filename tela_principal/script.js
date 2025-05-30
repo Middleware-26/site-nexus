@@ -15,6 +15,8 @@ const nameTag      = document.getElementById('userName');
 const preview      = document.getElementById('avatarPreview');
 const themeToggle  = document.getElementById('themeToggle');
 const themeLabel   = document.getElementById('themeLabel'); // ← declaração adicionada
+const notifButton  = document.getElementById('notifButton');
+const notifList    = document.getElementById('notifList');
 
 // Funções de menu lateral
 function abrirMenu() {
@@ -84,4 +86,47 @@ window.addEventListener('load', () => {
 
 themeToggle.addEventListener('change', toggleTheme);
 window.addEventListener('resize', syncSidebarHeaderHeight);
+
+
+
+
+// Funções de notificação
+function toggleNotifs() {
+  const list = document.getElementById('notifList');
+  list.classList.toggle('hidden');
+}
+
+// Fecha a lista ao clicar fora do botão ou da lista
+function handleClickOutside(e) {
+  const btn = document.getElementById('notifButton');
+  const list = document.getElementById('notifList');
+  if (!btn.contains(e.target) && !list.contains(e.target)) {
+    list.classList.add('hidden');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const notifButton    = document.getElementById('notifButton');
+  const notifList      = document.getElementById('notifList');
+  const notifContainer = notifButton.parentElement;
+
+  // Inicia com a lista oculta
+  notifList.classList.add('hidden');
+
+  // Clique no botão: alterna visibilidade
+  notifButton.addEventListener('click', toggleNotifs);
+
+  // Clique externo: esconde
+  document.addEventListener('click', handleClickOutside);
+
+  // Hover: ao passar o mouse, mostrar; ao sair, esconder
+  notifContainer.addEventListener('mouseenter', () => {
+    notifList.classList.remove('hidden');
+  });
+  notifContainer.addEventListener('mouseleave', () => {
+    notifList.classList.add('hidden');
+  });
+});
+
+
 
