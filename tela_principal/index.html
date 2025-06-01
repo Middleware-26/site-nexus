@@ -4,9 +4,41 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = { darkMode: 'class' };
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+            },
+            secondary: {
+              500: '#6366F1',
+              600: '#4F46E5',
+            },
+            emotion: {
+              worst: '#EF4444',
+              bad: '#F97316',
+              neutral: '#EAB308',
+              good: '#22C55E',
+              great: '#16A34A'
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 2s infinite'
+          }
+        }
+      }
+    };
   </script>
   <title>Aluno</title>
   <style>
@@ -14,7 +46,17 @@
       transition: height 0.2s ease, background-color 0.3s ease;
     }
     #sidebar {
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+    .emotion-card {
+      transition: all 0.3s ease;
+    }
+    .emotion-card:hover {
+      transform: translateY(-5px);
+    }
+    .emotion-card.selected {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
     /* previno flash de mudança de tema */
     html {
@@ -22,11 +64,11 @@
     }
   </style>
 </head>
-<body class="relative bg-neutral-200 text-gray-800 dark:bg-neutral-900 dark:text-gray-100 transition-colors">
-
-  <!-- Cabeçalho principal -->
-  <header id="main-header"
-          class="bg-blue-500 dark:bg-blue-800 p-6 flex items-center justify-between h-16">
+<body class="relative bg-gray-200 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 font-sans min-h-screen">
+  
+<!-- Cabeçalho principal -->
+<header id="main-header"
+          class="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 p-6 flex items-center justify-between h-16">
     <button class="flex flex-col gap-1.5 w-6 text-white" onclick="abrirMenu()">
       <span class="h-0.5 w-full bg-white"></span>
       <span class="h-0.5 w-full bg-white"></span>
@@ -38,7 +80,7 @@
     <!-- Botão de Notificações posicionado abaixo da logo Nexus-->
      
   <div class="fixed top-20 right-6 z-40">
-    <button id="notifButton" class="relative p-2 rounded-full bg-slate-800 text-white hover:bg-slate-700 focus:outline-none transition-transform duration-150 ease-in-out hover:scale-110">
+    <button id="notifButton" class="relative p-2 rounded-full bg-neutral-100 text-gray-800 dark:bg-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700 focus:outline-none transition-transform duration-150 ease-in-out hover:scale-110">
       <!--desenho do botão, q bagui zuado viu--
     esse "d" abbaido define o caminho de desenho de um ícone vetorial, esse tipo de código normalmente é usado com bibliotecsa de ícones como Heroicons, muito comum com Tailwind CSS-->
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -77,167 +119,154 @@
   </div>
 
   <!-- Sidebar -->
-  <div id="sidebar"
-       class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-neutral-800
-              shadow-xl shadow-gray-500/30 dark:shadow-black/40
-              transform -translate-x-full opacity-0 z-50"
-       onmouseleave="fecharMenu()">
-
-    <div id="sidebar-header" class="bg-blue-500 dark:bg-blue-800 p-6 flex justify-between items-center">
-      <img src="imagens/Sem nomeee.png" alt="Seta" class="w-20 h-20 object-contain">
+  <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-xl shadow-gray-500/30 dark:shadow-black/40 transform -translate-x-full opacity-0 z-50 overflow-y-auto" onmouseleave="fecharMenu()">
+    <div id="sidebar-header" class="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 p-6 flex justify-between items-center">
+      <img src="imagens/Sem nomeee.png" alt="Logo Middleware" class="w-16 h-16 object-contain mb-2">
       <span class="material-symbols-outlined text-sm ml-8 text-white">arrow_back</span><h3 class="text-sm text-white">Automático</h3>
     </div>
 
-    <div class="p-6 flex flex-col items-center text-black dark:text-gray-100">
-      <img id="avatarPreview"
+    <div class="p-6 flex flex-col items-center text-gray-800 dark:text-gray-100">
+    <img id="avatarPreview"
            src="imagens/padrao.jpg"
            alt="Foto de perfil"
            class="w-32 h-32 rounded-full border-4 border-black dark:border-gray-300 object-cover mb-4"/>
 
       <div class="flex flex-col items-center mb-6">
-        <h2 id="userName" class="text-lg font-semibold text-center">Usuário Padrão</h2>
-        <h1 class="text-center text-sm text-black dark:text-gray-300">Colégio: xxxx</h1>
+        <h2 id="userName" class="text-lg font-semibold text-center">Aluno</h2>
+        <p class="text-center text-sm text-gray-600 dark:text-gray-300">Ensino Médio</p>
+        <p class="text-center text-sm text-gray-600 dark:text-gray-300 mt-1">2º Ano - Turma B</p>
       </div>
 
-      <nav class="w-full space-y-2 mt-6">
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">forum</span> Conversar
+      <nav class="w-full space-y-1 mt-6">
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">forum</span>
+          <span>Conversar</span>
         </a>
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">calendar_month</span> Agendamentos
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">calendar_month</span>
+          <span>Agendamentos</span>
         </a>
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">import_contacts</span> Recursos
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">import_contacts</span>
+          <span>Recursos</span>
         </a>
 
-        <div class="pt-4 border-t border-gray-300 dark:border-gray-600">
-          <!-- Switch Claro/Escuro -->
-          <div class="w-full flex gap-4 py-3 px-4">
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="themeToggle" class="sr-only peer">
-              <div
-                class="w-11 h-6 bg-gray-200 dark:bg-gray-700
-                       peer-focus:ring-4 peer-focus:ring-slate-500
-                       rounded-full peer peer-checked:after:translate-x-full
-                       peer-checked:after:border-white
-                       after:content-[''] after:absolute after:top-0.5 after:left-[2px]
-                       after:bg-white after:border-gray-300 after:border after:rounded-full
-                       after:h-5 after:w-5 after:transition-all"></div>
-            </label>
-            <span id="themeLabel" class="text-sm text-black dark:text-gray-100">Claro</span>
+        <div class="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4"></div>
+
+        <a href="configuracao.html" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">settings</span>
+          <span>Configurações</span>
+        </a>
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">logout</span>
+          <span>Sair</span>
+        </a>
+
+        <!-- Switch Claro/Escuro -->
+        <div class="w-full flex items-center justify-between py-3 px-4 mt-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">light_mode</span>
+            <span id="themeLabel" class="text-sm text-black dark:text-gray-100">Tema Claro</span>
           </div>
-
-          <a href="configuracao.html"
-             class="block py-3 px-4 rounded-lg bg-blue-500 dark:bg-blue-700 text-white text-center font-semibold shadow-md hover:bg-blue-600 dark:hover:bg-blue-800 transform hover:scale-105 transition-all duration-300">
-            Configuração
-          </a>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="themeToggle" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+          </label>
         </div>
       </nav>
     </div>
   </div>
 
   <!-- Main Content -->
-  <main class="ml-0 lg:ml-0 transition-all duration-300 p-6">
+  <main class="ml-0 transition-all duration-300 p-4 md:p-6">
     <!-- Cabeçalho da página -->
-    <div class="w-full h-32 flex justify-center bg-blue-500 dark:bg-blue-800 rounded-xl shadow-xl shadow-gray-500/30 dark:shadow-black/40">
-      <div class="flex flex-col items-left justify-center">
-        <h1 class="text-3xl font-bold text-white">Olá, <span id="userName">Usuário Padrão</span></h1>
-        <p class="text-white">Tudo bem? Você gostaria de compartilhar o que está sentindo?
-           Às vezes, colocar pra fora o que está passando aí dentro pode ajudar muito.</p>
+    <div class="w-full p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 rounded-xl shadow-lg mb-6 relative overflow-hidden">
+      <!-- Decorative elements -->
+      <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-white bg-opacity-10"></div>
+      <div class="absolute -right-5 -bottom-5 w-20 h-20 rounded-full bg-white bg-opacity-10"></div>
+      
+      <div class="flex flex-col items-start justify-center relative z-10">
+        <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Olá, <span id="userName">Usuário Padrão</span>!</h1>
+        <p class="text-white text-sm md:text-base opacity-90 max-w-3xl">
+          Tudo bem? Você gostaria de compartilhar o que está sentindo?
+          Às vezes, colocar pra fora o que está passando aí dentro pode ajudar muito.
+        </p>
+      </div>
+      <div class="mt-4 md:mt-0 relative z-10">
+        <button class="flex items-center gap-2 bg-white text-primary-600 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm hover:bg-gray-300">
+          <span class="material-symbols-outlined text-base">emergency</span>
+          Ajuda Imediata
+        </button>
       </div>
     </div>
 
     <!-- Estado Emocional -->
-    <div
-      class="flex flex-col items-start mt-4 pl-10 pr-10 p-6
-             bg-neutral-100 dark:bg-neutral-800
-             shadow-xl shadow-gray-500/30 dark:shadow-black/40
-             rounded-xl">
-      <h1 class="text-2xl font-bold text-center mb-4 mt-4 dark:text-gray-100">
-        Como você está se sentindo hoje?
-      </h1>
-
-      <div class="flex flex-nowrap gap-4 w-full mb-4 justify-center">
-        <!-- Cada card -->
-        <div
-          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-red-800 dark:hover:ring-red-600
-                 hover:border-red-900 cursor-pointer" data-ring="ring-red-800 dark:ring-red-600">
-          <div class="rounded-full overflow-hidden w-24 h-24 mb-2 ">
-            <img src="imagens/Vermelho-Raiva.webp" alt="Péssimo" class="w-full h-full object-cover">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Seu estado emocional hoje</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Selecione como você está se sentindo</p>
+      </div>
+      
+      <div class="p-6">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <!-- Péssimo -->
+          <div class="emotion-card flex flex-col items-center p-4 rounded-xl cursor-pointer hover:scale-110 transition-all duration-300 border-2 border-transparent hover:border-emotion-worst"  data-emotion="worst" onclick="selectEmotion(this)">
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-emotion-worst bg-opacity-10 flex items-center justify-center mb-2">
+              <img src="imagens/Vermelho-Raiva.webp" alt="Péssimo" class="w-12 h-12 md:w-16 md:h-16 object-contain">
+            </div>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Péssimo</h3>
           </div>
-          <h2 class="dark:text-gray-100">Péssimo</h2>
+          
+          <!-- Triste -->
+          <div class="emotion-card flex flex-col items-center p-4 rounded-xl cursor-pointer hover:scale-110 transition-all duration-300 border-2 border-transparent hover:border-emotion-bad"  data-emotion="bad" onclick="selectEmotion(this)">
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-emotion-bad bg-opacity-10 flex items-center justify-center mb-2" >
+              <img src="imagens/Laranja-Ruim.webp" alt="Triste" class="w-12 h-12 md:w-16 md:h-16 object-contain">
+            </div>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Triste</h3>
+          </div>
+          
+          <!-- Normal -->
+          <div class="emotion-card flex flex-col items-center p-4 rounded-xl cursor-pointer hover:scale-110 transition-all duration-300 border-2 border-transparent hover:border-emotion-neutral"  data-emotion="neutral" onclick="selectEmotion(this)">
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-emotion-neutral bg-opacity-10 flex items-center justify-center mb-2">
+              <img src="imagens/Amarelo-Neutro.webp" alt="Normal" class="w-12 h-12 md:w-16 md:h-16 object-contain">
+            </div>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Normal</h3>
+          </div>
+          
+          <!-- Bem -->
+          <div class="emotion-card flex flex-col items-center p-4 rounded-xl cursor-pointer hover:scale-110 transition-all duration-300 border-2 border-transparent hover:border-emotion-good"  data-emotion="good" onclick="selectEmotion(this)">
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-emotion-good bg-opacity-10 flex items-center justify-center mb-2">
+              <img src="imagens/Verde-Bom.webp" alt="Bem" class="w-12 h-12 md:w-16 md:h-16 object-contain">
+            </div>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Bem</h3>
+          </div>
+          
+          <!-- Ótimo -->
+          <div class="emotion-card flex flex-col items-center p-4 rounded-xl cursor-pointer hover:scale-110 transition-all duration-300 border-2 border-transparent hover:border-emotion-great"  data-emotion="great" onclick="selectEmotion(this)">
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-emotion-great bg-opacity-10 flex items-center justify-center mb-2">
+              <img src="imagens/Verde-Otimo.webp" alt="Ótimo" class="w-12 h-12 md:w-16 md:h-16 object-contain">
+            </div>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Ótimo</h3>
+          </div>
         </div>
-
-        <div
-          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-orange-500 dark:hover:ring-orange-400
-                 hover:border-orange-500 cursor-pointer" data-ring="ring-orange-500 dark:ring-orange-400">
-          <div class="rounded-full overflow-hidden w-24 h-24 mb-2">
-            <img src="imagens/Laranja-Ruim.webp" alt="Triste" class="w-full h-full object-cover">
+        
+        <div class="mt-6">
+          <label for="emotionDetails" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Quer compartilhar mais sobre como você está se sentindo? (Opcional).
+          </label>
+          <textarea 
+            id="emotionDetails" 
+            rows="4" 
+            class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-700 dark:text-gray-300 transition" 
+            placeholder="Escreva aqui o que está sentindo, o que aconteceu hoje, ou qualquer coisa que queira compartilhar..."></textarea>
+          
+          <div class="mt-4 flex justify-end">
+            <button id="submitEmotion" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              Enviar
+            </button>
           </div>
-          <h2 class="dark:text-gray-100">Triste</h2>
-        </div>
-
-        <div
-          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-yellow-500 dark:hover:ring-yellow-400
-                 hover:border-yellow-900 cursor-pointer" data-ring="ring-yellow-500 dark:ring-yellow-400">
-          <div class="rounded-full overflow-hidden w-24 h-24 mb-2">
-            <img src="imagens/Amarelo-Neutro.webp" alt="Normal" class="w-full h-full object-cover">
-          </div>
-          <h2 class="dark:text-gray-100">Normal</h2>
-        </div>
-
-        <div
-          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-green-500 dark:hover:ring-green-400
-                 hover:border-green-500 cursor-pointer"  data-ring="ring-green-500 dark:ring-green-400">
-          <div class="rounded-full overflow-hidden w-24 h-24 mb-2">
-            <img src="imagens/Verde-Bom.webp" alt="Bem" class="w-full h-full object-cover">
-          </div>
-          <h2 class="dark:text-gray-100">Bem</h2>
-        </div>
-
-        <div
-          class=" card w-1/5 h-48 bg-white dark:bg-neutral-700 rounded-xl flex flex-col items-center justify-center
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-green-900 dark:hover:ring-green-700
-                 hover;border-green-900 cursor-pointer" data-ring="ring-green-900 dark:ring-green-700">
-          <div class="rounded-full overflow-hidden w-24 h-24 mb-2">
-            <img src="imagens/Verde-Otimo.webp" alt="Ótimo" class="w-full h-full object-cover">
-          </div>
-          <h2 class="dark:text-gray-100">Ótimo</h2>
         </div>
       </div>
-
-      <p class="text-center text-gray-600 dark:text-gray-300 mt-5">
-        Quer compartilhar mais sobre como você está se sentindo?
-      </p>
-      <textarea
-        class="w-full mb-5 mt-2 p-3
-               bg-white dark:bg-neutral-700
-               border border-gray-300 dark:border-gray-600
-               rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        rows="3"
-        placeholder="Escreva aqui..."></textarea>
-      <button
-        class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium
-               hover:bg-blue-700 dark:hover:bg-blue-800 transition mb-5">
-        Enviar
-      </button>
     </div>
   </main>
 

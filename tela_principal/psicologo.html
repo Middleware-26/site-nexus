@@ -4,29 +4,99 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <title>Middleware - Área do Psicólogo</title>
+
   <script>
-    tailwind.config = { darkMode: 'class' };
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+            },
+            secondary: {
+              500: '#6366F1',
+              600: '#4F46E5',
+            }
+          }
+        }
+      }
+    };
   </script>
-  <title>Psicologo</title>
+
   <style>
     #sidebar-header {
       transition: height 0.2s ease, background-color 0.3s ease;
     }
     #sidebar {
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
     }
     /* previno flash de mudança de tema */
     html {
       visibility: hidden;
     }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    .avatar-upload {
+      position: relative;
+      display: inline-block;
+    }
+    .avatar-upload:hover .avatar-overlay {
+      opacity: 1;
+    }
+    .avatar-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+    }
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.35s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    .stat-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    }
   </style>
 </head>
-<body class="relative bg-neutral-200 text-gray-800 dark:bg-neutral-900 dark:text-gray-100 transition-colors">
-
+<body class="relative bg-gray-200 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 font-sans min-h-screen">
+  
   <!-- Cabeçalho principal -->
-  <header id="main-header"
-          class="bg-blue-500 dark:bg-blue-800 p-6 flex items-center justify-between h-16">
+<header id="main-header"
+          class="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 p-6 flex items-center justify-between h-16">
     <button class="flex flex-col gap-1.5 w-6 text-white" onclick="abrirMenu()">
       <span class="h-0.5 w-full bg-white"></span>
       <span class="h-0.5 w-full bg-white"></span>
@@ -35,175 +105,376 @@
     <img src="imagens/Sem nomeee.png" alt="Logo" class="h-10 object-contain" />
   </header>
 
-  <!-- Sidebar -->
-  <div id="sidebar"
-       class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-neutral-800
-              shadow-xl shadow-gray-500/30 dark:shadow-black/40
-              transform -translate-x-full opacity-0 z-50 overflow-y-auto"
-       onmouseleave="fecharMenu()">
+  <!-- Botão de Notificações posicionado abaixo da logo Nexus-->
+     
+  <div class="fixed top-20 right-6 z-40">
+    <button id="notifButton" class="relative p-2 rounded-full bg-neutral-100 text-gray-800 dark:bg-neutral-800 dark:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700 focus:outline-none transition-transform duration-150 ease-in-out hover:scale-110">
+      <!--desenho do botão, q bagui zuado viu--
+    esse "d" abbaido define o caminho de desenho de um ícone vetorial, esse tipo de código normalmente é usado com bibliotecsa de ícones como Heroicons, muito comum com Tailwind CSS-->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118
+                 14.158V11a6.002 6.002 0 00-4-5.659V5a2
+                 2 0 10-4 0v.341C7.67 6.165 6 8.388 6
+                 11v3.159c0 .538-.214 1.055-.595
+                 1.436L4 17h5m6 0v1a3 3 0 11-6
+                 0v-1m6 0H9" />
+      </svg>
+      <span id="notifCount" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold text-red-100 bg-red-600 rounded-full">3</span>
+    </button>
+    <div id="notifList" class="absolute right-0 mt-2 w-64 bg-white dark:bg-neutral-800 rounded-lg shadow-lg overflow-hidden z-50">
+      <div class="p-4 border-b dark:border-neutral-700">
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Notificações</h3>
+      </div>
+      <ul class="divide-y divide-gray-200 dark:divide-neutral-700 max-h-56 overflow-y-auto">
+        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
+          <p class="text-sm">🔔 Nova mensagem de Paulo</p>
+          <span class="text-xs text-gray-500">5 min atrás</span>
+        </li>
+        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
+          <p class="text-sm">🔔 Sistema atualizado</p>
+          <span class="text-xs text-gray-500">1 hora atrás</span>
+        </li>
+        <li class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-neutral-700">
+          <p class="text-sm">🔔 Lembrete: Reunião às 15h</p>
+          <span class="text-xs text-gray-500">Hoje, 08:00</span>
+        </li>
+      </ul>
+      <div class="p-2 text-center">
+        <a href="#" class="text-sm text-slate-600 dark:text-gray-400 hover:underline">Ver todas</a>
+      </div>
+    </div>
+  </div>
 
-    <div id="sidebar-header" class="bg-blue-500 dark:bg-blue-800 p-6 flex justify-center items-center">
-      <img src="imagens/Sem nomeee.png" alt="Seta" class="w-20 h-20 object-contain">
+  <!-- Sidebar -->
+  <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-xl shadow-gray-500/30 dark:shadow-black/40 transform -translate-x-full opacity-0 z-50 overflow-y-auto" onmouseleave="fecharMenu()">
+    <div id="sidebar-header" class="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 p-6 flex justify-between items-center">
+      <img src="imagens/Sem nomeee.png" alt="Seta" class="w-16 h-16 object-contain mb-2">
+      <span class="material-symbols-outlined text-sm ml-8 text-white">arrow_back</span><h3 class="text-sm text-white">Automático</h3>  
     </div>
 
-    <div class="p-6 flex flex-col items-center text-black dark:text-gray-100">
-      <img id="avatarPreview"
+     <div class="p-6 flex flex-col items-center text-black dark:text-gray-100">
+    <img id="avatarPreview"
            src="imagens/padrao.jpg"
            alt="Foto de perfil"
            class="w-32 h-32 rounded-full border-4 border-black dark:border-gray-300 object-cover mb-4"/>
 
       <div class="flex flex-col items-center mb-6">
-        <h2 id="userName" class="text-lg font-semibold text-center">Dr.Usuário</h2>
-        <h1 class="text-center text-sm text-black dark:text-gray-300">Colégio: xxxx</h1>
+        <h2 id="userName" class="text-lg font-semibold text-center">Dr. Usuário</h2>
+        <p class="text-center text-sm text-gray-600 dark:text-gray-300">Psicólogo Educacional</p>
+        <p class="text-center text-sm text-gray-600 dark:text-gray-300 mt-1">Colégio: xxxx</p>
       </div>
 
-      <nav class="w-full space-y-2 mt-6">
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">group</span> Alunos
+      <nav class="w-full space-y-1 mt-6">
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">group</span>
+          <span>Alunos</span>
         </a>
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">forum</span> Conversar
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">forum</span>
+          <span>Conversar</span>
         </a>
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">calendar_month</span> Agendamentos
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">calendar_month</span>
+          <span>Agendamentos</span>
         </a>
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">monitoring</span> Relatorios
-        </a>
-
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">notifications</span> Notificações
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">monitoring</span>
+          <span>Relatórios</span>
         </a>
 
-        <div class="pt-4 border-t border-gray-300 dark:border-gray-600"></div>
+        <div class="pt-4 border-t border-gray-200 dark:border-gray-700 mt-4"></div>
 
-          <a href="configuracao.html"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">settings</span> Configuração
+        <a href="configuracao.html" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">settings</span>
+          <span>Configurações</span>
         </a>
-
-        <a href="#"
-           class="flex gap-4 py-3 px-4 rounded hover:bg-blue-300 dark:hover:bg-blue-600 text-black dark:text-gray-100">
-          <span class="material-symbols-outlined">logout</span> Sair
+        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">logout</span>
+          <span>Sair</span>
         </a>
 
         <!-- Switch Claro/Escuro -->
-          <div class="w-full flex gap-4 py-3 px-4">
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="themeToggle" class="sr-only peer">
-              <div
-                class="w-11 h-6 bg-gray-200 dark:bg-gray-700
-                       peer-focus:ring-4 peer-focus:ring-slate-500
-                       rounded-full peer peer-checked:after:translate-x-full
-                       peer-checked:after:border-white
-                       after:content-[''] after:absolute after:top-0.5 after:left-[2px]
-                       after:bg-white after:border-gray-300 after:border after:rounded-full
-                       after:h-5 after:w-5 after:transition-all"></div>
-            </label>
-            <span id="themeLabel" class="text-sm text-black dark:text-gray-100">Claro</span>
+        <div class="w-full flex items-center justify-between py-3 px-4 mt-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">light_mode</span>
+            <span id="themeLabel" class="text-sm text-black dark:text-gray-100">Tema Claro</span>
           </div>
-        
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="themeToggle" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+          </label>
+        </div>
       </nav>
+      </div>
     </div>
-  </div>
 
   <!-- Main Content -->
-  <main class="ml-0 lg:ml-0 transition-all duration-300 p-6">
+  <main class="ml-0 transition-all duration-300 p-4 md:p-6">
     <!-- Cabeçalho da página -->
-    <div class="w-full h-32 flex justify-center bg-blue-500 dark:bg-blue-800 rounded-xl shadow-xl shadow-gray-500/30 dark:shadow-black/40">
-      <div class="flex flex-col items-left justify-center ml-5">
-        <h1 class="text-3xl font-bold text-white">Bem-vinda, <span id="userName">Dr.Usuário</span></h1>
-        <p class="text-white">Aqui você pode monitorar de forma prática e segura o bem-estar emocional dos alunos, identificar tendências, 
-            intervir preventivamente e oferecer o suporte necessário para promover um ambiente escolar mais saudável e acolhedor.
-           </p>
+    <div class="w-full p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 rounded-xl shadow-lg mb-6">
+
+      <div class="flex flex-col items-start justify-center">
+        <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Bem-vindo(a), <span id="userName">Dr. Usuário</span></h1>
+        <p class="text-white text-sm md:text-base opacity-90 max-w-3xl">
+          Aqui você pode monitorar de forma prática e segura o bem-estar emocional dos alunos, identificar tendências, 
+          intervir preventivamente e oferecer o suporte necessário para promover um ambiente escolar mais saudável e acolhedor.
+        </p>
+      </div>
+      <div class="mt-4 md:mt-0">
+        <button class="flex items-center gap-2 bg-white text-primary-600 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm hover:bg-gray-300">
+          <span class="material-symbols-outlined">add</span>
+          Novo Relatório
+        </button>
       </div>
     </div>
 
-
-    <!-- Cards de Alunos -->
-   <div
-      class="flex flex-col items-start mt-4 pl-10 pr-10 p-6
-             bg-neutral-100 dark:bg-neutral-800
-             shadow-xl shadow-gray-500/30 dark:shadow-black/40
-             rounded-xl">
-
-             <div>
-                <h1 class="text-2xl font-bold text-left mb-4 dark:text-gray-100">
-                Alunos
-                </h1>
-                <label for="filtrar">Filtrar: </label>
-                    <select name="" id="filtrar" class="border-2 rounded-sm bg-white dark:bg-neutral-700">
-                    <option value="todos">Todas</option>
-                    <option value="1ens">1º Ano</option>
-                    <option value="2ens">2º Ano</option>
-                    <option value="3ens">3º Ano</option>
-                    </select>
-             </div>
-
-      <div class="flex flex-nowrap gap-4 w-full mb-4 mt-4 justify-left">
-        <!-- Cada card -->
-        <div
-          class="w-3/12 h-24 bg-white dark:bg-neutral-700 rounded-xl flex flex-row justify-around
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-600
-                 hover:border-blue-500 cursor-pointer">
-                <h1 class="ml-2 mt-2">Total de alunos</h1>
-                
-                      <div class="w-10 h-10 flex border-2 rounded-full border-black">
-                        <img src="" alt="">
-                        </div>
+    <!-- Cards de Estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <!-- Card 1 - Total de Alunos -->
+      <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md card-hover border-l-4 border-blue-500">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total de Alunos</p>
+            <h3 class="text-2xl font-bold mt-1">247</h3>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+            <span class="material-symbols-outlined text-blue-500 dark:text-blue-400">group</span>
+          </div>
         </div>
+      </div>
 
-        <div
-          class="w-3/12 h-24 bg-white dark:bg-neutral-700 rounded-xl flex flex-row justify-around
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400
-                 hover:border-blue-500 cursor-pointer">
-                          <h1 class="ml-2 mt-2">Sessões Hoje</h1>
-                
-                      <div class="w-10 h-10 flex border-2 rounded-full border-black">
-                        <img src="" alt="">
-                        </div>
+      <!-- Card 2 - Sessões Hoje -->
+      <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md card-hover border-l-4 border-green-500">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Sessões Hoje</p>
+            <h3 class="text-2xl font-bold mt-1">8</h3>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+            <span class="material-symbols-outlined text-green-500 dark:text-green-400">calendar_month</span>
+          </div>
         </div>
+      </div>
 
-        <div
-          class="w-3/12 h-24 bg-white dark:bg-neutral-700 rounded-xl flex flex-row justify-around
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400
-                 hover:border-blue-900 cursor-pointer">
-                          <h1 class="ml-2 mt-2">Acompanhamentos</h1>
-                
-                      <div class="w-10 h-10 flex border-2 rounded-full border-black">
-                        <img src="" alt="">
-                        </div>
+      <!-- Card 3 - Acompanhamentos -->
+      <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md card-hover border-l-4 border-purple-500">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Acompanhamentos</p>
+            <h3 class="text-2xl font-bold mt-1">32</h3>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+            <span class="material-symbols-outlined text-purple-500 dark:text-purple-400">monitoring</span>
+          </div>
         </div>
+      </div>
 
-        <div
-          class="w-3/12 h-24 bg-white dark:bg-neutral-700 rounded-xl flex flex-row justify-around
-                 transition-transform transform hover:scale-110
-                 shadow-xl shadow-gray-500/20 dark:shadow-black/30
-                 hover:ring-2 hover:ring-blue-500 dark:hover:ring-blue-400
-                 hover:border-blue-500 cursor-pointer">
-                         <h1 class="ml-2 mt-2">Novos Casos</h1>
-                
-                      <div class="w-10 h-10 flex border-2 rounded-full border-black">
-                        <img src="" alt="">
-                        </div>
+      <!-- Card 4 - Novos Casos -->
+      <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md card-hover border-l-4 border-red-500">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Novos Casos</p>
+            <h3 class="text-2xl font-bold mt-1">4</h3>  
+          </div>
+          <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
+            <span class="material-symbols-outlined text-red-500 dark:text-red-400">add_alert</span>
+          </div>
         </div>
-
       </div>
     </div>
-    
+
+    <!-- Seção de Alunos -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Alunos em Acompanhamento</h2>
+          <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Visualize e gerencie os alunos que estão em acompanhamento psicológico</p>
+        </div>
+        
+        <div class="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div class="relative">
+            <select id="filtrar" class="appearance-none bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 pl-4 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm w-full">
+              <option value="todos">Todos os anos</option>
+              <option value="1ens">1º Ano</option>
+              <option value="2ens">2º Ano</option>
+              <option value="3ens">3º Ano</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-3 top-2 text-gray-500 dark:text-gray-400 pointer-events-none">expand_more</span>
+          </div>
+          
+          <div class="relative w-full sm:w-64">
+            <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-500 dark:text-gray-400">search</span>
+            <input type="text" placeholder="Pesquisar aluno..." class="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm w-full">
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Alunos -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aluno</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ano/Turma</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Última Sessão</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <!-- Aluno 1 -->
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <img class="h-10 w-10 rounded-full object-cover" src="imagens/padrao.jpg" alt="">
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Ana Carolina Silva</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">17 anos</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900 dark:text-gray-100">2º Ano - B</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
+                  Em andamento
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                15/05/2023
+              </td>
+
+
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 mr-3">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+                  <span class="material-symbols-outlined">chat</span>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Aluno 2 -->
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <img class="h-10 w-10 rounded-full object-cover" src="imagens/padrao.jpg" alt="">
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Pedro Henrique Oliveira</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">18 anos</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900 dark:text-gray-100">3º Ano - A</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                  Estável
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                10/05/2023
+              </td>
+
+
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 mr-3">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+                  <span class="material-symbols-outlined">chat</span>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Aluno 3 -->
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <img class="h-10 w-10 rounded-full object-cover" src="imagens/padrao.jpg" alt="">
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Mariana Costa</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">15 anos</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900 dark:text-gray-100">1º Ano - C</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">
+                  Crítico
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                05/05/2023
+              </td>
+
+
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 mr-3">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+                <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+                  <span class="material-symbols-outlined">chat</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginação -->
+      <div class="bg-gray-50 dark:bg-gray-700 px-6 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600">
+            Anterior
+          </a>
+          <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600">
+            Próximo
+          </a>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Mostrando <span class="font-medium">1</span> a <span class="font-medium">3</span> de <span class="font-medium">12</span> resultados
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <span class="sr-only">Anterior</span>
+                <span class="material-symbols-outlined">chevron_left</span>
+              </a>
+              <a href="#" aria-current="page" class="z-10 bg-primary-50 dark:bg-primary-900 border-primary-500 dark:border-primary-600 text-primary-600 dark:text-primary-300 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                1
+              </a>
+              <a href="#" class="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                2
+              </a>
+              <a href="#" class="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                3
+              </a>
+              <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <span class="sr-only">Próximo</span>
+                <span class="material-symbols-outlined">chevron_right</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
-
   <script src="script.js" defer></script>
 </body>
 </html>
