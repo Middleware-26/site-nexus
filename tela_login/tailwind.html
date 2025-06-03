@@ -185,9 +185,9 @@
         }
 
         /* Botões ocultos (modo alternar entre login/cadastro) */
-        .container button.hidden {
-            background-color: transparent;
-            border-color: #fff;
+        .hidden {
+            background-color: transparent !important;
+            border-color: #fff !important;
         }
     </style>
 </head>
@@ -210,13 +210,19 @@
         <div class="cadastro-container cadastrar">
             <form id="simpleForm" class="bg-white flex items-center justify-center flex-col px-10 h-full" onsubmit="return validateForm(event)">
                 <div class="logo">
-                    <a href="#"><img src="/logo/espiral sem fundo.png" alt="" class="h-[50px] w-[50px] mb-[10px]"></a>
+                    <a href="#"><img src="/logo/espiral sem fundo.png" alt="Logo Nexus" class="h-[50px] w-[50px] mb-[10px]"></a>
                 </div>
                 <h1 class="text-2xl font-bold mb-3">Crie sua conta!</h1>
-                <input type="text" id="name" placeholder="Nome" required class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
-                <input type="email" id="email" placeholder="Email" required class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
-                <input type="password" id="password" placeholder="Senha" required class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 px-11 border border-transparent rounded-lg tracking-wide uppercase mt-2.5 cursor-pointer">Registrar-se</button>
+                <input type="text" id="name" placeholder="Nome" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="email" id="email" placeholder="Email" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="password" id="password" placeholder="Senha" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <button type="submit" 
+                        class="bg-[#0273D6] hover:bg-[#0269c2] text-white text-xs font-semibold py-2.5 px-11 rounded-lg uppercase tracking-wider mt-2.5 cursor-pointer transition-colors">
+                    Registrar-se
+                </button>
             </form>
         </div>
 
@@ -224,13 +230,18 @@
         <div class="login-container logar">
             <form class="bg-white flex items-center justify-center flex-col px-10 h-full">
                 <div class="logo">
-                    <a href="#"><img src="/logo/espiral sem fundo.png" alt="" class="h-[50px] w-[50px] mb-[10px]"></a>
+                    <a href="#"><img src="/logo/espiral sem fundo.png" alt="Logo Nexus" class="h-[50px] w-[50px] mb-[10px]"></a>
                 </div>
                 <h1 class="text-2xl font-bold mb-3">Login</h1>
-                <input type="email" placeholder="Email" required class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
-                <input type="password" placeholder="Senha" required class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 px-11 border border-transparent rounded-lg tracking-wide uppercase mt-2.5 cursor-pointer">Entrar</button>
-                <a href="#" class="text-gray-700 text-xs no-underline my-4">Esqueceu sua senha?</a>
+                <input type="email" placeholder="Email" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="password" placeholder="Senha" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <button type="submit" 
+                        class="bg-[#0273D6] hover:bg-[#0269c2] text-white text-xs font-semibold py-2.5 px-11 rounded-lg uppercase tracking-wider mt-2.5 cursor-pointer transition-colors">
+                    Entrar
+                </button>
+                <a href="#" class="text-gray-700 text-xs no-underline my-4 hover:text-gray-900 transition-colors">Esqueceu sua senha?</a>
             </form>
         </div>
 
@@ -240,12 +251,16 @@
                 <div class="alternar-painel alternar-esquerda">
                     <h1 class="text-2xl font-bold mb-3">Bem-vindo de volta!</h1>
                     <p class="text-sm leading-[20px] tracking-[0.3px] my-5">Insira seus dados pessoais para acessar nossos recursos!</p>
-                    <button class="hidden" id="login">Login</button>
+                    <button id="login" class="bg-transparent border border-white text-white text-xs font-semibold py-2.5 px-11 rounded-lg uppercase tracking-wider mt-2.5 cursor-pointer">
+                        Login
+                    </button>
                 </div>
                 <div class="alternar-painel alternar-direita">
                     <h1 class="text-2xl font-bold mb-3">Seja bem-vindo!</h1>
                     <p class="text-sm leading-[20px] tracking-[0.3px] my-5">Cadastre-se com seus dados pessoais para acessar nossos recursos!</p>
-                    <button class="hidden" id="register">Cadastro</button>
+                    <button id="register" class="bg-transparent border border-white text-white text-xs font-semibold py-2.5 px-11 rounded-lg uppercase tracking-wider mt-2.5 cursor-pointer">
+                        Cadastro
+                    </button>
                 </div>
             </div>
         </div>
