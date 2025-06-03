@@ -15,6 +15,8 @@ const nameTag      = document.getElementById('userName');
 const preview      = document.getElementById('avatarPreview');
 const themeToggle  = document.getElementById('themeToggle');
 const themeLabel   = document.getElementById('themeLabel'); // ← declaração adicionada
+const notifButton  = document.getElementById('notifButton');
+const notifList    = document.getElementById('notifList');
 
 // Funções de menu lateral
 function abrirMenu() {
@@ -40,7 +42,7 @@ function syncSidebarHeaderHeight() {
 function toggleTheme() {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  themeLabel.textContent = isDark ? 'Escuro' : 'Claro';
+  themeLabel.textContent = isDark ? 'Tema: Escuro' : 'Tema: Claro';
 }
 
 function loadTheme() {
@@ -48,7 +50,7 @@ function loadTheme() {
   const isDark = savedTheme === 'dark';              // ← criei isDark aqui
   document.documentElement.classList.toggle('dark', isDark);
   themeToggle.checked = isDark;
-  themeLabel.textContent = isDark ? 'Escuro' : 'Claro';
+  themeLabel.textContent = isDark ? 'Tema: Escuro' : 'Tema: Claro';
 }
 
 // Eventos
@@ -61,12 +63,15 @@ window.addEventListener('load', () => {
   if (savedName)   nameTag.textContent = savedName;
   if (savedAvatar) preview.src = savedAvatar;
 
-   // --- início: lógica de seleção de cards ---
+
+  
+
+// --- início: lógica de seleção de cards ---
   // seleção de cards com cor específica
   const cards = document.querySelectorAll('.card');
   let activeCard = null;
 
- cards.forEach(card => {
+  cards.forEach(card => {
     card.addEventListener('click', () => {
       // remove ring do anterior
       if (activeCard) {
@@ -80,8 +85,119 @@ window.addEventListener('load', () => {
     });
   });
   // --- fim: lógica de seleção de cards ---
+
+  // --- início: lógica de seleção de emoções ---
+  let selectedEmotion = null;
+
+  function selectEmotion(element) {
+    // Remove seleção de todos os cards
+    document.querySelectorAll('.emotion-card').forEach(card => {
+      card.classList.remove('selected');
+      card.classList.remove(
+        'border-emotion-worst',
+        'border-emotion-bad',
+        'border-emotion-neutral',
+        'border-emotion-good',
+        'border-emotion-great'
+      );
+    });
+
+    // Adiciona seleção no card clicado
+    element.classList.add('selected');
+    const emotion = element.getAttribute('data-emotion');
+    element.classList.add(`border-emotion-${emotion}`);
+
+    selectedEmotion = emotion;
+
+    // Habilita o botão de envio
+    const btnSubmit = document.getElementById('submitEmotion');
+    if (btnSubmit) btnSubmit.disabled = false;
+  }
+
+  // Adiciona event listener em cada card de emoção
+  document.querySelectorAll('.emotion-card').forEach(card => {
+    card.addEventListener('click', () => {
+      selectEmotion(card);
+    });
+  });
+
+  // Botão “Enviar Emoção”
+  const btnSubmitEmotion = document.getElementById('submitEmotion');
+  if (btnSubmitEmotion) {
+    btnSubmitEmotion.addEventListener('click', () => {
+      const details = document.getElementById('emotionDetails').value;
+
+      // Aqui você pode enviar selectedEmotion e details para o backend
+      console.log('Emotion submitted:', {
+        emotion: selectedEmotion,
+        details: details
+      });
+
+      // Mostrar mensagem de sucesso
+      alert('Obrigado por compartilhar como você está se sentindo! Se precisar de ajuda, estamos aqui para você.');
+
+      // Resetar formulário de emoções
+      document.querySelectorAll('.emotion-card').forEach(card => {
+        card.classList.remove('selected');
+        card.classList.remove(
+          'border-emotion-worst',
+          'border-emotion-bad',
+          'border-emotion-neutral',
+          'border-emotion-good',
+          'border-emotion-great'
+        );
+      });
+      document.getElementById('emotionDetails').value = '';
+      btnSubmitEmotion.disabled = true;
+      selectedEmotion = null;
+    });
+  }
+  // --- fim: lógica de seleção de emoções ---
 });
+
+
+
 
 themeToggle.addEventListener('change', toggleTheme);
 window.addEventListener('resize', syncSidebarHeaderHeight);
+
+// Funções de notificação
+function toggleNotifs() {
+  const list = document.getElementById('notifList');
+  list.classList.toggle('hidden');
+}
+
+// Fecha a lista ao clicar fora do botão ou da lista
+function handleClickOutside(e) {
+  const btn = document.getElementById('notifButton');
+  const list = document.getElementById('notifList');
+  if (!btn.contains(e.target) && !list.contains(e.target)) {
+    list.classList.add('hidden');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const notifButton    = document.getElementById('notifButton');
+  const notifList      = document.getElementById('notifList');
+  const notifContainer = notifButton.parentElement;
+
+  // Inicia com a lista oculta
+  notifList.classList.add('hidden');
+
+  // Clique no botão: alterna visibilidade
+  notifButton.addEventListener('click', toggleNotifs);
+
+  // Clique externo: esconde
+  document.addEventListener('click', handleClickOutside);
+
+  // Hover: ao passar o mouse, mostrar; ao sair, esconder
+  notifContainer.addEventListener('mouseenter', () => {
+    notifList.classList.remove('hidden');
+  });
+  notifContainer.addEventListener('mouseleave', () => {
+    notifList.classList.add('hidden');
+  });
+});
+
+
 
