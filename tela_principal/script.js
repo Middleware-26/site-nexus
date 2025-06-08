@@ -24,13 +24,17 @@ function abrirMenu() {
   sidebar.classList.toggle('opacity-0');
   sidebar.classList.toggle('translate-x-0');
   sidebar.classList.toggle('opacity-100');
+  // se sidebar agora estiver escondido, main perde margem; senão, ganha
+  const hidden = sidebar.classList.contains('-translate-x-full');
+  mainContent.classList.toggle('ml-64', !hidden);
+  mainContent.classList.toggle('ml-0', hidden);
 }
 
 function fecharMenu() {
-  sidebar.classList.add('-translate-x-full');
-  sidebar.classList.add('opacity-0');
-  sidebar.classList.remove('translate-x-0');
-  sidebar.classList.remove('opacity-100');
+  // opcional: chamar abrirMenu() garante consistência
+  if (!sidebar.classList.contains('-translate-x-full')) {
+    abrirMenu();
+  }
 }
 
 function syncSidebarHeaderHeight() {
@@ -153,9 +157,9 @@ window.addEventListener('load', () => {
     });
   }
   // --- fim: lógica de seleção de emoções ---
+
+  
 });
-
-
 
 
 themeToggle.addEventListener('change', toggleTheme);
@@ -197,7 +201,182 @@ document.addEventListener('DOMContentLoaded', () => {
   notifContainer.addEventListener('mouseleave', () => {
     notifList.classList.add('hidden');
   });
+
+
+        // Configura o modal de agendamento
+      const openModalBtn = document.getElementById('addScheduleBtn');
+      const openFirstBtn = document.getElementById('addFirstScheduleBtn');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const modal = document.getElementById('agendamentoModal');
+      
+      if(openModalBtn) {
+        openModalBtn.addEventListener('click', () => {
+          modal.classList.remove('hidden');
+          document.body.classList.add('modal-open');
+        });
+      }
+      
+      if(openFirstBtn) {
+        openFirstBtn.addEventListener('click', () => {
+          modal.classList.remove('hidden');
+          document.body.classList.add('modal-open');
+        });
+      }
+      
+      closeModalBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      });
+      
+      // Fecha modal ao clicar fora
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.add('hidden');
+          document.body.classList.remove('modal-open');
+        }
+      });
+  
+
+  const tabAgendados   = document.getElementById('tab-agendados');
+  const tabPassados    = document.getElementById('tab-passados');
+  const emptyAgendados = document.getElementById('empty-agendados');
+  const emptyPassados  = document.getElementById('empty-passados');
+  const scheduleCards  = document.getElementById('schedule-cards');
+
+  // Simule seus dados reais aqui:
+  const agendados   = [];                
+  const passados    = [];                
+
+  function updateView() {
+    if (tabAgendados.classList.contains('active')) {
+      // aba Agendados
+      tabAgendados.classList.replace('text-gray-500','text-primary-600');
+      tabAgendados.classList.replace('dark:text-gray-400','dark:text-primary-400');
+      tabAgendados.classList.add('border-b-2','border-primary-600','dark:border-primary-400');
+      tabPassados.classList.replace('text-primary-600','text-gray-500');
+      tabPassados.classList.replace('dark:text-primary-400','dark:text-gray-400');
+      tabPassados.classList.remove('border-b-2','border-primary-600','dark:border-primary-400');
+
+      // conteúdo
+      if (agendados.length === 0) {
+        emptyAgendados.classList.remove('hidden');
+        scheduleCards.classList.add('hidden');
+      } else {
+        emptyAgendados.classList.add('hidden');
+        scheduleCards.classList.remove('hidden');
+      }
+      emptyPassados.classList.add('hidden');
+    } else {
+      // aba Passados
+      tabPassados.classList.replace('text-gray-500','text-primary-600');
+      tabPassados.classList.replace('dark:text-gray-400','dark:text-primary-400');
+      tabPassados.classList.add('border-b-2','border-primary-600','dark:border-primary-400');
+      tabAgendados.classList.replace('text-primary-600','text-gray-500');
+      tabAgendados.classList.replace('dark:text-primary-400','dark:text-gray-400');
+      tabAgendados.classList.remove('border-b-2','border-primary-600','dark:border-primary-400');
+
+      // conteúdo
+      if (passados.length === 0) {
+        emptyPassados.classList.remove('hidden');
+      } else {
+        emptyPassados.classList.add('hidden');
+        // Se quiser listar cards de passados, adapte aqui
+      }
+      emptyAgendados.classList.add('hidden');
+      scheduleCards.classList.add('hidden');
+    }
+  }
+
+  tabAgendados.addEventListener('click', () => {
+    tabAgendados.classList.add('active');
+    tabPassados.classList.remove('active');
+    updateView();
+  });
+
+  tabPassados.addEventListener('click', () => {
+    tabPassados.classList.add('active');
+    tabAgendados.classList.remove('active');
+    updateView();
+  });
+
+  // Inicializa
+  updateView();
+
+  // seleção de tipo de agendamento
+  const cardsTipo = document.querySelectorAll('.card-tipo-agendamento');
+  cardsTipo.forEach(card => {
+    card.addEventListener('click', () => {
+      // 1) limpa o destaque de todos
+      cardsTipo.forEach(c => {
+        c.classList.remove(
+          'ring-2',
+          'ring-primary-600',
+          'bg-primary-600',
+          'bg-opacity-20',
+          'dark:bg-primary-400',
+          'dark:bg-opacity-50'
+          
+        );
+      });
+
+       const color = card.dataset.color; // "primary" ou "secondary"
+
+      // 2) adiciona destaque no clicado
+      card.classList.add(
+        'ring-2',
+        'ring-primary-600',
+        'bg-primary-600',
+        'bg-opacity-20',
+        'dark:bg-primary-400',
+        'dark:bg-opacity-50'
+
+      );
+
+      // opcional: pega o tipo
+      console.log('Tipo selecionado:', card.dataset.tipo);
+    });
+  });
+
+  // scrollspy para links de navegação
+  const links    = document.querySelectorAll('.scrollspy-link');
+  const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
+
+  const ACTIVE_CLASSES   = ['bg-primary-600', 'bg-opacity-40','text-primary-600', 'dark:text-primary-400', 'border-l-4', 'border-primary-600', 'pl-2'];
+  const INACTIVE_CLASSES = ['text-gray-700',   'dark:text-gray-300',            'border-l-0'];
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const id   = entry.target.id;
+      const link = document.querySelector(`.scrollspy-link[href="#${id}"]`);
+      if (!link) return;
+
+      if (entry.isIntersecting) {
+        // marca só este link como ativo
+        links.forEach(l => {
+          l.classList.remove(...ACTIVE_CLASSES);
+          l.classList.add(...INACTIVE_CLASSES);
+        });
+        link.classList.remove(...INACTIVE_CLASSES);
+        link.classList.add(...ACTIVE_CLASSES);
+      }
+    });
+  }, {
+    root: null,
+    threshold: 0.5
+  });
+
+  sections.forEach(sec => {
+    if (sec) observer.observe(sec);
+  });
 });
+
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="scroll-smooth">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -23,6 +23,10 @@
             secondary: {
               500: '#6366F1',
               600: '#4F46E5',
+            },
+            purple: {
+              500: '#8e44ad',
+              600: '#7d3c98',
             },
             emotion: {
               worst: '#EF4444',
@@ -119,11 +123,17 @@
   </div>
 
   <!-- Sidebar -->
-  <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-xl shadow-gray-500/30 dark:shadow-black/40 transform -translate-x-full opacity-0 z-50 overflow-y-auto" onmouseleave="fecharMenu()">
-    <div id="sidebar-header" class="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 p-6 flex justify-between items-center">
-      <img src="imagens/Sem nomeee.png" alt="Logo Middleware" class="w-16 h-16 object-contain mb-2">
-      <span class="material-symbols-outlined text-sm ml-8 text-white">arrow_back</span><h3 class="text-sm text-white">Automático</h3>
+ <div id="sidebar"
+     class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800
+            shadow-xl shadow-gray-500/30 dark:shadow-black/40
+            transform translate-x-0 opacity-100 z-50 overflow-y-auto"
+     onmouseleave="">
+    <div id="sidebar-header" class="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 p-6 flex items-center justify-between">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" onclick="abrirMenu()">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 6H3V5h18v1zm0 5H3v1h18v-1zm0 6H3v1h18v-1z"></path></svg>
+        <img src="imagens/Sem nomeee.png" alt="Logo Middleware" class="w-20 h-16 object-contain">
     </div>
+    
 
     <div class="p-6 flex flex-col items-center text-gray-800 dark:text-gray-100">
     <img id="avatarPreview"
@@ -131,22 +141,26 @@
            alt="Foto de perfil"
            class="w-32 h-32 rounded-full border-4 border-black dark:border-gray-300 object-cover mb-4"/>
 
-      <div class="flex flex-col items-center mb-6">
+      <div class="flex flex-col items-center mb-4">
         <h2 id="userName" class="text-lg font-semibold text-center">Aluno</h2>
         <p class="text-center text-sm text-gray-600 dark:text-gray-300">Ensino Médio</p>
         <p class="text-center text-sm text-gray-600 dark:text-gray-300 mt-1">2º Ano - Turma B</p>
       </div>
 
       <nav class="w-full space-y-1 mt-6">
-        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
-          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">forum</span>
-          <span>Conversar</span>
+        <a href="#meu-estado" class="scrollspy-link flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">sentiment_satisfied</span>
+          <span>Meu estado</span>
         </a>
-        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+        <a href="#agendamentos" class="scrollspy-link flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
           <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">calendar_month</span>
           <span>Agendamentos</span>
         </a>
-        <a href="#" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+        <a href="#forum" class="scrollspy-link flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+          <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">forum</span>
+          <span>Fórum</span>
+        </a>
+        <a href="#recursos" class="scrollspy-link flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
           <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">import_contacts</span>
           <span>Recursos</span>
         </a>
@@ -178,8 +192,9 @@
   </div>
 
   <!-- Main Content -->
-  <main class="ml-0 transition-all duration-300 p-4 md:p-6">
+  <main id="mainContent" class="ml-64 transition-all duration-300 p-4 md:p-6">
     <!-- Cabeçalho da página -->
+    <section id="meu-estado" class="">
     <div class="w-full p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 rounded-xl shadow-lg mb-6 relative overflow-hidden">
       <!-- Decorative elements -->
       <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-white bg-opacity-10"></div>
@@ -268,6 +283,443 @@
         </div>
       </div>
     </div>
+</section>
+
+<!-- ABA DE AGENDAMENTO -->
+<section id="agendamentos" class="pt-10 pb-10">
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
+
+    
+    <div class="p-6 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-200 dark:border-gray-700">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Meus Agendamentos</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+          Visualize e gerencie suas consultas com professores e psicólogos
+        </p>
+      </div>
+    </div>
+
+    <!-- Navegação das abas -->
+    <div class="px-4 py-3 flex border-b border-gray-200 dark:border-gray-700">
+      <button id="tab-agendados"
+              class="tab-button active text-sm px-4 py-2 font-medium text-primary-600 border-b-2 border-primary-600 dark:text-primary-400 dark:border-primary-400">
+        Agendados
+      </button>
+      <button id="tab-passados"
+              class="tab-button text-sm px-4 py-2 font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+        Passados
+      </button>
+    </div>
+
+    <!-- Conteúdos -->
+    <div id="agendamentos-container" class="p-4 grid gap-4">
+
+      <!-- Sem agendados -->
+      <div id="empty-agendados"
+           class="flex flex-col items-center justify-center py-12 text-center">
+        <div class="w-20 h-20 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+          <span class="material-symbols-outlined text-4xl text-gray-400">calendar_add_on</span>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+          Nenhum agendamento marcado
+        </h3>
+        <p class="text-gray-500 dark:text-gray-400 max-w-md mb-6">
+          Você ainda não possui agendamentos marcados. Clique no botão abaixo para marcar sua primeira consulta.
+        </p>
+        <button id="addScheduleBtn"
+                class="mt-3 sm:mt-0 flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+          <span class="material-symbols-outlined text-base">add</span>
+          Novo Agendamento
+        </button>
+      </div>
+
+      <!-- Sem passados -->
+      <div id="empty-passados"
+           class="flex flex-col items-center justify-center py-12 text-center">
+        <div class="w-20 h-20 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+          <span class="material-symbols-outlined text-4xl text-gray-400">history</span>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+          Você ainda não tem consultas passadas
+        </h3>
+        <p class="text-gray-500 dark:text-gray-400 max-w-md mb-6">
+          Assim que você concluir suas consultas, elas aparecerão aqui.
+        </p>
+      </div>
+
+      <!-- Cards de agendamento -->
+      <div id="schedule-cards" class="grid grid-cols-1 gap-4">
+        <!-- exemplo de card -->
+        <div class="agendamento-card bg-white dark:bg-gray-700 rounded-xl custom-shadow overflow-hidden transition-all duration-300">
+          <!-- ... seu markup de cada card ... -->
+          <div class="p-5 flex flex-col md:flex-row">
+            <!-- conteúdo do card -->
+            <div class="flex flex-1 flex-col">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full">
+                  <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">psychology_alt</span>
+                </div>
+                <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">Psicólogo</span>
+                <div class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded-full">
+                  Confirmado
+                </div>
+              </div>
+              <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg mb-1">Dra. Ana Clara Silva</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Avaliação sobre ansiedade pré-vestibular</p>
+              <div class="flex items-center gap-3 flex-wrap">
+                <div class="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                  <span class="material-symbols-outlined text-sm">calendar_month</span>
+                  <span>22/11/2023</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                  <span class="material-symbols-outlined text-sm">schedule</span>
+                  <span>14:30 - 15:30</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 md:mt-0 flex md:items-center">
+              <div class="flex gap-2">
+                <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300">
+                  <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 text-red-500">
+                  <span class="material-symbols-outlined">cancel</span>
+                </button>
+                <button class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-500">
+                  <span class="material-symbols-outlined text-base mr-1">chat</span>
+                  Mensagem
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- fim do exemplo -->
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+      <!-- Novo Agendamento -->
+  <div id="agendamentoModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="modal-backdrop absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+      <div class="relative bg-white dark:bg-gray-800 rounded-2xl max-w-3xl w-full mx-auto max-h-[90vh] overflow-hidden fade-in custom-shadow">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">Novo Agendamento</h3>
+          <button id="closeModalBtn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+            <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">close</span>
+          </button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto max-h-[80vh]">
+          <div class="mb-6">
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Agendamento</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="card-tipo-agendamento  hover:border-primary-600 bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-2 border-transparent cursor-pointer hover:border-primary-300 transition-colors" data-tipo="psicologico">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">psychology_alt</span>
+                  </div>
+                  <h4 class="font-medium text-gray-800 dark:text-gray-200">Acompanhamento Psicológico</h4>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Sessões individuais para apoio emocional e orientação psicológica.</p>
+              </div>
+              
+              <div class="card-tipo-agendamento  hover:border-primary-600 bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-2 border-transparent cursor-pointer hover:border-primary-300 transition-colors" data-tipo="avaliacao">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">psychology</span>
+                  </div>
+                  <h4 class="font-medium text-gray-800 dark:text-gray-200">Avaliação Psicológica</h4>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Reunião para avaliar o desenvolvimento, dificuldades e potencial do estudante.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Selecione o Profissional</h4>
+            <select class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-700 dark:text-gray-300">
+              <option value="" disabled selected>Selecione um profissional</option>
+              <optgroup label="Psicólogos">
+                <option value="1">Dra. Ana Clara Silva</option>
+                <option value="2">Dr. Roberto Mendes</option>
+                <option value="3">Dra. Carla Fernandes</option>
+              </optgroup>
+            </select>
+          </div>
+          
+          <div class="mb-6">
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Selecione a Data</h4>
+            <div class="calendar bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-4">
+                <button class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <span class="material-symbols-outlined">arrow_back_ios</span>
+                </button>
+                <h4 class="font-medium text-gray-800 dark:text-gray-200">Novembro 2023</h4>
+                <button class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <span class="material-symbols-outlined">arrow_forward_ios</span>
+                </button>
+              </div>
+              
+              <div class="grid grid-cols-7 gap-1 text-center">
+                <!-- Dias da semana -->
+                <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">DOM</div>
+                <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">SEG</div>
+                <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">TER</div>
+                <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">QUA</div>
+                <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">QUI</div>
+                <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">SEX</div>
+                <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">SAB</div>
+                
+                <!-- Dias do mês -->
+                <div class="py-2 text-gray-400 dark:text-gray-500">29</div>
+                <div class="py-2 text-gray-400 dark:text-gray-500">30</div>
+                <div class="py-2 text-gray-400 dark:text-gray-500">31</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">1</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">2</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">3</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">4</div>
+                
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">5</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">6</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">7</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">8</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">9</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">10</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">11</div>
+                
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">12</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">13</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">14</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">15</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">16</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">17</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">18</div>
+                
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">19</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">20</div>
+                <div class="calendar-day selected py-2 bg-blue-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300 cursor-pointer">21</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">22</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">23</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">24</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">25</div>
+                
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">26</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">27</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">28</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">29</div>
+                <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">30</div>
+                <div class="py-2 text-gray-400 dark:text-gray-500">1</div>
+                <div class="py-2 text-gray-400 dark:text-gray-500">2</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Horários Disponíveis</h4>
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">08:30</div>
+              <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">09:15</div>
+              <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">10:00</div>
+              <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">10:45</div>
+              <div class="availability-time time-selected bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 py-2 text-center rounded-lg text-sm font-medium cursor-pointer">11:30</div>
+              <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">14:00</div>
+              <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">14:45</div>
+              <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">15:30</div>
+              <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">16:15</div>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Motivo da Consulta
+            </label>
+            <textarea 
+              rows="3"
+              class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-700 dark:text-gray-300 transition"
+              placeholder="Descreva brevemente o motivo do seu agendamento..."></textarea>
+          </div>
+          
+          <div class="flex justify-end gap-3">
+            <button class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+              Cancelar
+            </button>
+            <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium">
+              Agendar Consulta
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+      <!-- Seção do Fórum -->
+    <section id="forum" class="pt-10 pb-10">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Fórum de Discussão</h2>
+          <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Compartilhe suas experiências e dúvidas com outros alunos</p>
+        </div>
+
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">Tópicos recentes</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Participe das discussões da comunidade</p>
+            </div>
+            <button class="flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+              <span class="material-symbols-outlined text-base">add</span>
+              Novo Tópico
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Tópico 1 -->
+            <div class="forum-topic bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                  <img src="imagens/padrao.jpg" alt="Usuário" class="w-10 h-10 rounded-full object-cover">
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <h4 class="font-medium text-gray-800 dark:text-gray-200">Como lidar com ansiedade antes das provas?</h4>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">2h atrás</span>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Estou tendo muita dificuldade para controlar minha ansiedade nas semanas de prova...</p>
+                  <div class="flex items-center gap-4 mt-3 text-xs">
+                    <span class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                      <span class="material-symbols-outlined text-sm">chat_bubble</span>
+                      12 respostas
+                    </span>
+                    <span class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                      <span class="material-symbols-outlined text-sm">visibility</span>
+                      45 visualizações
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tópico 2 -->
+            <div class="forum-topic bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                  <img src="imagens/padrao.jpg" alt="Usuário" class="w-10 h-10 rounded-full object-cover">
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <h4 class="font-medium text-gray-800 dark:text-gray-200">Indicações de técnicas de estudo</h4>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">1 dia atrás</span>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Quais técnicas vocês usam para se concentrar nos estudos? Alguém tem dicas?</p>
+                  <div class="flex items-center gap-4 mt-3 text-xs">
+                    <span class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                      <span class="material-symbols-outlined text-sm">chat_bubble</span>
+                      8 respostas
+                    </span>
+                    <span class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                      <span class="material-symbols-outlined text-sm">visibility</span>
+                      32 visualizações
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tópico 3 -->
+            <div class="forum-topic bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                  <img src="imagens/padrao.jpg" alt="Usuário" class="w-10 h-10 rounded-full object-cover">
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <h4 class="font-medium text-gray-800 dark:text-gray-200">Grupo de apoio emocional</h4>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">3 dias atrás</span>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Estamos organizando um grupo de apoio entre alunos. Quem quiser participar...</p>
+                  <div class="flex items-center gap-4 mt-3 text-xs">
+                    <span class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                      <span class="material-symbols-outlined text-sm">chat_bubble</span>
+                      20 respostas
+                    </span>
+                    <span class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                      <span class="material-symbols-outlined text-sm">visibility</span>
+                      78 visualizações
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-center">
+            <button class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+              Carregar mais tópicos
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Estado Emocional -->
+    <section id="recursos" class="pt-10 pb-10">
+        <!-- Recursos Rápidos -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Recursos para você</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Ferramentas e conteúdos para ajudar no seu bem-estar</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+        <!-- Recurso 1 -->
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-4xl">self_improvement</span>
+          </div>
+          <div class="p-4">
+            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Exercícios de Respiração</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Técnicas simples para acalmar a mente em momentos de ansiedade.</p>
+            <button class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center">
+              Acessar <span class="material-symbols-outlined text-base ml-1">chevron_right</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Recurso 2 -->
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <div class="h-32 bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-4xl">headphones</span>
+          </div>
+          <div class="p-4">
+            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Músicas Relaxantes</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Playlists selecionadas para ajudar na concentração e relaxamento.</p>
+            <button class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center">
+              Acessar <span class="material-symbols-outlined text-base ml-1">chevron_right</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Recurso 3 -->
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <div class="h-32 bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-4xl">menu_book</span>
+          </div>
+          <div class="p-4">
+            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">Guia de Estudos</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Dicas para organizar seus estudos e reduzir o estresse acadêmico.</p>
+            <button class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center">
+              Acessar <span class="material-symbols-outlined text-base ml-1">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
   </main>
 
   <script src="script.js" defer></script>
