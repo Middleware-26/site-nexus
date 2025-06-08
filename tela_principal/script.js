@@ -319,8 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         );
       });
 
-       const color = card.dataset.color; // "primary" ou "secondary"
-
       // 2) adiciona destaque no clicado
       card.classList.add(
         'ring-2',
