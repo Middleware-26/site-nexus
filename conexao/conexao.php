@@ -3,7 +3,7 @@
 if($_SERVER['REQUEST_METHOD'] !== 'POST'){
     //Redireciona para a página inicial se for acesso direto
     // MUDAR A PAGINA INICIAL
-    header("Location:");
+    header("Location: http://localhost:8081/teste/tela_inicial/inicio.html");
     exit;
 }
 
