@@ -219,19 +219,19 @@
       </div>
 
       <nav class="w-full space-y-1 mt-6">
-        <a href="#alunos" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+        <a href="#alunos" class=" scrollspy-link flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
           <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">group</span>
           <span>Alunos</span>
         </a>
-        <a href="#conversar" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+        <a href="#conversar" class=" scrollspy-link flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
           <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">forum</span>
           <span>Conversar</span>
         </a>
-        <a href="#agendamentos" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+        <a href="#agendamentos" class=" scrollspy-link flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
           <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">calendar_month</span>
           <span>Agendamentos</span>
         </a>
-        <a href="#relatorios" class="flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
+        <a href="#relatorios" class=" scrollspy-link flex gap-3 py-3 px-4 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 items-center transition-colors">
           <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">monitoring</span>
           <span>Relatórios</span>
         </a>
@@ -265,6 +265,7 @@
   <!-- Main Content -->
   <main id="mainContent" class="ml-64 transition-all duration-300 p-4 md:p-6">
     <!-- Cabeçalho da página -->
+     
     <div class="w-full p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 rounded-xl shadow-lg mb-6">
 
       <div class="flex flex-col items-start justify-center">
@@ -283,6 +284,7 @@
     </div>
 
     <!-- Cards de Estatísticas -->
+     <section id="alunos" class="pt-10 pb-10">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <!-- Card 1 - Total de Alunos -->
       <div class="stat-card bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md card-hover border-l-4 border-blue-500">
@@ -338,7 +340,7 @@
     </div>
 
     <!-- Seção de Alunos -->
-     <section id="alunos" class="pt-10 pb-10">
+    
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-6">
       <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
@@ -618,7 +620,7 @@
 </div>
 
                         <!-- Conversa -->
-<section id="conversar" class="">
+<section id="conversar" class="pt-10 pb-10">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
 
@@ -855,24 +857,24 @@
               <!-- Lista de Alunos -->
               <div id="studentList" class="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     <!-- Aluno 1 -->
-                  <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                  <div class="card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                     <img class="h-10 w-10 rounded-full object-cover mb-2" src="imagens/padrao.jpg" alt="">
-                    <h5 class="font-semibold text-gray-800 dark:text-gray-200">João Silva</h5>
+                    <h5 class="font-semibold text-gray-800 dark:text-gray-200">Pedro Henrique Oliveira</h5>
                     <p class="text-sm text-gray-600 dark:text-gray-400">3º Ano – Turma A</p>
                   </div>
                   
                   <!-- Aluno 2 -->
-                  <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                  <div class=" card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                     <img class="h-10 w-10 rounded-full object-cover mb-2" src="imagens/padrao.jpg" alt="">
-                    <h5 class="font-semibold text-gray-800 dark:text-gray-200">Maria Santos</h5>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">2º Ano – Turma B</p>
+                    <h5 class="font-semibold text-gray-800 dark:text-gray-200">Mariana Costa</h5>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">1º Ano – Turma C</p>
                   </div>
                   
                   <!-- Aluno 3 -->
-                  <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                  <div class=" card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                     <img class="h-10 w-10 rounded-full object-cover mb-2" src="imagens/padrao.jpg" alt="">
-                    <h5 class="font-semibold text-gray-800 dark:text-gray-200">Pedro Oliveira</h5>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">1º Ano – Turma C</p>
+                    <h5 class="font-semibold text-gray-800 dark:text-gray-200">Ana Carolina Silva</h5>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">2º Ano – Turma B</p>
                   </div>
               </div>
               
@@ -992,7 +994,8 @@
 
   </main>
   
-    <script type="module" src="js/main.js"></script>
+   <script src="script.js"></script>
+
     
 </body>
 </html>
