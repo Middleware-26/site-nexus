@@ -367,14 +367,3 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sec) observer.observe(sec);
   });
 });
-
-
-
-
-
-
-
-
-
-
-
