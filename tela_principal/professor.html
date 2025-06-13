@@ -425,99 +425,119 @@
 </section>
 
 
-<!-- Conversa -->
+<!-- Conversa - Seção Corrigida -->
 <section id="conversar" class="pt-4 pb-10">
   <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
-    <!-- Restaurada a md:flex-row aqui -->
-    <div class="flex flex-col md:flex-row h-[500px]">
+    <div class="flex flex-col md:flex-row min-h-[500px]">
       
-      <!-- Painel de Contatos (igual ao seu original) -->
+      <!-- Lista de Conversas -->
       <div class="w-full md:w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-          <!-- Painel de Contatos -->
-            <!-- Cabeçalho do painel de contatos -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex justify-between items-center">
-                <h2 class="font-bold text-lg text-gray-900 dark:text-white">Conversas</h2>
-                <button class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
-                  <span class="material-symbols-outlined">add</span>
-                </button>
-              </div>
-              
-              <div class="mt-4 relative">
-                <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-500 dark:text-gray-400">search</span>
-                <input type="text" placeholder="Pesquisar conversas..." class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
-              </div>
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex justify-between items-center">
+            <h2 class="font-bold text-lg text-gray-900 dark:text-white">Conversas</h2>
+            <button class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+              <span class="material-symbols-outlined">add</span>
+            </button>
+          </div>
+          
+          <div class="mt-4 relative">
+            <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-500 dark:text-gray-400">search</span>
+            <input type="text" placeholder="Pesquisar conversas..." class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm">
+          </div>
+        </div>
+        
+        <!-- Lista de Contatos -->
+        <div class="conversation-list flex-1 overflow-y-auto">
+          <!-- Psicólogo 1 -->
+          <div class="contact-item p-4 flex items-center border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+            <div class="relative">
+              <img src="imagens/padrao.jpg" alt="Dra. Carla" class="w-12 h-12 rounded-full object-cover">
+              <div class="online-indicator"></div>
             </div>
-            
-            <!-- Lista de Contatos -->
-            <div class="flex-1 overflow-y-auto">
-              <!-- Psicólogo 1 -->
-              <div class="contact-item p-4 flex items-center border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                <div class="relative">
-                  <img src="imagens/padrao.jpg" alt="Dra. Carla" class="w-12 h-12 rounded-full object-cover">
-                  <div class="online-indicator"></div>
-                </div>
-                <div class="ml-4 flex-1 min-w-0">
-                  <div class="flex justify-between">
-                    <h3 class="font-semibold text-gray-900 dark:text-white truncate">Dra. Carla Silva</h3>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">10:45</span>
-                  </div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 truncate">Estou analisando os casos...</p>
-                </div>
+            <div class="ml-4 flex-1 min-w-0">
+              <div class="flex justify-between">
+                <h3 class="font-semibold text-gray-900 dark:text-white truncate">Dra. Carla Silva</h3>
+                <span class="text-xs text-gray-500 dark:text-gray-400">10:45</span>
               </div>
-              
-              <!-- Psicólogo 2 -->
-              <div class="contact-item p-4 flex items-center border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                <div class="relative">
-                  <img src="imagens/padrao.jpg" alt="Dr. Marcos" class="w-12 h-12 rounded-full object-cover">
-                  <div class="online-indicator"></div>
-                </div>
-                <div class="ml-4 flex-1 min-w-0">
-                  <div class="flex justify-between">
-                    <h3 class="font-semibold text-gray-900 dark:text-white truncate">Dr. Marcos Oliveira</h3>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Ontem</span>
-                  </div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 truncate">Recebi seu relatório, obrigado!</p>
-                </div>
-              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400 truncate">Estou analisando os casos...</p>
             </div>
+          </div>
+          
+          <!-- Psicólogo 2 -->
+          <div class="contact-item p-4 flex items-center border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+            <div class="relative">
+              <img src="imagens/padrao.jpg" alt="Dr. Marcos" class="w-12 h-12 rounded-full object-cover">
+              <div class="online-indicator"></div>
+            </div>
+            <div class="ml-4 flex-1 min-w-0">
+              <div class="flex justify-between">
+                <h3 class="font-semibold text-gray-900 dark:text-white truncate">Dr. Marcos Oliveira</h3>
+                <span class="text-xs text-gray-500 dark:text-gray-400">Ontem</span>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400 truncate">Recebi seu relatório, obrigado!</p>
+            </div>
+          </div>
+          
+          <!-- Psicólogo 3 -->
+          <div class="contact-item p-4 flex items-center border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+            <div class="relative">
+              <img src="imagens/padrao.jpg" alt="Dra. Fernanda" class="w-12 h-12 rounded-full object-cover">
+              <div class="online-indicator bg-gray-300"></div>
+            </div>
+            <div class="ml-4 flex-1 min-w-0">
+              <div class="flex justify-between">
+                <h3 class="font-semibold text-gray-900 dark:text-white truncate">Dra. Fernanda Costa</h3>
+                <span class="text-xs text-gray-500 dark:text-gray-400">Terça</span>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400 truncate">Precisamos conversar sobre o João...</p>
+            </div>
+          </div>
+        </div>
       </div>
       
       <!-- Painel de Conversa -->
       <div class="w-full md:w-2/3 flex flex-col">
         <div class="chat-header p-4 flex items-center border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-              <div class="relative">
-                <img src="imagens/padrao.jpg" alt="Dra. Carla" class="w-10 h-10 rounded-full object-cover">
-                <div class="online-indicator"></div>
-              </div>
-              <div class="ml-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Dra. Carla Silva</h3>
-                <p class="text-xs text-green-600 dark:text-green-400">Psicóloga • Online</p>
-              </div>
-              <div class="ml-auto flex space-x-2">
-                <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
-                  <span class="material-symbols-outlined">info</span>
-                </button>
-              </div>
+          <div class="relative">
+            <img src="imagens/padrao.jpg" alt="Dra. Carla" class="w-10 h-10 rounded-full object-cover">
+            <div class="online-indicator"></div>
+          </div>
+          <div class="ml-4">
+            <h3 class="font-semibold text-gray-900 dark:text-white">Dra. Carla Silva</h3>
+            <p class="text-xs text-green-600 dark:text-green-400">Psicóloga • Online</p>
+          </div>
+          <div class="ml-auto flex space-x-2">
+            <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+              <span class="material-symbols-outlined">info</span>
+            </button>
+          </div>
         </div>
         
         <!-- Corpo da Conversa -->
         <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-gray-900">
-          <div class="overflow-y-auto p-4 space-y-4 scrollbar-hide">
+          <div class="chat-messages overflow-y-auto p-4 space-y-4 scrollbar-hide">
             <div class="eu max-w-[80%] ml-auto bg-indigo-600 text-white px-4 py-3 rounded-lg">
               <p class="text-sm">Olá, Dra. Carla! Você tem um minutinho para conversarmos sobre como os alunos estão se sentindo em sala?</p>
-              <p class="text-xs text-gray-200 mt-1">Você</p>
+              <p class="text-xs text-gray-200 mt-1">Você - 10:15</p>
             </div>
             <div class="ele max-w-[80%] bg-gray-100 dark:bg-gray-700 px-4 py-3 rounded-lg">
               <p class="text-sm">Claro, Ana. O que você tem observado?</p>
-              <p class="text-xs text-gray-500 dark:text-gray-300 mt-1">Dra. Carla - Psicóloga</p>
+              <p class="text-xs text-gray-500 dark:text-gray-300 mt-1">Dra. Carla - 10:16</p>
             </div>
-            <div class="eu max-w-[80%] ml-auto bg-indigo-600 text-white px-4 py-3 rounded-lg relative">
-          <p class="text-sm">
-            Percebi vários sinais de cansaço e desmotivação: declinio das notas, distração frequente e menos participação em atividades em grupo.
-          </p>
-          <p class="text-xs text-gray-200 mt-1">Você</p>
-        </div>
+            <div class="eu max-w-[80%] ml-auto bg-indigo-600 text-white px-4 py-3 rounded-lg">
+              <p class="text-sm">
+                Percebi vários sinais de cansaço e desmotivação: declínio das notas, distração frequente e menos participação em atividades em grupo.
+              </p>
+              <p class="text-xs text-gray-200 mt-1">Você - 10:17</p>
+            </div>
+            <div class="ele max-w-[80%] bg-gray-100 dark:bg-gray-700 px-4 py-3 rounded-lg">
+              <p class="text-sm">Isso é preocupante. Você pode me enviar os relatórios de desempenho dos alunos que mais chamaram sua atenção? Assim posso analisar melhor.</p>
+              <p class="text-xs text-gray-500 dark:text-gray-300 mt-1">Dra. Carla - 10:18</p>
+            </div>
+            <div class="eu max-w-[80%] ml-auto bg-indigo-600 text-white px-4 py-3 rounded-lg">
+              <p class="text-sm">Claro, já estou enviando. Os principais são: Ana Carolina Silva, Pedro Henrique Oliveira e Mariana Costa.</p>
+              <p class="text-xs text-gray-200 mt-1">Você - 10:18</p>
+            </div>
           </div>
           
           <div class="typing-indicator flex items-center px-4 py-2 text-gray-500 dark:text-gray-400">
@@ -528,7 +548,7 @@
           </div>
         </div>
         
-        <div class="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
+        <div class="chat-input-container border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
           <div class="flex items-center">
             <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 mr-2">
               <span class="material-symbols-outlined">add</span>
@@ -549,9 +569,6 @@
     </div>
   </div>
 </section>
-
-
-
 
     <!-- ABA DE AGENDAMENTO -->
 <section id="agendamentos" class="pt-10 pb-10">
