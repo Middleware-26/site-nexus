@@ -484,6 +484,50 @@ closeModalButton.addEventListener('click', () => {
   studentModal.classList.add('hidden');
 });
 
+
+
+
+// Relatorio dos Alunos Psicologo.
+// Referências ao DOM
+const chatModal       = document.getElementById('relatorio-chat-modal');
+const btnCloseChat    = document.getElementById('btn-close-rel-chat');
+
+const fldNameChat     = document.getElementById('rel-student-name');
+const fldInitialChat  = document.getElementById('rel-student-initial');
+const fldStatusChat   = document.getElementById('rel-student-status');
+const fldAgeChat      = document.getElementById('rel-student-age');
+const fldClassChat    = document.getElementById('rel-student-class');
+
+// Abre modal ao clicar no ícone de chat
+document.querySelectorAll('button span.material-symbols-outlined')
+  .forEach(icon => {
+    if (icon.textContent.trim() !== 'chat') return;
+
+    icon.parentElement.addEventListener('click', () => {
+      const tr = icon.closest('tr');
+      const [tdAluno, tdTurma, tdStatus] = tr.querySelectorAll('td');
+
+      const nome  = tdAluno.querySelector('.font-medium').textContent.trim();
+      const idade = tdAluno.querySelector('.text-gray-500').textContent.trim();
+      const turma = tdTurma.textContent.trim();
+      const status= tdStatus.textContent.trim();
+
+      fldNameChat.textContent    = nome;
+      fldInitialChat.textContent = nome.charAt(0).toUpperCase();
+      fldStatusChat.textContent  = status;
+      fldAgeChat.textContent     = idade;
+      fldClassChat.textContent   = turma;
+
+      chatModal.classList.remove('hidden');
+    });
+  });
+
+// Fecha o modal de chat
+btnCloseChat.addEventListener('click', () => {
+  chatModal.classList.add('hidden');
+});
+
+
 // 
 // MODAL DE FICHA DO ESTUDANTE (CHAT)
 // 
@@ -504,3 +548,5 @@ document.querySelectorAll('button span.material-symbols-outlined').forEach(icon 
 fecharModalButton.addEventListener('click', () => {
   fichaModal.classList.add('hidden');
 });
+
+
