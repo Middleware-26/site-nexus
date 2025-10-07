@@ -929,7 +929,7 @@
             <div class="mb-6">
               <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Agendamento</h4>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="card-tipo-agendamento hover:border-primary-600 bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-2 border-transparent cursor-pointer hover:border-primary-300 transition-colors" data-tipo="psicologico">
+                <div class="card-tipo-agendamento hover:bg-gray-200 dark:hover:bg-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-2 border-transparent cursor-pointer transition-colors" data-tipo="psicologico">
                   <div class="flex items-center gap-3 mb-3">
                     <div class="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full">
                       <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">psychology_alt</span>
@@ -938,8 +938,8 @@
                   </div>
                   <p class="text-sm text-gray-600 dark:text-gray-400">Sessões individuais para apoio emocional e orientação psicológica.</p>
                 </div>
-                
-                <div class="card-tipo-agendamento hover:border-primary-600 bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-2 border-transparent cursor-pointer hover:border-primary-300 transition-colors" data-tipo="avaliacao">
+                 
+                <div class="card-tipo-agendamento hover:bg-gray-200 dark:hover:bg-gray-600 bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-2 border-transparent cursor-pointer transition-colors" data-tipo="avaliacao">
                   <div class="flex items-center gap-3 mb-3">
                     <div class="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-full">
                       <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">psychology</span>
@@ -998,21 +998,23 @@
               <!-- Lista de Alunos -->
               <div id="studentList" class="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     <!-- Aluno 1 -->
-                  <div class="card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                  <div class="card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition" data-serie="3ens" data-turma="A">
                     <img class="h-10 w-10 rounded-full object-cover mb-2" src="imagens/padrao.jpg" alt="">
                     <h5 class="font-semibold text-gray-800 dark:text-gray-200">Pedro Henrique Oliveira</h5>
                     <p class="text-sm text-gray-600 dark:text-gray-400">3º Ano – Turma A</p>
                   </div>
                   
                   <!-- Aluno 2 -->
-                  <div class=" card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                  <div class=" card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition"
+                   data-serie="1ens" data-turma="C">
                     <img class="h-10 w-10 rounded-full object-cover mb-2" src="imagens/padrao.jpg" alt="">
                     <h5 class="font-semibold text-gray-800 dark:text-gray-200">Mariana Costa</h5>
                     <p class="text-sm text-gray-600 dark:text-gray-400">1º Ano – Turma C</p>
                   </div>
                   
                   <!-- Aluno 3 -->
-                  <div class=" card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                  <div class=" card-aluno p-4 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-primary-800 transition"
+                   data-serie="2ens" data-turma="B">
                     <img class="h-10 w-10 rounded-full object-cover mb-2" src="imagens/padrao.jpg" alt="">
                     <h5 class="font-semibold text-gray-800 dark:text-gray-200">Ana Carolina Silva</h5>
                     <p class="text-sm text-gray-600 dark:text-gray-400">2º Ano – Turma B</p>
@@ -1032,11 +1034,11 @@
               <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Selecione a Data</h4>
               <div class="calendar bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                 <div class="flex items-center justify-between mb-4">
-                  <button class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <button class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" id="prevBtn">
                     <span class="material-symbols-outlined">arrow_back_ios</span>
                   </button>
-                  <h4 class="font-medium text-gray-800 dark:text-gray-200">Novembro 2023</h4>
-                  <button class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <div class="" id="MonthYear"></div>
+                  <button class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" id="nextBtn">
                     <span class="material-symbols-outlined">arrow_forward_ios</span>
                   </button>
                 </div>
@@ -1050,49 +1052,11 @@
                   <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">QUI</div>
                   <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">SEX</div>
                   <div class="py-2 text-sm font-medium text-gray-500 dark:text-gray-400">SAB</div>
-                  
+                  </div>
+
                   <!-- Dias do mês -->
-                  <div class="py-2 text-gray-400 dark:text-gray-500">29</div>
-                  <div class="py-2 text-gray-400 dark:text-gray-500">30</div>
-                  <div class="py-2 text极t-gray-400 dark:text-gray-500">31</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">1</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">2</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">3</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">4</div>
-                  
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">5</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">6</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">7</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">8</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">9</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">10</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">11</div>
-                  
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">12</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">13</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">14</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">15</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">16</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">17</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">18</div>
-                  
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">19</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">20</div>
-                  <div class="calendar-day selected py-2 bg-blue-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300 cursor-pointer">21</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">22</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">23</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">24</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">25</div>
-                  
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">26</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">27</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">28</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">29</div>
-                  <div class="calendar-day py-2 text-gray-700 dark:text-gray-300">30</div>
-                  <div class="py-2 text-gray-400 dark:text-gray-500">1</div>
-                  <div class="py-2 text-gray-400 dark:text-gray-500">2</div>
+                  <div class="grid grid-cols-7 gap-1 text-center" id="dates">
                 </div>
-              </div>
             </div>
             
             <div class="mb-6">
@@ -1102,7 +1066,7 @@
                 <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">09:15</div>
                 <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">10:00</div>
                 <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">10:45</div>
-                <div class="availability-time time-selected bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 py-2 text-center rounded-lg text-sm font-medium cursor-pointer">11:30</div>
+                <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">11:30</div>
                 <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">14:00</div>
                 <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">14:45</div>
                 <div class="availability-time bg-gray-100 dark:bg-gray-700 py-2 text-center rounded-lg text-sm font-medium cursor-pointer transition-colors">15:30</div>
@@ -1121,10 +1085,10 @@
             </div>
             
             <div class="flex justify-end gap-3">
-              <button class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+              <button class="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" id="cancelarBtn">
                 Cancelar
               </button>
-              <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium">
+              <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium" id="AgendarBtn">
                 Agendar Consulta
               </button>
             </div>

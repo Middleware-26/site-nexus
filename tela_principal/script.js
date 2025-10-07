@@ -208,110 +208,119 @@ function handleClickOutside(e) {
 // CONFIGURAÇÃO GERAL
 // 
 document.addEventListener('DOMContentLoaded', () => {
-  // Referências de notificação
-  const notifButton    = document.getElementById('notifButton');
-  const notifList      = document.getElementById('notifList');
+  // ======================
+  // NOTIFICAÇÕES
+  // ======================
+  const notifButton = document.getElementById('notifButton');
+  const notifList = document.getElementById('notifList');
   const notifContainer = notifButton.parentElement;
 
-  // Inicia com notificações ocultas
   notifList.classList.add('hidden');
 
-  // Eventos de notificação
+  function toggleNotifs() {
+    notifList.classList.toggle('hidden');
+  }
+
+  function handleClickOutside(e) {
+    if (!notifContainer.contains(e.target)) notifList.classList.add('hidden');
+  }
+
   notifButton.addEventListener('click', toggleNotifs);
   document.addEventListener('click', handleClickOutside);
-  
-  // Comportamento hover
+
   notifContainer.addEventListener('mouseenter', () => notifList.classList.remove('hidden'));
   notifContainer.addEventListener('mouseleave', () => notifList.classList.add('hidden'));
 
-  // 
+  // ======================
   // MODAL DE AGENDAMENTO
-  // 
+  // ======================
+  const modal = document.getElementById('agendamentoModal');
   const openModalBtn = document.getElementById('addScheduleBtn');
   const openFirstBtn = document.getElementById('addFirstScheduleBtn');
   const closeModalBtn = document.getElementById('closeModalBtn');
-  const modal = document.getElementById('agendamentoModal');
-  
-  // Abrir modal
-  if(openModalBtn) openModalBtn.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-  });
-  
-  if(openFirstBtn) openFirstBtn.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-  });
-  
-  // Fechar modal
-  closeModalBtn.addEventListener('click', () => {
+  const cancelModalBtn = document.getElementById('cancelarBtn');
+
+  function resetTipoConsulta() {
+    cardsTipo.forEach(c => c.classList.remove(
+      'ring-2','ring-primary-600','bg-primary-600','bg-opacity-20',
+      'dark:bg-primary-400','dark:bg-opacity-50'
+    ));
+    selectedTipo = null;
+  }
+
+  function resetAlunoFiltro() {
+    if (filterSeries) filterSeries.value = '';
+    if (filterTurma) filterTurma.value = '';
+    if (searchStudent) searchStudent.value = '';
+    resetAlunoSelecao();
+    filterAlunos();
+  }
+
+  function fecharModal() {
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
-  });
-  
-  // Fechar ao clicar fora
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.add('hidden');
-      document.body.classList.remove('modal-open');
-    }
+    resetTipoConsulta();
+    resetAlunoFiltro();
+  }
+
+  [openModalBtn, openFirstBtn].forEach(btn => {
+    if (btn) btn.addEventListener('click', () => {
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      resetCalendar();
+    });
   });
 
-  // 
+  [closeModalBtn, cancelModalBtn].forEach(btn => {
+    if (btn) btn.addEventListener('click', fecharModal);
+  });
+
+  if (modal) {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) fecharModal();
+    });
+  }
+
+  // ======================
   // ABA DE AGENDAMENTOS
-  // 
-  const tabAgendados   = document.getElementById('tab-agendados');
-  const tabPassados    = document.getElementById('tab-passados');
+  // ======================
+  const tabAgendados = document.getElementById('tab-agendados');
+  const tabPassados = document.getElementById('tab-passados');
   const emptyAgendados = document.getElementById('empty-agendados');
-  const emptyPassados  = document.getElementById('empty-passados');
-  const scheduleCards  = document.getElementById('schedule-cards');
+  const emptyPassados = document.getElementById('empty-passados');
+  const scheduleCards = document.getElementById('schedule-cards');
 
-  // Dados simulados
-  const agendados   = [];                
-  const passados    = [];                
+  const agendados = [];
+  const passados = [];
 
   function updateView() {
     if (tabAgendados.classList.contains('active')) {
-      // Configura aba "Agendados"
       tabAgendados.classList.replace('text-gray-500','text-primary-600');
       tabAgendados.classList.replace('dark:text-gray-400','dark:text-primary-400');
       tabAgendados.classList.add('border-b-2','border-primary-600','dark:border-primary-400');
-      
+
       tabPassados.classList.replace('text-primary-600','text-gray-500');
       tabPassados.classList.replace('dark:text-primary-400','dark:text-gray-400');
       tabPassados.classList.remove('border-b-2','border-primary-600','dark:border-primary-400');
 
-      // Mostra/oculta conteúdo
-      if (agendados.length === 0) {
-        emptyAgendados.classList.remove('hidden');
-        scheduleCards.classList.add('hidden');
-      } else {
-        emptyAgendados.classList.add('hidden');
-        scheduleCards.classList.remove('hidden');
-      }
+      emptyAgendados.classList.toggle('hidden', agendados.length !== 0);
+      scheduleCards.classList.toggle('hidden', agendados.length === 0);
       emptyPassados.classList.add('hidden');
     } else {
-      // Configura aba "Passados"
       tabPassados.classList.replace('text-gray-500','text-primary-600');
       tabPassados.classList.replace('dark:text-gray-400','dark:text-primary-400');
       tabPassados.classList.add('border-b-2','border-primary-600','dark:border-primary-400');
-      
+
       tabAgendados.classList.replace('text-primary-600','text-gray-500');
       tabAgendados.classList.replace('dark:text-primary-400','dark:text-gray-400');
       tabAgendados.classList.remove('border-b-2','border-primary-600','dark:border-primary-400');
 
-      // Mostra/oculta conteúdo
-      if (passados.length === 0) {
-        emptyPassados.classList.remove('hidden');
-      } else {
-        emptyPassados.classList.add('hidden');
-      }
+      emptyPassados.classList.toggle('hidden', passados.length !== 0);
       emptyAgendados.classList.add('hidden');
       scheduleCards.classList.add('hidden');
     }
   }
 
-  // Eventos das abas
   tabAgendados.addEventListener('click', () => {
     tabAgendados.classList.add('active');
     tabPassados.classList.remove('active');
@@ -324,90 +333,117 @@ document.addEventListener('DOMContentLoaded', () => {
     updateView();
   });
 
-  // Inicialização
   updateView();
 
-  // 
+  // ======================
   // SELEÇÃO DE TIPO DE AGENDAMENTO
-  // 
+  // ======================
   const cardsTipo = document.querySelectorAll('.card-tipo-agendamento');
+  let selectedTipo = null;
+
   cardsTipo.forEach(card => {
     card.addEventListener('click', () => {
-      // Remove destaque de todos
-      cardsTipo.forEach(c => {
-        c.classList.remove(
-          'ring-2',
-          'ring-primary-600',
-          'bg-primary-600',
-          'bg-opacity-20',
-          'dark:bg-primary-400',
-          'dark:bg-opacity-50'
+      if(selectedTipo === card){
+        resetTipoConsulta();
+      } else {
+        resetTipoConsulta();
+        card.classList.add(
+          'ring-2','ring-primary-600','bg-primary-600','bg-opacity-20',
+          'dark:bg-primary-400','dark:bg-opacity-50'
         );
-      });
-
-      // Aplica destaque ao selecionado
-      card.classList.add(
-        'ring-2',
-        'ring-primary-600',
-        'bg-primary-600',
-        'bg-opacity-20',
-        'dark:bg-primary-400',
-        'dark:bg-opacity-50'
-      );
-
-      // Log para debug (pode ser removido)
-      console.log('Tipo selecionado:', card.dataset.tipo);
+        selectedTipo = card;
+      }
+      console.log('Tipo selecionado:', selectedTipo ? selectedTipo.dataset.tipo : null);
     });
   });
 
-    // 1) Selecione todos os cards
-    const cardsAluno = document.querySelectorAll('.card-aluno');
+  // ======================
+  // SELEÇÃO DE ALUNOS E FILTROS
+  // ======================
+  const cardsAluno = document.querySelectorAll('.card-aluno');
+  const filterSeries = document.getElementById('filterSeries');
+  const filterTurma = document.getElementById('filterTurma');
+  const searchStudent = document.getElementById('searchStudent');
+  const noStudentsMsg = document.getElementById('noStudentsMsg');
 
-    // 2) Itere e adicione o listener de clique
+  let selectedAluno = null;
+
+  function resetAlunoSelecao() {
+    selectedAluno = null;
+    cardsAluno.forEach(c => c.classList.remove(
+      'ring-2','ring-primary-600','bg-primary-600','bg-opacity-20',
+      'dark:bg-primary-400','dark:bg-opacity-50'
+    ));
+  }
+
+  function filterAlunos() {
+    const serieFiltro = filterSeries ? filterSeries.value.trim().toLowerCase() : '';
+    const turmaFiltro = filterTurma ? filterTurma.value.trim().toLowerCase() : '';
+    const busca = searchStudent ? searchStudent.value.trim().toLowerCase() : '';
+
+    let visibleCount = 0;
+
     cardsAluno.forEach(card => {
-      card.addEventListener('click', () => {
-        // 3) Remove destaque de todos
-        cardsAluno.forEach(c => {
-          c.classList.remove(
-          'ring-2',
-          'ring-primary-600',
-          'bg-primary-600',
-          'bg-opacity-20',
-          'dark:bg-primary-400',
-          'dark:bg-opacity-50')
-        });
+      const serieAluno = (card.dataset.serie || '').toLowerCase();
+      const turmaAluno = (card.dataset.turma || '').toLowerCase();
+      const nomeAluno  = (card.dataset.nome || (card.querySelector('h5')?.textContent || '')).toLowerCase();
+      const fullText   = card.textContent.toLowerCase();
 
-        // 4) Aplica destaque só ao clicado
-        card.classList.add(
-        'ring-2',
-        'ring-primary-600',
-        'bg-primary-600',
-        'bg-opacity-20',
-        'dark:bg-primary-400',
-        'dark:bg-opacity-50');
+      const matchesSerie = !serieFiltro || serieAluno === serieFiltro;
+      const matchesTurma = !turmaFiltro || turmaAluno === turmaFiltro;
+      const matchesBusca = !busca || nomeAluno.includes(busca) || fullText.includes(busca);
 
-      });
+      if (matchesSerie && matchesTurma && matchesBusca) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+        if (selectedAluno === card) resetAlunoSelecao();
+      }
     });
 
-  // 
-  // SCROLLSPY (NAVEGAÇÃO)
-  // 
-  const links    = document.querySelectorAll('.scrollspy-link');
+    if (noStudentsMsg) noStudentsMsg.style.display = visibleCount ? 'none' : 'block';
+  }
+
+  function selecionarAluno(card) {
+    if (card.style.display === 'none') return;
+
+    if (selectedAluno === card) {
+      resetAlunoSelecao();
+    } else {
+      resetAlunoSelecao();
+      card.classList.add(
+        'ring-2','ring-primary-600','bg-primary-600','bg-opacity-20',
+        'dark:bg-primary-400','dark:bg-opacity-50'
+      );
+      selectedAluno = card;
+    }
+    console.log('Aluno selecionado:', selectedAluno ? (selectedAluno.querySelector('h5')?.textContent || selectedAluno.dataset.nome) : null);
+  }
+
+  cardsAluno.forEach(card => card.addEventListener('click', () => selecionarAluno(card)));
+
+  [filterSeries, filterTurma].forEach(f => { if(f) f.addEventListener('change', filterAlunos) });
+  if(searchStudent) searchStudent.addEventListener('input', filterAlunos);
+
+  resetAlunoFiltro();
+
+  // ======================
+  // SCROLLSPY
+  // ======================
+  const links = document.querySelectorAll('.scrollspy-link');
   const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
 
-  // Classes para estado ativo/inativo
   const ACTIVE_CLASSES   = ['bg-primary-600', 'bg-opacity-40','text-primary-600', 'dark:text-primary-400', 'border-l-4', 'border-primary-600', 'pl-2'];
-  const INACTIVE_CLASSES = ['text-gray-700',   'dark:text-gray-300',            'border-l-0'];
+  const INACTIVE_CLASSES = ['text-gray-700', 'dark:text-gray-300', 'border-l-0'];
 
-  // Observer para elementos visíveis
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      const id   = entry.target.id;
+      const id = entry.target.id;
       const link = document.querySelector(`.scrollspy-link[href="#${id}"]`);
       if (!link) return;
 
       if (entry.isIntersecting) {
-        // Ativa link correspondente à seção visível
         links.forEach(l => {
           l.classList.remove(...ACTIVE_CLASSES);
           l.classList.add(...INACTIVE_CLASSES);
@@ -418,11 +454,115 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, { root: null, threshold: 0.5 });
 
-  // Observa todas as seções
-  sections.forEach(sec => {
-    if (sec) observer.observe(sec);
-  });
+  sections.forEach(sec => { if(sec) observer.observe(sec); });
+
+  // ======================
+  // CALENDÁRIO
+  // ======================
+  const monthYearElement = document.getElementById('MonthYear');
+  const datesElement = document.getElementById('dates');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  let currentDate = new Date();
+  let selectedDate = new Date().toDateString();
+
+  function updateCalendar() {
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const totalDays = lastDay.getDate();
+    const firstDayIndex = firstDay.getDay();
+    const lastDayIndex = lastDay.getDay();
+
+    monthYearElement.textContent = currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    let datesHTML = '';
+
+    for (let i = firstDayIndex; i > 0; i--) {
+      const prevDate = new Date(currentYear, currentMonth, 1 - i);
+      datesHTML += `<div class="date inactive text-gray-500">${prevDate.getDate()}</div>`;
+    }
+
+    for (let i = 1; i <= totalDays; i++) {
+      const date = new Date(currentYear, currentMonth, i);
+      const isToday = date.toDateString() === new Date().toDateString();
+      const isSelected = date.toDateString() === selectedDate;
+
+      let classes = 'hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg cursor-pointer';
+      if (isToday && !selectedDate) classes += ' bg-blue-600 text-white font-semibold';
+      if (isSelected) classes += ' bg-blue-600 text-white font-semibold';
+
+      datesHTML += `<div class="date ${classes}" data-date="${date.toDateString()}">${i}</div>`;
+    }
+
+    for (let i = 1; i < 7 - lastDayIndex; i++) {
+      const nextDate = new Date(currentYear, currentMonth + 1, i);
+      datesHTML += `<div class="date inactive text-gray-500">${nextDate.getDate()}</div>`;
+    }
+
+    datesElement.innerHTML = datesHTML;
+
+    datesElement.querySelectorAll('.date').forEach(day => {
+      if (!day.classList.contains('inactive')) {
+        day.addEventListener('click', () => {
+          datesElement.querySelectorAll('.date').forEach(d => d.classList.remove('bg-blue-600','text-white','font-semibold'));
+          day.classList.add('bg-blue-600','text-white','font-semibold');
+          selectedDate = day.dataset.date;
+          console.log('Data selecionada:', selectedDate);
+        });
+      }
+    });
+  }
+
+  function resetCalendar() {
+    currentDate = new Date();
+    selectedDate = new Date().toDateString();
+    updateCalendar();
+  }
+
+  prevBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); updateCalendar(); });
+  nextBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); updateCalendar(); });
+
+  updateCalendar();
+
+  // ======================
+  // HORÁRIOS DISPONÍVEIS
+  // ======================
+  const horarios = document.querySelectorAll('.availability-time');
+  const horariosIndisponiveis = ['08:30', '10:00'];
+
+  function selecionarHorario(e) {
+    horarios.forEach(h => {
+      h.classList.remove('time-selected', 'bg-blue-100', 'dark:bg-blue-900/30', 'text-blue-600', 'dark:text-blue-300');
+    });
+
+    const horario = e.currentTarget;
+    if (!horario.classList.contains('opacity-50')) {
+      horario.classList.add('time-selected', 'bg-blue-100', 'dark:bg-blue-900/30', 'text-blue-600', 'dark:text-blue-300');
+      console.log('Horário selecionado:', horario.textContent);
+    }
+  }
+
+  function resetHorario() {
+    horarios.forEach(h => {
+      h.classList.remove('time-selected', 'bg-blue-100', 'dark:bg-blue-900/30', 'text-blue-600', 'dark:text-blue-300');
+
+      if (horariosIndisponiveis.includes(h.textContent)) {
+        h.classList.add('opacity-50', 'cursor-not-allowed');
+        h.removeEventListener('click', selecionarHorario);
+      } else {
+        h.classList.remove('opacity-50', 'cursor-not-allowed');
+        h.addEventListener('click', selecionarHorario);
+      }
+    });
+  }
+
+  resetHorario();
 });
+
 
 // 
 // MODAL DE VISUALIZAÇÃO DO ESTUDANTE
@@ -483,9 +623,6 @@ document.querySelectorAll('button span.material-symbols-outlined').forEach(icon 
 closeModalButton.addEventListener('click', () => {
   studentModal.classList.add('hidden');
 });
-
-
-
 
 // Relatorio dos Alunos Psicologo.
 // Referências ao DOM
@@ -548,5 +685,6 @@ document.querySelectorAll('button span.material-symbols-outlined').forEach(icon 
 fecharModalButton.addEventListener('click', () => {
   fichaModal.classList.add('hidden');
 });
+
 
 
