@@ -265,3 +265,30 @@ server.listen(PORT, () => {
     console.log(`  🔌 WebSocket habilitado para chat em tempo real.`);
     console.log(`================================================`);
 });
+
+// Rota para verificar o banco via navegador
+app.get('/admin/db-status', (req, res) => {
+    db.all("SELECT name FROM sqlite_master WHERE type='table'", (err, tables) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        
+        let html = `<h1>Status do Banco de Dados</h1>`;
+        html += `<h2>Tabelas (${tables.length}):</h2><ul>`;
+        
+        tables.forEach(table => {
+            html += `<li>${table.name}</li>`;
+        });
+        html += `</ul>`;
+        
+        // Ver usuários
+        db.all("SELECT * FROM usuarios", (err, usuarios) => {
+            html += `<h2>Usuários (${usuarios.length}):</h2><ul>`;
+            usuarios.forEach(user => {
+                html += `<li>${user.nome} - ${user.email} (${user.tipo})</li>`;
+            });
+            html += `</ul>`;
+            res.send(html);
+        });
+    });
+});
