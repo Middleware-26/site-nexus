@@ -80,11 +80,45 @@ function initializeDatabase() {
 
     db.exec(setupSQL, (err) => {
         if (err) {
-            console.error('Erro ao criar tabelas:', err);
+            console.error('❌ Erro ao criar tabelas:', err);
+            return;
+        }
+        console.log('✅ Tabelas criadas/verificadas com sucesso.');
+        
+        // Inserir dados de exemplo
+        seedDatabase();
+    });
+}
+
+function seedDatabase() {
+    // Verificar se já existem usuários
+    db.get("SELECT COUNT(*) as count FROM usuarios", (err, row) => {
+        if (err) {
+            console.error('❌ Erro ao verificar dados:', err);
+            return;
+        }
+
+        if (row.count === 0) {
+            console.log('📥 Inserindo dados iniciais...');
+            
+            const insertUsers = `
+                INSERT INTO usuarios (nome, email, senha_hash, tipo, codigo_escola, turma, materia) VALUES
+                ('Ana Carolina Silva', 'ana.silva@escola.com', 'hash123', 'estudante', 'ESC001', '2º Ano - B', NULL),
+                ('Pedro Henrique Oliveira', 'pedro.oliveira@escola.com', 'hash123', 'estudante', 'ESC001', '3º Ano - A', NULL),
+                ('Mariana Costa', 'mariana.costa@escola.com', 'hash123', 'estudante', 'ESC001', '1º Ano - C', NULL),
+                ('Professor João Santos', 'joao.santos@escola.com', 'hash123', 'professor', 'ESC001', NULL, 'Matemática'),
+                ('Dra. Carla Fernandes', 'carla.fernandes@escola.com', 'hash123', 'psicologo', 'ESC001', NULL, NULL);
+            `;
+
+            db.exec(insertUsers, (err) => {
+                if (err) {
+                    console.error('❌ Erro ao inserir dados iniciais:', err);
+                } else {
+                    console.log('✅ Dados iniciais inseridos com sucesso.');
+                }
+            });
         } else {
-            console.log('✅ Tabelas criadas/verificadas com sucesso.');
-            // Inserir dados iniciais
-            seedDatabase();
+            console.log(`✅ Banco já contém ${row.count} usuários.`);
         }
     });
 }
