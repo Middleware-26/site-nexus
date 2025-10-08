@@ -781,36 +781,110 @@ document.addEventListener('DOMContentLoaded', () => {
   // ======================
   // HORÁRIOS DISPONÍVEIS
   // ======================
-  const horarios = document.querySelectorAll('.availability-time');
-  const horariosIndisponiveis = ['08:30', '10:00'];
+ 
+  const timeSlotsContainer = document.getElementById('time-slots'); // precisa existir no HTML
+const selectedTimeInput = document.getElementById('selectedTimeInput'); // input hidden
+let selectedTime = null;
 
-  function selecionarHorario(e) {
-    horarios.forEach(h => {
-      h.classList.remove('time-selected', 'bg-blue-100', 'dark:bg-blue-900/30', 'text-blue-600', 'dark:text-blue-300');
-    });
+// Gera horários de 08:00 até 16:00 (último slot = 16:00) em passos de 15 minutos
+function gerarHorarios() {
+  const slots = [];
+  for (let mins = 8 * 60; mins <= 16 * 60; mins += 15) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+  }
+  return slots;
+}
 
-    const horario = e.currentTarget;
-    if (!horario.classList.contains('opacity-50')) {
-      horario.classList.add('time-selected', 'bg-blue-100', 'dark:bg-blue-900/30', 'text-blue-600', 'dark:text-blue-300');
-      console.log('Horário selecionado:', horario.textContent);
+// Mostra horários para a data (Date object)
+function mostrarHorariosDisponiveis(dateObj) {
+  if (!timeSlotsContainer || !dateObj) return;
+
+  timeSlotsContainer.innerHTML = '';
+  selectedTime = null;
+  if (selectedTimeInput) selectedTimeInput.value = '';
+
+  const slots = gerarHorarios();
+  const agora = new Date();
+  const ehHoje =
+    dateObj.getFullYear() === agora.getFullYear() &&
+    dateObj.getMonth() === agora.getMonth() &&
+    dateObj.getDate() === agora.getDate();
+
+  slots.forEach(slot => {
+    const [hh, mm] = slot.split(':').map(Number);
+    const slotDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), hh, mm, 0, 0);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = slot;
+    btn.className = 'p-2 border border-gray-300 rounded-lg text-sm transition hover:bg-blue-50 dark:hover:bg-blue-800 dark:border-gray-600';
+
+    // Se for hoje e o horário já passou (<= agora) => desativa
+    if (ehHoje && slotDate <= agora) {
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      btn.addEventListener('click', () => {
+        // desmarca os outros
+        timeSlotsContainer.querySelectorAll('button').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
+        // marca este
+        btn.classList.add('bg-blue-600', 'text-white');
+        selectedTime = slot;
+        if (selectedTimeInput) selectedTimeInput.value = slot;
+        console.log('Horário selecionado:', slot);
+      });
     }
-  }
 
-  function resetHorario() {
-    horarios.forEach(h => {
-      h.classList.remove('time-selected', 'bg-blue-100', 'dark:bg-blue-900/30', 'text-blue-600', 'dark:text-blue-300');
+    timeSlotsContainer.appendChild(btn);
+  });
+}
 
-      if (horariosIndisponiveis.includes(h.textContent)) {
-        h.classList.add('opacity-50', 'cursor-not-allowed');
-        h.removeEventListener('click', selecionarHorario);
-      } else {
-        h.classList.remove('opacity-50', 'cursor-not-allowed');
-        h.addEventListener('click', selecionarHorario);
-      }
-    });
-  }
+// Reset visual/estado dos horários
+function resetHorario() {
+  if (timeSlotsContainer) timeSlotsContainer.innerHTML = '';
+  selectedTime = null;
+  if (selectedTimeInput) selectedTimeInput.value = '';
+}
 
-  resetHorario();
+// --- Integrar com o calendário (delegation) ---
+// Ao clicar em um dia ('.date') mostramos os horários para aquela data.
+// OBS: o seu updateCalendar já cria elementos com data-date contendo uma string de data.
+// Aqui usamos event delegation para não duplicar listeners por mês.
+
+if (datesElement) {
+  datesElement.addEventListener('click', (e) => {
+    const day = e.target.closest('.date');
+    if (!day || day.classList.contains('inactive')) return;
+
+    // garante seleção visual
+    datesElement.querySelectorAll('.date').forEach(d => d.classList.remove('bg-blue-600','text-white','font-semibold'));
+    day.classList.add('bg-blue-600','text-white','font-semibold');
+
+    // pega a data do data-date (criada no updateCalendar)
+    const ds = day.dataset.date;
+    let dateObj = new Date(ds);
+    if (isNaN(dateObj.getTime())) {
+      // fallback seguro para evitar erro
+      dateObj = new Date();
+    }
+
+    // mostra horários para a data escolhida
+    mostrarHorariosDisponiveis(dateObj);
+  });
+}
+
+// --- Reset quando modal abre/fecha ---
+// limpa sempre que abrir o modal
+if (openModalBtn) openModalBtn.addEventListener('click', resetHorario);
+if (openFirstBtn) openFirstBtn.addEventListener('click', resetHorario);
+
+// limpa quando fechar o modal (X, cancelar, clique fora)
+if (closeModalBtn) closeModalBtn.addEventListener('click', resetHorario);
+if (cancelModalBtn) cancelModalBtn.addEventListener('click', resetHorario);
+if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) resetHorario(); });
+
 });
 
 // 
