@@ -45,3 +45,43 @@
         document.addEventListener('touchmove', function(e) {
             e.preventDefault();
         }, { passive: false });
+
+        // Função de login atualizada
+async function loginUser(email, senha) {
+    try {
+        const response = await fetch('http://localhost:3000/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, senha })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Salva dados do usuário no localStorage
+            localStorage.setItem('usuario', JSON.stringify(result.usuario));
+            
+            // Redireciona baseado no tipo de usuário
+            switch(result.usuario.tipo) {
+                case 'estudante':
+                    window.location.href = '../telaprincipal/index.html';
+                    break;
+                case 'professor':
+                    window.location.href = '../telaprincipal/professor.html';
+                    break;
+                case 'psicologo':
+                    window.location.href = '../telaprincipal/psicologo.html';
+                    break;
+                default:
+                    alert('Tipo de usuário não reconhecido');
+            }
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error('Erro no login:', error);
+        alert('Erro de conexão com o servidor');
+    }
+}
