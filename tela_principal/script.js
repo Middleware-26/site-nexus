@@ -505,6 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('modal-open');
       resetTipoConsulta();
       resetAlunoFiltro();
+      resetPsicologo();
     }
   }
 
@@ -528,6 +529,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+ const selectPsicologo = document.querySelector('select'); // pega o <select> de psicólogos
+    function resetPsicologo() {
+  if (selectPsicologo) selectPsicologo.value = ""; // volta para "Selecione um profissional"
+}
   // ======================
   // ABA DE AGENDAMENTOS
   // ======================
