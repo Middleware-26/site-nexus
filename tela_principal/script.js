@@ -12,10 +12,273 @@
   document.documentElement.style.visibility = 'visible';
 })();
 
+// =========================================================================
+// SISTEMA DE CHAT COM REDIRECIONAMENTO PARA TELEGRAM
+// =========================================================================
+class ChatSystem {
+    constructor() {
+        console.log('[ChatSystem] Iniciando...');
+        this.chatSection = document.querySelector('#conversar');
+        if (!this.chatSection) {
+            console.warn('[ChatSystem] Seção de chat não encontrada. O sistema de chat não será iniciado.');
+            return;
+        }
+
+        this.currentChatId = null;
+        this.currentContact = null;
+        this.firstMessageSent = false;
+        this.detectUserType();
+        this.setupEventListeners();
+    }
+
+    detectUserType() {
+        const pageTitle = document.title || '';
+        if (pageTitle.toLowerCase().includes('psicólogo')) {
+            this.userType = 'psychologist';
+            this.userName = 'Dr. Usuário';
+        } else if (pageTitle.toLowerCase().includes('professor')) {
+            this.userType = 'teacher';
+            this.userName = 'Pr. Usuário';
+        } else {
+            this.userType = 'unknown';
+            this.userName = 'Usuário';
+        }
+        console.log(`[ChatSystem] Usuário detectado como: ${this.userType}`);
+    }
+
+    setupEventListeners() {
+        const contactItems = this.chatSection.querySelectorAll('.contact-item');
+        const messageInput = this.chatSection.querySelector('input[placeholder*="Digite sua mensagem"]');
+
+        // Encontra o botão de enviar
+        let sendButton = null;
+        const allButtons = this.chatSection.querySelectorAll('button');
+        allButtons.forEach(button => {
+            const icon = button.querySelector('.material-symbols-outlined');
+            if (icon && icon.textContent.trim() === 'send') {
+                sendButton = button;
+            }
+        });
+
+        if (contactItems.length > 0) {
+            contactItems.forEach(contact => {
+                contact.addEventListener('click', () => this.startChatWithContact(contact));
+            });
+        }
+
+        if (sendButton && messageInput) {
+            console.log('[ChatSystem] Botão de enviar e input de mensagem encontrados com sucesso.');
+            sendButton.addEventListener('click', () => this.sendMessage(messageInput.value));
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.sendMessage(messageInput.value);
+                }
+            });
+        } else {
+            console.error('[ChatSystem] Não foi possível encontrar o input de mensagem ou o botão de enviar.');
+        }
+    }
+
+    startChatWithContact(contactElement) {
+        const contactName = contactElement.querySelector('h3').textContent.trim();
+        const contactRole = contactName.toLowerCase().startsWith('dr.') ? 'psychologist' : 'teacher';
+
+        this.currentContact = {
+            name: contactName,
+            role: contactRole
+        };
+        this.currentChatId = `${this.userType}_${contactRole}`;
+
+        const chatHeaderName = this.chatSection.querySelector('.chat-header h3');
+        if (chatHeaderName) chatHeaderName.textContent = contactName;
+
+        console.log(`[ChatSystem] Chat iniciado com: ${contactName} (ID da conversa: ${this.currentChatId})`);
+        
+        // Limpa mensagens antigas ao trocar de conversa
+        const chatContainer = this.chatSection.querySelector('.chat-messages');
+        if(chatContainer) chatContainer.innerHTML = '';
+        
+        // Reset do estado da primeira mensagem
+        this.firstMessageSent = false;
+    }
+
+    async sendMessage(messageText) {
+        if (!this.currentContact) {
+            alert('Por favor, selecione um contato para iniciar a conversa.');
+            return;
+        }
+        const text = messageText.trim();
+        if (!text) return;
+
+        console.log(`[Frontend] Enviando mensagem: "${text}"`);
+
+        const message = {
+            text: text,
+            senderName: this.userName,
+            senderType: this.userType,
+            receiverType: this.currentContact.role,
+            timestamp: new Date()
+        };
+
+        // Adiciona a mensagem na tela imediatamente
+        this.addMessageToChat(message, true);
+        this.clearMessageInput();
+
+        // Envia para o servidor
+        try {
+            const response = await fetch('http://localhost:3000/enviar-mensagem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    senderType: message.senderType,
+                    receiverType: message.receiverType,
+                    text: message.text
+                }),
+            });
+
+            if (response.ok) {
+                console.log('[Frontend] Servidor confirmou o envio da mensagem.');
+                
+                // **FUNCIONALIDADE: Mostra o banner de redirecionamento após primeira mensagem**
+                if (!this.firstMessageSent) {
+                    this.firstMessageSent = true;
+                    setTimeout(() => {
+                        this.showTelegramRedirectBanner();
+                    }, 1000); // Aguarda 1 segundo para dar tempo da mensagem aparecer
+                }
+            } else {
+                const errorResult = await response.json();
+                console.error('[Frontend] Erro retornado pelo servidor:', errorResult.message);
+                this.showErrorMessage('Falha ao enviar mensagem. Tente novamente.');
+            }
+        } catch (error) {
+            console.error('[Frontend] Falha de conexão com o servidor:', error);
+            this.showErrorMessage('Sem conexão com o servidor. Verifique sua internet.');
+        }
+    }
+
+    showTelegramRedirectBanner() {
+        const chatContainer = this.chatSection.querySelector('.chat-messages');
+        if (!chatContainer) return;
+
+        // Remove banner anterior se existir
+        const existingBanner = chatContainer.querySelector('.telegram-redirect-banner');
+        if (existingBanner) {
+            existingBanner.remove();
+        }
+
+        // Determina o link do grupo baseado no tipo de usuário
+        const groupLink = this.getGroupLink();
+
+        // Cria o banner de redirecionamento (SEM o botão "Continuar aqui")
+        const bannerDiv = document.createElement('div');
+        bannerDiv.className = 'telegram-redirect-banner w-full my-4';
+        
+        bannerDiv.innerHTML = `
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white shadow-lg border-l-4 border-blue-300">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-.896 6.728-.377 2.655-.377 2.655-1.377 2.655-.896 0-1.377-.896-1.377-2.655 0 0-.896-4.87-.896-6.728 0-1.858.481-2.655 1.377-2.655s1.377.797 1.377 2.655z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold mb-2">
+                            🚀 Continue a conversa no Telegram!
+                        </h3>
+                        <p class="text-sm text-blue-100 mb-3">
+                            Sua mensagem foi enviada com sucesso! Para uma experiência de chat mais fluida e receber notificações em tempo real, continue a conversa diretamente no Telegram.
+                        </p>
+                        <div class="flex justify-center">
+                            <a href="${groupLink}" 
+                               target="_blank" 
+                               class="inline-flex items-center justify-center px-6 py-3 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors duration-200 text-sm shadow-md">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-.896 6.728-.377 2.655-.377 2.655-1.377 2.655-.896 0-1.377-.896-1.377-2.655 0 0-.896-4.87-.896-6.728 0-1.858.481-2.655 1.377-2.655s1.377.797 1.377 2.655z"/>
+                                </svg>
+                                Abrir no Telegram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-blue-200">
+                    💡 <strong>Dica:</strong> No Telegram você receberá notificações instantâneas e poderá usar recursos como áudio, fotos e documentos.
+                </div>
+            </div>
+        `;
+
+        chatContainer.appendChild(bannerDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        // Adiciona animação de entrada
+        bannerDiv.style.opacity = '0';
+        bannerDiv.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            bannerDiv.style.transition = 'all 0.5s ease';
+            bannerDiv.style.opacity = '1';
+            bannerDiv.style.transform = 'translateY(0)';
+        }, 100);
+
+        console.log('[ChatSystem] Banner de redirecionamento para Telegram exibido.');
+    }
+
+    getGroupLink() {
+        if (this.userType === 'psychologist') {
+            return 'https://web.telegram.org/a/#-4987808900'; // Link do grupo do professor
+        } else {
+            return 'https://web.telegram.org/a/#-4987808900'; // Link do grupo do psicólogo
+        }
+    }
+
+    addMessageToChat(message, isSender) {
+        const chatContainer = this.chatSection.querySelector('.chat-messages');
+        if (!chatContainer) return;
+
+        const messageDiv = document.createElement('div');
+        const time = new Date(message.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        const messageClass = isSender ? 'eu' : 'ele';
+        messageDiv.className = `${messageClass} max-w-[80%] mb-3`;
+
+        const senderLabel = isSender ? 'Você' : (message.senderName || 'Contato');
+        
+        messageDiv.innerHTML = `
+            <div class="p-3 rounded-lg ${isSender ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white'}">
+                <p class="text-sm">${message.text}</p>
+                <p class="text-xs opacity-75 mt-1">${senderLabel} - ${time}</p>
+            </div>
+        `;
+
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    clearMessageInput() {
+        const messageInput = this.chatSection.querySelector('input[placeholder*="Digite sua mensagem"]');
+        if (messageInput) {
+            messageInput.value = '';
+            messageInput.focus();
+        }
+    }
+
+    showErrorMessage(message) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+}
+
 // 
 // SELEÇÃO DE ELEMENTOS
 // 
 const sidebar      = document.getElementById('sidebar');
+const mainContent  = document.getElementById('mainContent');
 const mainHdr      = document.getElementById('main-header');
 const sbHdr        = document.getElementById('sidebar-header');
 const nameTag      = document.getElementById('userName');
@@ -37,8 +300,10 @@ function abrirMenu() {
   
   // Ajusta margem do conteúdo principal
   const hidden = sidebar.classList.contains('-translate-x-full');
-  mainContent.classList.toggle('ml-64', !hidden);
-  mainContent.classList.toggle('ml-0', hidden);
+  if (mainContent) {
+    mainContent.classList.toggle('ml-64', !hidden);
+    mainContent.classList.toggle('ml-0', hidden);
+  }
 }
 
 function fecharMenu() {
@@ -65,7 +330,7 @@ function toggleTheme() {
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   
   // Atualiza rótulo do tema
-  themeLabel.textContent = isDark ? 'Tema: Escuro' : 'Tema: Claro';
+  if (themeLabel) themeLabel.textContent = isDark ? 'Tema: Escuro' : 'Tema: Claro';
 }
 
 function loadTheme() {
@@ -77,14 +342,17 @@ function loadTheme() {
   document.documentElement.classList.toggle('dark', isDark);
   
   // Atualiza toggle e rótulo
-  themeToggle.checked = isDark;
-  themeLabel.textContent = isDark ? 'Tema: Escuro' : 'Tema: Claro';
+  if (themeToggle) themeToggle.checked = isDark;
+  if (themeLabel) themeLabel.textContent = isDark ? 'Tema: Escuro' : 'Tema: Claro';
 }
 
 // 
-// EVENTOS PRINCIPAIS
+// CONFIGURAÇÃO GERAL
 // 
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
+  // Inicializa o sistema de chat
+  new ChatSystem();
+
   // Configurações iniciais
   loadTheme();
   syncSidebarHeaderHeight();
@@ -92,8 +360,8 @@ window.addEventListener('load', () => {
   // Carrega dados do usuário
   const savedName   = localStorage.getItem('nomeUsuario');
   const savedAvatar = localStorage.getItem('avatarUsuario');
-  if (savedName)   nameTag.textContent = savedName;
-  if (savedAvatar) preview.src = savedAvatar;
+  if (savedName && nameTag)   nameTag.textContent = savedName;
+  if (savedAvatar && preview) preview.src = savedAvatar;
 
   // 
   // LÓGICA DE SELEÇÃO DE CARDS (EMOÇÕES)
@@ -178,58 +446,29 @@ window.addEventListener('load', () => {
       selectedEmotion = null;
     });
   }
-});
 
-// 
-// EVENTOS SECUNDÁRIOS
-// 
-themeToggle.addEventListener('change', toggleTheme);
-window.addEventListener('resize', syncSidebarHeaderHeight);
-
-// 
-// FUNÇÕES DE NOTIFICAÇÃO
-// 
-function toggleNotifs() {
-  // Alterna visibilidade da lista de notificações
-  const list = document.getElementById('notifList');
-  list.classList.toggle('hidden');
-}
-
-function handleClickOutside(e) {
-  // Fecha notificações ao clicar fora
-  const btn = document.getElementById('notifButton');
-  const list = document.getElementById('notifList');
-  if (!btn.contains(e.target) && !list.contains(e.target)) {
-    list.classList.add('hidden');
-  }
-}
-
-// 
-// CONFIGURAÇÃO GERAL
-// 
-document.addEventListener('DOMContentLoaded', () => {
   // ======================
   // NOTIFICAÇÕES
   // ======================
-  const notifButton = document.getElementById('notifButton');
-  const notifList = document.getElementById('notifList');
-  const notifContainer = notifButton.parentElement;
+  if (notifButton && notifList) {
+    notifList.classList.add('hidden');
 
-  notifList.classList.add('hidden');
+    function toggleNotifs() {
+      notifList.classList.toggle('hidden');
+    }
 
-  function toggleNotifs() {
-    notifList.classList.toggle('hidden');
+    function handleClickOutside(e) {
+      const notifContainer = notifButton.parentElement;
+      if (!notifContainer.contains(e.target)) notifList.classList.add('hidden');
+    }
+
+    notifButton.addEventListener('click', toggleNotifs);
+    document.addEventListener('click', handleClickOutside);
+
+    const notifContainer = notifButton.parentElement;
+    notifContainer.addEventListener('mouseenter', () => notifList.classList.remove('hidden'));
+    notifContainer.addEventListener('mouseleave', () => notifList.classList.add('hidden'));
   }
-
-  function handleClickOutside(e) {
-    if (!notifContainer.contains(e.target)) notifList.classList.add('hidden');
-  }
-
-  notifButton.addEventListener('click', toggleNotifs);
-  document.addEventListener('click', handleClickOutside);
-
-  notifContainer.addEventListener('mouseenter', () => notifList.classList.remove('hidden'));
-  notifContainer.addEventListener('mouseleave', () => notifList.classList.add('hidden'));
 
   // ======================
   // MODAL DE AGENDAMENTO
@@ -241,6 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelModalBtn = document.getElementById('cancelarBtn');
 
   function resetTipoConsulta() {
+    const cardsTipo = document.querySelectorAll('.card-tipo-agendamento');
     cardsTipo.forEach(c => c.classList.remove(
       'ring-2','ring-primary-600','bg-primary-600','bg-opacity-20',
       'dark:bg-primary-400','dark:bg-opacity-50'
@@ -249,6 +489,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetAlunoFiltro() {
+    const filterSeries = document.getElementById('filterSeries');
+    const filterTurma = document.getElementById('filterTurma');
+    const searchStudent = document.getElementById('searchStudent');
     if (filterSeries) filterSeries.value = '';
     if (filterTurma) filterTurma.value = '';
     if (searchStudent) searchStudent.value = '';
@@ -257,17 +500,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function fecharModal() {
-    modal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
-    resetTipoConsulta();
-    resetAlunoFiltro();
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+      resetTipoConsulta();
+      resetAlunoFiltro();
+    }
   }
 
   [openModalBtn, openFirstBtn].forEach(btn => {
     if (btn) btn.addEventListener('click', () => {
-      modal.classList.remove('hidden');
-      document.body.classList.add('modal-open');
-      resetCalendar();
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+        resetCalendar();
+      }
     });
   });
 
@@ -294,46 +541,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const passados = [];
 
   function updateView() {
-    if (tabAgendados.classList.contains('active')) {
-      tabAgendados.classList.replace('text-gray-500','text-primary-600');
-      tabAgendados.classList.replace('dark:text-gray-400','dark:text-primary-400');
-      tabAgendados.classList.add('border-b-2','border-primary-600','dark:border-primary-400');
+    if (tabAgendados && tabPassados) {
+      if (tabAgendados.classList.contains('active')) {
+        tabAgendados.classList.replace('text-gray-500','text-primary-600');
+        tabAgendados.classList.replace('dark:text-gray-400','dark:text-primary-400');
+        tabAgendados.classList.add('border-b-2','border-primary-600','dark:border-primary-400');
 
-      tabPassados.classList.replace('text-primary-600','text-gray-500');
-      tabPassados.classList.replace('dark:text-primary-400','dark:text-gray-400');
-      tabPassados.classList.remove('border-b-2','border-primary-600','dark:border-primary-400');
+        tabPassados.classList.replace('text-primary-600','text-gray-500');
+        tabPassados.classList.replace('dark:text-primary-400','dark:text-gray-400');
+        tabPassados.classList.remove('border-b-2','border-primary-600','dark:border-primary-400');
 
-      emptyAgendados.classList.toggle('hidden', agendados.length !== 0);
-      scheduleCards.classList.toggle('hidden', agendados.length === 0);
-      emptyPassados.classList.add('hidden');
-    } else {
-      tabPassados.classList.replace('text-gray-500','text-primary-600');
-      tabPassados.classList.replace('dark:text-gray-400','dark:text-primary-400');
-      tabPassados.classList.add('border-b-2','border-primary-600','dark:border-primary-400');
+        if (emptyAgendados) emptyAgendados.classList.toggle('hidden', agendados.length !== 0);
+        if (scheduleCards) scheduleCards.classList.toggle('hidden', agendados.length === 0);
+        if (emptyPassados) emptyPassados.classList.add('hidden');
+      } else {
+        tabPassados.classList.replace('text-gray-500','text-primary-600');
+        tabPassados.classList.replace('dark:text-gray-400','dark:text-primary-400');
+        tabPassados.classList.add('border-b-2','border-primary-600','dark:border-primary-400');
 
-      tabAgendados.classList.replace('text-primary-600','text-gray-500');
-      tabAgendados.classList.replace('dark:text-primary-400','dark:text-gray-400');
-      tabAgendados.classList.remove('border-b-2','border-primary-600','dark:border-primary-400');
+        tabAgendados.classList.replace('text-primary-600','text-gray-500');
+        tabAgendados.classList.replace('dark:text-primary-400','dark:text-gray-400');
+        tabAgendados.classList.remove('border-b-2','border-primary-600','dark:border-primary-400');
 
-      emptyPassados.classList.toggle('hidden', passados.length !== 0);
-      emptyAgendados.classList.add('hidden');
-      scheduleCards.classList.add('hidden');
+        if (emptyPassados) emptyPassados.classList.toggle('hidden', passados.length !== 0);
+        if (emptyAgendados) emptyAgendados.classList.add('hidden');
+        if (scheduleCards) scheduleCards.classList.add('hidden');
+      }
     }
   }
 
-  tabAgendados.addEventListener('click', () => {
-    tabAgendados.classList.add('active');
-    tabPassados.classList.remove('active');
-    updateView();
-  });
+  if (tabAgendados && tabPassados) {
+    tabAgendados.addEventListener('click', () => {
+      tabAgendados.classList.add('active');
+      tabPassados.classList.remove('active');
+      updateView();
+    });
 
-  tabPassados.addEventListener('click', () => {
-    tabPassados.classList.add('active');
-    tabAgendados.classList.remove('active');
-    updateView();
-  });
+    tabPassados.addEventListener('click', () => {
+      tabPassados.classList.add('active');
+      tabAgendados.classList.remove('active');
+      updateView();
+    });
 
-  updateView();
+    updateView();
+  }
 
   // ======================
   // SELEÇÃO DE TIPO DE AGENDAMENTO
@@ -468,6 +719,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedDate = new Date().toDateString();
 
   function updateCalendar() {
+    if (!monthYearElement || !datesElement) return;
+    
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth();
 
@@ -482,23 +735,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let datesHTML = '';
 
     for (let i = firstDayIndex; i > 0; i--) {
-      const prevDate = new Date(currentYear, currentMonth, 1 - i);
+      const prevDate = new Date(currentYear, currentMonth, 0 - i + 1);
       datesHTML += `<div class="date inactive text-gray-500">${prevDate.getDate()}</div>`;
     }
 
     for (let i = 1; i <= totalDays; i++) {
       const date = new Date(currentYear, currentMonth, i);
-      const isToday = date.toDateString() === new Date().toDateString();
+      const today = new Date();
+      const isToday = date.toDateString() === today.toDateString();
       const isSelected = date.toDateString() === selectedDate;
-
-      let classes = 'hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg cursor-pointer';
-      if (isToday && !selectedDate) classes += ' bg-blue-600 text-white font-semibold';
-      if (isSelected) classes += ' bg-blue-600 text-white font-semibold';
-
-      datesHTML += `<div class="date ${classes}" data-date="${date.toDateString()}">${i}</div>`;
+      
+      datesHTML += `<div class="date cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${isToday ? 'bg-blue-100 text-blue-600' : ''} ${isSelected ? 'bg-blue-600 text-white font-semibold' : ''}" data-date="${date.toDateString()}">${i}</div>`;
     }
 
-    for (let i = 1; i < 7 - lastDayIndex; i++) {
+    for (let i = 1; i <= (6 - lastDayIndex); i++) {
       const nextDate = new Date(currentYear, currentMonth + 1, i);
       datesHTML += `<div class="date inactive text-gray-500">${nextDate.getDate()}</div>`;
     }
@@ -523,8 +773,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCalendar();
   }
 
-  prevBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); updateCalendar(); });
-  nextBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); updateCalendar(); });
+  if (prevBtn) prevBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); updateCalendar(); });
+  if (nextBtn) nextBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); updateCalendar(); });
 
   updateCalendar();
 
@@ -563,6 +813,11 @@ document.addEventListener('DOMContentLoaded', () => {
   resetHorario();
 });
 
+// 
+// EVENTOS SECUNDÁRIOS
+// 
+if (themeToggle) themeToggle.addEventListener('change', toggleTheme);
+window.addEventListener('resize', syncSidebarHeaderHeight);
 
 // 
 // MODAL DE VISUALIZAÇÃO DO ESTUDANTE
@@ -596,33 +851,37 @@ document.querySelectorAll('button span.material-symbols-outlined').forEach(icon 
     const ultima= tdUltima.textContent.trim();
 
     // Preenche modal
-    fldName.textContent    = nome;
-    fldInitial.textContent = nome.charAt(0);
-    fldStatus.textContent  = status;
-    fldAge.textContent     = idade;
-    fldClass.textContent   = turma;
-    fldEmail.textContent   = tr.dataset.email || 'sememail@escola.edu.br';
+    if (fldName) fldName.textContent    = nome;
+    if (fldInitial) fldInitial.textContent = nome.charAt(0);
+    if (fldStatus) fldStatus.textContent  = status;
+    if (fldAge) fldAge.textContent     = idade;
+    if (fldClass) fldClass.textContent   = turma;
+    if (fldEmail) fldEmail.textContent   = tr.dataset.email || 'sememail@escola.edu.br';
 
     // Exibe histórico (simplificado)
-    historyList.innerHTML = `
-      <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
-        <div class="flex justify-between items-start mb-2">
-          <h5 class="font-medium">Última Sessão</h5>
-          <span class="text-sm text-gray-500 dark:text-gray-400">${ultima}</span>
+    if (historyList) {
+      historyList.innerHTML = `
+        <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+          <div class="flex justify-between items-start mb-2">
+            <h5 class="font-medium">Última Sessão</h5>
+            <span class="text-sm text-gray-500 dark:text-gray-400">${ultima}</span>
+          </div>
+          <p class="text-sm">[descrição do registro]</p>
         </div>
-        <p class="text-sm">[descrição do registro]</p>
-      </div>
-    `;
+      `;
+    }
 
     // Mostra modal
-    studentModal.classList.remove('hidden');
+    if (studentModal) studentModal.classList.remove('hidden');
   });
 });
 
 // Fechar modal
-closeModalButton.addEventListener('click', () => {
-  studentModal.classList.add('hidden');
-});
+if (closeModalButton) {
+  closeModalButton.addEventListener('click', () => {
+    if (studentModal) studentModal.classList.add('hidden');
+  });
+}
 
 // Relatorio dos Alunos Psicologo.
 // Referências ao DOM
@@ -649,21 +908,22 @@ document.querySelectorAll('button span.material-symbols-outlined')
       const turma = tdTurma.textContent.trim();
       const status= tdStatus.textContent.trim();
 
-      fldNameChat.textContent    = nome;
-      fldInitialChat.textContent = nome.charAt(0).toUpperCase();
-      fldStatusChat.textContent  = status;
-      fldAgeChat.textContent     = idade;
-      fldClassChat.textContent   = turma;
+      if (fldNameChat) fldNameChat.textContent    = nome;
+      if (fldInitialChat) fldInitialChat.textContent = nome.charAt(0).toUpperCase();
+      if (fldStatusChat) fldStatusChat.textContent  = status;
+      if (fldAgeChat) fldAgeChat.textContent     = idade;
+      if (fldClassChat) fldClassChat.textContent   = turma;
 
-      chatModal.classList.remove('hidden');
+      if (chatModal) chatModal.classList.remove('hidden');
     });
   });
 
 // Fecha o modal de chat
-btnCloseChat.addEventListener('click', () => {
-  chatModal.classList.add('hidden');
-});
-
+if (btnCloseChat) {
+  btnCloseChat.addEventListener('click', () => {
+    if (chatModal) chatModal.classList.add('hidden');
+  });
+}
 
 // 
 // MODAL DE FICHA DO ESTUDANTE (CHAT)
@@ -677,14 +937,13 @@ document.querySelectorAll('button span.material-symbols-outlined').forEach(icon 
 
   icon.parentElement.addEventListener('click', () => {
     // Mostrar modal (dados podem ser preenchidos aqui)
-    fichaModal.classList.remove('hidden');
+    if (fichaModal) fichaModal.classList.remove('hidden');
   });
 });
 
 // Fechar modal
-fecharModalButton.addEventListener('click', () => {
-  fichaModal.classList.add('hidden');
-});
-
-
-
+if (fecharModalButton) {
+  fecharModalButton.addEventListener('click', () => {
+    if (fichaModal) fichaModal.classList.add('hidden');
+  });
+}
