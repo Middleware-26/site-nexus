@@ -353,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Inicializa o sistema de chat
   new ChatSystem();
 
+
   // Configurações iniciais
   loadTheme();
   syncSidebarHeaderHeight();
@@ -890,6 +891,182 @@ if (closeModalBtn) closeModalBtn.addEventListener('click', resetHorario);
 if (cancelModalBtn) cancelModalBtn.addEventListener('click', resetHorario);
 if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) resetHorario(); });
 
+
+// ---------- initReportModal ----------
+function initReportModal() {
+  const modal = document.getElementById('relatorio-chat-modal');
+  const openBtn = document.getElementById('show-report-btn'); // opcional
+  const closeBtn = document.getElementById('btn-close-rel-chat');
+  const downloadBtn = document.getElementById('btn-download-pdf');
+  const reportContent = document.getElementById('report-content');
+
+  // Helper: trava scroll do body quando modal aberto
+  function lockBodyScroll() {
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+  function unlockBodyScroll() {
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+
+  // Abre modal
+  function openModal() {
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+    lockBodyScroll();
+    // atualiza ícones feather dentro do modal
+    if (window.feather && typeof window.feather.replace === 'function') {
+      try { window.feather.replace(); } catch (e) { /* ignore */ }
+    }
+  }
+
+  // Fecha modal
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    unlockBodyScroll();
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+  // Fecha ao clicar fora do painel (click no backdrop)
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // suporte ESC pra fechar
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+  }
+
+  // Função que cria wrapper branco escondido e gera PDF usando html2canvas + jsPDF
+// Substitua a função exportReportPDF existente por esta versão:
+async function exportReportPDF() {
+  if (!reportContent) return;
+
+  // 1) Clona o conteúdo (para não alterar o DOM original)
+  const clone = reportContent.cloneNode(true);
+
+  // 2) Cria wrapper visível apenas fora da tela (para html2canvas renderizar com estilos inline)
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-9999px';
+  wrapper.style.top = '0';
+  wrapper.style.background = '#ffffff';        // fundo branco
+  wrapper.style.color = '#000000';             // texto preto
+  wrapper.style.padding = '24px';
+  wrapper.style.width = '1200px';              // largura fixa para boa resolução
+  wrapper.style.fontFamily = 'Poppins, Arial, sans-serif'; // garante fonte legível
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  try {
+    // 3) Limpeza de classes/tailwind que afetam cores/planos de fundo
+    //    e aplicação de estilos inline para forçar padrão preto/no branco.
+    const elems = Array.from(clone.querySelectorAll('*'));
+    elems.unshift(clone); // também estiliza o próprio clone
+
+    elems.forEach(el => {
+      // remove classes tailwind que influenciam cores/fundos/borders/hover
+      const classes = Array.from(el.classList || []);
+      const filtered = classes.filter(c => {
+        return !(
+          c.startsWith('dark') ||
+          c.startsWith('bg-') ||
+          c.startsWith('text-') ||
+          c.startsWith('border-') ||
+          c.startsWith('hover:') ||
+          c.startsWith('from-') ||
+          c.startsWith('to-') ||
+          c.startsWith('ring-') ||
+          c.startsWith('opacity-') ||
+          c.startsWith('shadow') ||
+          c.startsWith('grid') // opcional: preserve se quiser layout
+        );
+      });
+      el.className = filtered.join(' ');
+
+      // Força estilos inline neutros
+      // não aplica background branco em *todos* elementos (pode cobrir), usamos transparente
+      el.style.background = 'transparent';
+      el.style.backgroundColor = 'transparent';
+      el.style.color = '#000000';
+      el.style.border = 'none';
+      el.style.boxShadow = 'none';
+    });
+
+    // 4) Corrige SVGs / ícones: força fill/stroke preto
+    clone.querySelectorAll('svg').forEach(svg => {
+      svg.setAttribute('fill', '#000000');
+      svg.setAttribute('stroke', '#000000');
+      // aplica inline style também
+      svg.style.fill = '#000000';
+      svg.style.color = '#000000';
+    });
+
+    // 5) Gera canvas com html2canvas forçando fundo branco
+    const canvas = await html2canvas(wrapper, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: wrapper.offsetWidth
+    });
+
+    // 6) Converte para PDF com jsPDF (A4)
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgWidth = 210;
+    const pageHeight = 295;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > -1) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save('relatorio-aluno.pdf');
+  } catch (err) {
+    console.error('Erro ao gerar PDF:', err);
+    alert('Não foi possível gerar o PDF. Veja o console para detalhes.');
+  } finally {
+    // 7) remove wrapper temporário
+    wrapper.remove();
+  }
+}
+
+
+  if (downloadBtn) downloadBtn.addEventListener('click', exportReportPDF);
+
+  // Substitui ícones feather (caso não tenham sido gerados)
+  if (window.feather && typeof window.feather.replace === 'function') {
+    try { window.feather.replace(); } catch (e) { /* ignore */ }
+  }
+}
+ initReportModal();
+// ---------- fim initReportModal ----------
+
+
 });
 
 // 
@@ -1026,3 +1203,4 @@ if (fecharModalButton) {
     if (fichaModal) fichaModal.classList.add('hidden');
   });
 }
+
