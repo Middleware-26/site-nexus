@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Raiz do documento HTML com idioma definido -->
+<head>
+    <!-- Metadados para charset e responsividade -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Link para arquivo externo de estilos CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Título da aba do navegador -->
+    <title>Nexus início</title>
+</head>
+<body>
+    <!-- Cabeçalho principal com logotipo e menu de navegação -->
+    <header>
+        <div class="logo">
+            <!-- Imagem do logotipo -->
+            <img src="/logo/nexusbola.png" alt="Logo Nexus">
+        </div>
+
+
+        <nav>
+            <!-- Menu de navegação principal -->
+            <ul class="menu">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Serviços</a></li>
+                <li><a href="#">Sobre</a></li>
+                <li><a href="#">Suporte</a></li>
+                <li><a href="#">Contato</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Seção de slider/carrossel de imagens -->
+    <div class="slider">
+        <div class="slides">
+            <!-- Cada .slide corresponde a uma imagem do carrossel -->
+            <div class="slide"><img src="/logo/nexusslide.png" alt="Imagem 1"></div>
+            <div class="slide"><img src="/logo/nexusslide.png" alt="Imagem 2"></div>
+            <div class="slide"><img src="/logo/nexusslide.png" alt="Imagem 3"></div>
+        </div>
+        <!-- Controles de navegação do slider -->
+        <div class="controls">
+            <span class="prev">&#10094;</span> <!-- Botão anterior -->
+            <span class="next">&#10095;</span> <!-- Botão próximo -->
+        </div>
+        <!-- Indicadores (dots) do slider -->
+        <div class="indicators">
+            <span data-index="0" class="active"></span>
+            <span data-index="1"></span>
+            <span data-index="2"></span>
+            <!-- Adicione mais spans conforme quantidade de slides -->
+        </div>
+    </div>
+
+    <!-- Seção de conteúdo principal (primeiro container) -->
+    <div class="container">
+        <div class="item">
+            <!-- Texto de apresentação com classes para estilização -->
+            <p class="p3">Impulsionando escolas rumo a uma educação contemporânea de excelência</p>
+            <br>
+            <p class="p4">
+                
+                Com escolas parceiras em Feira de Santana, somos uma plataforma de educação 
+                aliada à inovação que oferece apoio completo para alunos em toda a sua trajetória escolar, mantendo
+                compromissos como: acompanhamento especializado, profissionais de excelência e os melhores resultados.
+            </p>
+        </div>
+        <div class="item">
+            <!-- Imagem decorativa dentro de um círculo -->
+            <div class="circulo">
+                <img src="/logo/psicos_Edited.png" alt="Imagem decorativa" class="bola">
+            </div>
+        </div>
+    </div>
+
+    <!-- Segunda seção de conteúdo (container2) com pilares -->
+    <div class="container2">
+        <div class="item2">
+            <div class="circulo2">
+                <img src="/logo/meta.png" alt="Pilar 1" class="bola2">
+            </div>
+        </div>
+        <div class="item2">
+            <!-- Título da seção de pilares -->
+            <p class="pi">Nossos pilares</p>
+            <div class="circulo2">
+                <img src="/logo/ideia.png" alt="Pilar 2" class="bola2">
+            </div>
+        </div>
+        <div class="item2">
+            <div class="circulo2">
+                <img src="/logo/união.png" alt="Pilar 3" class="bola2">
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé do site com direitos autorais -->
+    <footer>
+        <p>&copy; 2025 - Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Script JavaScript para funcionalidades do slider -->
+    <script src="script.js"></script>
+</body>
+</html>

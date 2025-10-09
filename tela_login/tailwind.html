@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus - Tailwind</title>
+    <!-- Incluindo Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Importa a fonte Montserrat do Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        /* Aplica a todos os elementos: zera margens e padding, define box-sizing e fonte padrão */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Corrige problemas de scroll e tremedeira */
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Impede scroll vertical */
+            position: fixed; /* Remove comportamento padrão de scroll */
+        }
+
+        /* Estilos customizados para a sobreposição de gradiente e animações dos raios */
+        body::before {
+            content: '';
+            background-image: linear-gradient(90deg, rgba(0, 212, 255, 0.4) 0%, rgba(2, 115, 214, 0.4) 56%, rgba(7, 57, 133, 0.4) 100%);
+            position: fixed;
+            top: 0; 
+            right: 0; 
+            bottom: 0; 
+            left: 0;
+            z-index: -1;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        /* Animações dos Raios - Movimento dinâmico */
+        @keyframes dynamicRay1 {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-48%, -52%) rotate(90deg) scale(1.05); }
+            50% { transform: translate(-45%, -55%) rotate(180deg) scale(1.1); }
+            75% { transform: translate(-47%, -53%) rotate(270deg) scale(1.05); }
+            100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
+        }
+        @keyframes dynamicRay2 {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-52%, -48%) rotate(-90deg) scale(0.95); }
+            50% { transform: translate(-55%, -45%) rotate(-180deg) scale(0.9); }
+            75% { transform: translate(-53%, -47%) rotate(-270deg) scale(0.95); }
+            100% { transform: translate(-50%, -50%) rotate(-360deg) scale(1); }
+        }
+        @keyframes dynamicRay3 {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            25% { transform: translate(-51%, -49%) rotate(120deg) scale(1.08); }
+            50% { transform: translate(-50%, -50%) rotate(240deg) scale(1.15); }
+            75% { transform: translate(-49%, -51%) rotate(300deg) scale(1.08); }
+            100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
+        }
+        
+        /* Ciclo de visibilidade */
+        @keyframes fadeInOutCyclePaused {
+            0% { opacity: 0; }
+            29.4% { opacity: 0; }
+            35.3% { opacity: 0.9; }
+            94.1% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+        
+        .ray-1 { 
+            animation: 
+                dynamicRay1 15s ease-in-out infinite alternate, 
+                fadeInOutCyclePaused 17s linear infinite;
+            transform: translate3d(-50%, -50%, 0);
+            backface-visibility: hidden;
+        }
+        .ray-2 { 
+            animation: 
+                dynamicRay2 18s ease-in-out infinite alternate, 
+                fadeInOutCyclePaused 17s linear infinite 0.5s;
+            transform: translate3d(-50%, -50%, 0);
+            backface-visibility: hidden;
+        }
+        .ray-3 { 
+            animation: 
+                dynamicRay3 21s ease-in-out infinite alternate, 
+                fadeInOutCyclePaused 17s linear infinite 1s;
+            transform: translate3d(-50%, -50%, 0);
+            backface-visibility: hidden;
+        }
+
+        /* Animação de transição entre painéis */
+        @keyframes move {
+            0%, 49.99% {
+                opacity: 0;
+                z-index: 1;
+            }
+            50%, 100% {
+                opacity: 1;
+                z-index: 5;
+            }
+        }
+
+        /* Estilos para a transição do container */
+        .cadastro-container,
+        .login-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+            backface-visibility: hidden;
+            transform: translate3d(0, 0, 0);
+        }
+
+        .logar {
+            left: 0;
+            width: 50%;
+            z-index: 2;
+        }
+
+        #container.active .logar {
+            transform: translate3d(100%, 0, 0);
+        }
+
+        .cadastrar {
+            left: 0;
+            width: 50%;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        #container.active .cadastrar {
+            transform: translate3d(100%, 0, 0);
+            opacity: 1;
+            z-index: 5;
+            animation: move 0.6s;
+        }
+
+        .alternar-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: all 0.6s ease-in-out;
+            border-radius: 150px 0 0 100px;
+            z-index: 1000;
+            backface-visibility: hidden;
+            transform: translate3d(0, 0, 0);
+        }
+
+        #container.active .alternar-container {
+            transform: translate3d(-100%, 0, 0);
+            border-radius: 0 150px 100px 0;
+        }
+
+        .alternar {
+            background: linear-gradient(to right, #00D4FF, rgba(7, 57, 133, 1));
+            color: #fff;
+            position: relative;
+            left: -100%;
+            height: 100%;
+            width: 200%;
+            transform: translate3d(0, 0, 0);
+            transition: all 0.6s ease-in-out;
+            backface-visibility: hidden;
+        }
+
+        #container.active .alternar {
+            transform: translate3d(50%, 0, 0);
+        }
+
+        .alternar-painel {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 30px;
+            text-align: center;
+            top: 0;
+            transform: translate3d(0, 0, 0);
+            transition: all 0.6s ease-in-out;
+            backface-visibility: hidden;
+        }
+
+        .alternar-esquerda {
+            transform: translate3d(-200%, 0, 0);
+        }
+
+        #container.active .alternar-esquerda {
+            transform: translate3d(0, 0, 0);
+        }
+
+        .alternar-direita {
+            right: 0;
+            transform: translate3d(0, 0, 0);
+        }
+
+        #container.active .alternar-direita {
+            transform: translate3d(200%, 0, 0);
+        }
+
+        /* Botões ocultos */
+        .hidden {
+            background-color: transparent !important;
+            border-color: #fff !important;
+        }
+    </style>
+</head>
+<body class="bg-cover bg-center flex items-center justify-center flex-col h-screen w-screen fixed top-0 left-0" style="background-image: url('../logo/adolecenteepsicologo.jpg');">
+
+    <!-- Logo Nexus Acima -->
+    <div class="imagem-estudante fixed top-0 flex pointer-events-none">
+        <img src="/logo/Sem nomeee.png" alt="Estudante" class="w-[45vh] transform -translate-y-[20%] items-center object-contain">
+    </div>
+
+    <!-- Container dos raios animados -->
+    <div class="thin-rays-container absolute top-1/2 left-1/2 w-px h-px z-[1] pointer-events-none">
+        <!--segundo raio-->
+        <div class="ray ray-1 absolute rounded-full border-solid border-[3px] border-sky-600 w-[550px] h-[550px] shadow-[0_0_20px_#3b82f6,0_0_30px_#3b82f6_inset] opacity-0"></div>
+        <div class="ray ray-2 absolute rounded-full border-solid border-[3px] border-sky-900 w-[600px] h-[600px] shadow-[0_0_20px_#0c4a6e,0_0_30px_##0c4a6e_inset] opacity-0"></div>
+        <div class="ray ray-3 absolute rounded-full border-solid border-[3px] border-blue-500 w-[650px] h-[650px] shadow-[0_0_20px_#1e293b,0_0_30px_#1e293b_inset] opacity-0"></div>
+    </div>
+
+    <div class="container bg-white rounded-[30px] shadow-[0_5px_15px_rgba(0,0,0,0.35)] relative overflow-hidden w-[768px] max-w-full min-h-[480px] z-10" id="container">
+        <!-- Cadastro -->
+        <div class="cadastro-container cadastrar">
+            <form id="simpleForm" class="bg-white flex items-center justify-center flex-col px-10 h-full" onsubmit="return validateForm(event)">
+                <div class="logo">
+                    <a href="#"><img src="/logo/espiral sem fundo.png" alt="Logo Nexus" class="h-[50px] w-[50px] mb-[10px]"></a>
+                </div>
+                <h1 class="text-2xl font-bold mb-3">Crie sua conta!</h1>
+                <input type="text" id="name" placeholder="Nome" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="email" id="email" placeholder="Email" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="password" id="password" placeholder="Senha" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <button type="submit" 
+                        class="bg-[#0273D6] hover:bg-[#0269c2] text-white text-xs font-semibold py-2.5 px-11 rounded-lg uppercase tracking-wider mt-2.5 cursor-pointer transition-colors">
+                    Registrar-se
+                </button>
+            </form>
+        </div>
+
+        <!-- Login -->
+        <div class="login-container logar">
+            <form class="bg-white flex items-center justify-center flex-col px-10 h-full">
+                <div class="logo">
+                    <a href="#"><img src="/logo/espiral sem fundo.png" alt="Logo Nexus" class="h-[50px] w-[50px] mb-[10px]"></a>
+                </div>
+                <h1 class="text-2xl font-bold mb-3">Login</h1>
+                <input type="email" placeholder="Email" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <input type="password" placeholder="Senha" required 
+                       class="bg-gray-200 border-none my-2 py-2.5 px-3.5 text-sm rounded-lg w-full outline-none">
+                <button type="submit" 
+                        class="bg-[#0273D6] hover:bg-[#0269c2] text-white text-xs font-semibold py-2.5 px-11 rounded-lg uppercase tracking-wider mt-2.5 cursor-pointer transition-colors">
+                    Entrar
+                </button>
+                <a href="#" class="text-gray-700 text-xs no-underline my-4 hover:text-gray-900 transition-colors">Esqueceu sua senha?</a>
+            </form>
+        </div>
+
+        <!-- Alternância -->
+        <div class="alternar-container">
+            <div class="alternar">
+                <div class="alternar-painel alternar-esquerda">
+                    <h1 class="text-2xl font-bold mb-3">Bem-vindo de volta!</h1>
+                    <p class="text-sm leading-[20px] tracking-[0.3px] my-5">Insira seus dados pessoais para acessar nossos recursos!</p>
+                    <button id="login" class="bg-transparent border border-white text-white text-xs font-semibold py-2.5 px-11 rounded-lg uppercase tracking-wider mt-2.5 cursor-pointer">
+                        Login
+                    </button>
+                </div>
+                <div class="alternar-painel alternar-direita">
+                    <h1 class="text-2xl font-bold mb-3">Seja bem-vindo!</h1>
+                    <p class="text-sm leading-[20px] tracking-[0.3px] my-5">Cadastre-se com seus dados pessoais para acessar nossos recursos!</p>
+                    <button id="register" class="bg-transparent border border-white text-white text-xs font-semibold py-2.5 px-11 rounded-lg uppercase tracking-wider mt-2.5 cursor-pointer">
+                        Cadastro
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="script.js"></script>
+</body>
+</html>
