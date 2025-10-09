@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Nexus – Selecione Perfil</title>
+  <style>
+    /* Custom styles that can't be easily done with Tailwind */
+    * {
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    body::before {
+      content: '';
+      background-image: linear-gradient(90deg, rgba(0, 212, 255, 0.4) 0%, rgba(2, 115, 214, 0.4) 56%, rgba(7, 57, 133, 0.4) 100%);
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+    
+    /* Animation for form switching */
+    @keyframes move {
+      0%, 49.99% {
+        opacity: 0;
+        z-index: 1;
+      }
+      50%, 100% {
+        opacity: 1;
+        z-index: 5;
+      }
+    }
+    
+    /* Custom select arrow */
+    .select-container::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 7px solid #666;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-[url('../logo/adolecenteepsicologo.jpg')] bg-cover flex items-center justify-center flex-column relative h-screen bg-no-repeat">
+  <!-- Main container -->
+  <div class="container2 bg-white rounded-[30px] shadow-[0_5px_15px_rgba(0,0,0,0.35)] relative overflow-hidden w-[700px] max-w-full min-h-[600px] mx-auto">
+    <!-- Logo -->
+    <div class="logo2 flex justify-center items-center">
+      <img src="/logo/nexusbola.png" alt="Logo Nexus" class="h-[100px] w-[200px]">
+    </div>
+
+    <!-- Form content -->
+    <div class="oquetué flex justify-center items-center flex-col mt-[50px]">
+      <h1 class="text-[25px] mt-[15px] mb-[15px]">Informe o que você é:</h1>
+
+      <!-- Custom select container -->
+      <div class="select-container relative w-64 mt-4">
+        <select 
+          id="perfil" 
+          name="perfil" 
+          required
+          class="w-full px-4 py-2 pr-8 text-gray-500 border border-gray-300 rounded-md appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
+        >
+          <option value="" disabled selected>Selecione uma opção</option>
+          <option value="estudante">Estudante</option>
+          <option value="professor">Professor</option>
+          <option value="psicologo">Psicólogo</option>
+        </select>
+      </div>
+
+      <h1 class="text-[25px] mt-8 mb-4">Informe o código da sua escola:</h1>
+      <input
+        type="text"
+        id="cod"
+        placeholder="Código"
+        class="bg-gray-200 border border-black my-2 px-[15px] py-[10px] text-[13px] rounded-[8px] outline-none w-64 focus:ring-2 focus:ring-blue-300"
+      />
+      <br />
+      <button
+        type="submit"
+        class="bg-[#0273D6] text-white text-[12px] px-[45px] py-[10px] border border-transparent rounded-[8px] font-semibold tracking-[0.5px] uppercase mt-[10px] cursor-pointer hover:bg-[#0269c2]"
+      >
+        Finalizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Login/Signup Container (hidden by default) -->
+  <div class="container bg-white rounded-[30px] shadow-[0_5px_15px_rgba(0,0,0,0.35)] relative overflow-hidden w-[768px] max-w-full min-h-[480px] mx-auto hidden">
+    <!-- This would contain your login/signup form with toggle functionality -->
+  </div>
+</body>
+</html>
