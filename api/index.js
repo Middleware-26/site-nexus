@@ -1,7 +1,4 @@
-// api/index.js - Versão Serverless para Vercel (sem WebSocket/polling)
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+// api/index.js - Versão Serverless para Vercel
 const TelegramBot = require('node-telegram-bot-api');
 
 // Configuração do Bot do Telegram
@@ -18,90 +15,80 @@ const userChatIds = {
 // Inicializa o bot (SEM polling para Vercel)
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: false });
 
-const app = express();
+// Handler principal para requisições
+module.exports = async (req, res) => {
+    // Configurar CORS
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
 
-app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST", "OPTIONS"]
-}));
-app.use(bodyParser.json());
+    // Tratar OPTIONS request
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
 
-// Rota de health check
-app.get('/api', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        message: 'API Nexus funcionando!',
-        timestamp: new Date().toISOString()
-    });
-});
-
-// Rota para enviar mensagem ao Telegram
-app.post('/api/enviar-mensagem', async (req, res) => {
-    try {
-        const { senderType, receiverType, text } = req.body;
-
-        console.log(`[API] Mensagem recebida de: ${senderType} | Para: ${receiverType} | Texto: "${text}"`);
-
-        if (!text || !senderType || !receiverType) {
-            return res.status(400).json({ 
-                status: 'erro', 
-                message: 'Campos obrigatórios faltando: senderType, receiverType, text' 
-            });
-        }
-
-        const targetChatId = userChatIds[receiverType];
-
-        if (!targetChatId) {
-            return res.status(400).json({ 
-                status: 'erro', 
-                message: 'Destinatário inválido.' 
-            });
-        }
-
-        // Formata a mensagem para o Telegram
-        const messageToSend = `💬 Nova mensagem de ${senderType === 'psychologist' ? 'Psicólogo' : 'Professor'}:\n\n"${text}"`;
-
-        await bot.sendMessage(targetChatId, messageToSend);
-        
-        console.log(`[API] Mensagem enviada para o Telegram (Chat ID: ${targetChatId}).`);
-        
-        res.json({ 
+    // GET / - Health check
+    if (req.method === 'GET') {
+        res.status(200).json({ 
             status: 'ok', 
-            message: 'Mensagem enviada com sucesso!' 
+            message: 'API Nexus funcionando!',
+            timestamp: new Date().toISOString()
         });
-    } catch (error) {
-        console.error('[API] Erro ao enviar mensagem:', error.message);
-        res.status(500).json({ 
-            status: 'erro', 
-            message: 'Falha ao contatar o Telegram.',
-            error: error.message 
-        });
+        return;
     }
-});
 
-// Webhook do Telegram (opcional - para receber mensagens)
-app.post('/api/webhook', async (req, res) => {
-    try {
-        const update = req.body;
-        
-        if (update.message) {
-            const msg = update.message;
-            const chatId = msg.chat.id.toString();
-            const text = msg.text;
-            const senderName = msg.from.first_name || 'Usuário';
+    // POST - Processar requisições
+    if (req.method === 'POST') {
+        try {
+            const { senderType, receiverType, text } = req.body;
 
-            console.log(`[Webhook] Mensagem recebida do Chat ID: ${chatId} | Remetente: ${senderName} | Texto: "${text}"`);
+            console.log(`[API] Mensagem recebida de: ${senderType} | Para: ${receiverType} | Texto: "${text}"`);
+
+            if (!text || !senderType || !receiverType) {
+                res.status(400).json({ 
+                    status: 'erro', 
+                    message: 'Campos obrigatórios faltando: senderType, receiverType, text' 
+                });
+                return;
+            }
+
+            const targetChatId = userChatIds[receiverType];
+
+            if (!targetChatId) {
+                res.status(400).json({ 
+                    status: 'erro', 
+                    message: 'Destinatário inválido.' 
+                });
+                return;
+            }
+
+            // Formata a mensagem para o Telegram
+            const messageToSend = `💬 Nova mensagem de ${senderType === 'psychologist' ? 'Psicólogo' : 'Professor'}:\n\n"${text}"`;
+
+            await bot.sendMessage(targetChatId, messageToSend);
             
-            // Aqui você pode implementar lógica adicional se necessário
-            // Por enquanto, apenas confirmamos o recebimento
+            console.log(`[API] Mensagem enviada para o Telegram (Chat ID: ${targetChatId}).`);
+            
+            res.status(200).json({ 
+                status: 'ok', 
+                message: 'Mensagem enviada com sucesso!' 
+            });
+        } catch (error) {
+            console.error('[API] Erro ao enviar mensagem:', error.message);
+            res.status(500).json({ 
+                status: 'erro', 
+                message: 'Falha ao contatar o Telegram.',
+                error: error.message 
+            });
         }
-        
-        res.status(200).json({ status: 'ok' });
-    } catch (error) {
-        console.error('[Webhook] Erro:', error.message);
-        res.status(500).json({ status: 'erro', message: error.message });
+        return;
     }
-});
 
-// Exporta o app para o Vercel
-module.exports = app;
+    // Método não permitido
+    res.status(405).json({ status: 'erro', message: 'Método não permitido' });
+};

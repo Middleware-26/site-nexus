@@ -5,17 +5,12 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node servidor/index.js",
-    "dev": "node servidor/index.js",
-    "build": "echo 'Build completed'"
+    "dev": "node servidor/index.js"
   },
   "engines": {
     "node": ">=18.x"
   },
   "dependencies": {
-    "body-parser": "^2.2.0",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "node-telegram-bot-api": "^0.66.0",
-    "socket.io": "^4.8.1"
+    "node-telegram-bot-api": "^0.66.0"
   }
 }
