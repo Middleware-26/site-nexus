@@ -1,0 +1,44 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/tela_inicial/(.*)",
+      "dest": "/tela_inicial/$1"
+    },
+    {
+      "src": "/tela_login/(.*)",
+      "dest": "/tela_login/$1"
+    },
+    {
+      "src": "/tela_principal/(.*)",
+      "dest": "/tela_principal/$1"
+    },
+    {
+      "src": "/logo/(.*)",
+      "dest": "/logo/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/tela_inicial/inicio.html"
+    }
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

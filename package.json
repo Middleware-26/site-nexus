@@ -1,4 +1,16 @@
 {
+  "name": "citysync-nexus",
+  "version": "1.0.0",
+  "description": "Sistema Nexus - Plataforma de comunicação entre psicólogos e professores",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node servidor/index.js",
+    "dev": "node servidor/index.js",
+    "build": "echo 'Build completed'"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
   "dependencies": {
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",

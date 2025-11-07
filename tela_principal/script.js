@@ -125,9 +125,14 @@ class ChatSystem {
         this.addMessageToChat(message, true);
         this.clearMessageInput();
 
+        // Detecta a URL da API baseado no ambiente
+        const apiUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/enviar-mensagem'
+            : '/api/enviar-mensagem';
+
         // Envia para o servidor
         try {
-            const response = await fetch('http://localhost:3000/enviar-mensagem', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
