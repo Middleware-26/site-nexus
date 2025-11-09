@@ -1,10 +1,21 @@
-// --- Firebase ---
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+// ======================================================
+// 🔥 INTEGRAÇÃO COM FIREBASE - LOGIN E REDIRECIONAMENTO
+// ======================================================
 
-// Configuração do Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  getDoc 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// ------------------------------------------------------
+// ⚙️ CONFIGURAÇÃO DO FIREBASE (substitua pelos seus dados)
+// ------------------------------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
   authDomain: "nexus-web-c35f1.firebaseapp.com",
@@ -12,91 +23,81 @@ const firebaseConfig = {
   storageBucket: "nexus-web-c35f1.firebasestorage.app",
   messagingSenderId: "387285405125",
   appId: "1:387285405125:web:96c2d0edb9695b79690fac",
-  measurementId: "G-1E0BGG8323"
 };
 
-// Inicializa Firebase
+// Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- Alternância de telas ---
-const container = document.getElementById('container');
-const registerBtn = document.getElementById('register');
-const loginBtn = document.getElementById('login');
+// ------------------------------------------------------
+// 🧩 LOGIN DE USUÁRIO
+// ------------------------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('loginForm');
 
-registerBtn.addEventListener('click', () => container.classList.add("active"));
-loginBtn.addEventListener('click', () => container.classList.remove("active"));
+  if (!form) return;
 
-// --- Cadastro ---
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const nome = document.getElementById('nome').value.trim();
-    const email = document.getElementById('emailCadastro').value.trim();
-    const senha = document.getElementById('senhaCadastro').value.trim();
-    const tipo = "aluno"; // Você pode pegar de algum input se quiser
-
-    if (!nome || !email || !senha) {
-        alert("Preencha todos os campos!");
-        return;
-    }
-
-    try {
-        // Cria usuário no Firebase Auth
-        const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-        const user = userCredential.user;
-
-        // Salva dados extras no Firestore
-        await setDoc(doc(db, "usuarios", user.uid), {
-            nome,
-            email,
-            tipo,
-            id_escola: "abc123", // Exemplo, pode alterar conforme necessidade
-            foto_url: "",
-        });
-
-        alert("Conta criada com sucesso!");
-        container.classList.remove("active"); // volta pra tela de login
-    } catch (err) {
-        alert(err.message);
-        console.error(err);
-    }
-});
-
-// --- Login ---
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const email = document.getElementById('emailLogin').value.trim();
-    const senha = document.getElementById('senhaLogin').value.trim();
+    const email = document.getElementById('emailLogin')?.value.trim();
+    const senha = document.getElementById('senhaLogin')?.value.trim();
 
     if (!email || !senha) {
-        alert("Preencha todos os campos!");
-        return;
+      alert("Preencha todos os campos!");
+      return;
     }
 
     try {
-        // Login no Firebase Auth
-        const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-        const user = userCredential.user;
+      // 🔐 Faz login no Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+      const user = userCredential.user;
 
-        // Busca dados extras no Firestore
-        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        if (!userDoc.exists()) {
-            alert("Usuário não encontrado no banco de dados!");
-            return;
-        }
-        const userData = userDoc.data();
+      // 🔎 Busca dados do usuário no Firestore
+      const docRef = doc(db, "usuarios", user.uid);
+      const docSnap = await getDoc(docRef);
 
-        // Salva dados no localStorage
-        localStorage.setItem("usuario", JSON.stringify(userData));
+      if (!docSnap.exists()) {
+        alert("Usuário não encontrado no banco de dados!");
+        return;
+      }
 
-        alert("Login realizado com sucesso!");
-        window.location.href = "alunos.html"; // Redireciona
-    } catch (err) {
-        alert(err.message);
-        console.error(err);
+      const dados = docSnap.data();
+      console.log("✅ Login bem-sucedido:", dados);
+
+      // 🔁 Armazena localmente (se precisar em outras páginas)
+      localStorage.setItem("usuario", JSON.stringify(dados));
+
+      // 🚀 Redireciona conforme o tipo da conta
+      switch (dados.tipo) {
+        case "aluno":
+          window.location.href = "alunos.html";
+          break;
+        case "professor":
+          window.location.href = "professores.html";
+          break;
+        case "psicologo":
+          window.location.href = "psicologos.html";
+          break;
+        case "admin":
+          window.location.href = "adminpainel.html";
+          break;
+        default:
+          alert("Tipo de usuário desconhecido!");
+      }
+
+    } catch (error) {
+      console.error("Erro ao fazer login:", error.message);
+      if (error.code === "auth/invalid-credential" || error.code === "auth/invalid-email") {
+        alert("Email ou senha inválidos.");
+      } else if (error.code === "auth/user-not-found") {
+        alert("Usuário não encontrado.");
+      } else if (error.code === "auth/wrong-password") {
+        alert("Senha incorreta.");
+      } else {
+        alert("Erro ao fazer login: " + error.message);
+      }
     }
+  });
 });

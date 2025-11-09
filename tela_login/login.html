@@ -1,67 +1,55 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Poppins", "sans-serif"] },
+          colors: {
+            primary: {
+              500: "#0273D6",
+              600: "#025BB0",
+              700: "#014B93"
+            }
+          }
+        }
+      }
+    };
+  </script>
 </head>
 
-<body>
+<body class="flex items-center justify-center min-h-screen bg-cover bg-center relative" style="background-image: url('/logo/adolecenteepsicologo.jpg')">
+  <!-- Camada de overlay -->
+  <div class="absolute inset-0 bg-gradient-to-r from-cyan-400/50 via-blue-600/50 to-blue-900/50"></div>
 
-    <div class="imagem-estudante">
-        <img src="/logo/Sem nomeee.png" alt="Estudante">
+  <!-- Container principal -->
+  <div class="relative z-10 w-full max-w-md bg-white rounded-3xl shadow-lg overflow-hidden">
+    <div class="p-8">
+      <form id="loginForm" class="flex flex-col space-y-4">
+        <div class="flex flex-col items-center">
+          <img src="/logo/espiral sem fundo.png" class="h-14 mb-3" alt="Logo" />
+          <h1 class="text-2xl font-semibold text-gray-800">Login</h1>
+        </div>
+
+        <input id="emailLogin" type="email" placeholder="Email" required
+          class="p-3 bg-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" />
+        <input id="senhaLogin" type="password" placeholder="Senha" required
+          class="p-3 bg-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" />
+
+        <button type="submit"
+          class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 rounded-lg transition">Entrar</button>
+
+        <a href="#" class="text-sm text-gray-600 hover:text-primary-500 text-center">Esqueceu sua senha?</a>
+      </form>
     </div>
+  </div>
 
-    <div class="container" id="container">
-        <!-- Cadastro -->
-        <div class="cadastro-container cadastrar">
-            <form id="registerForm" onsubmit="return validateForm(event)">
-                <div class="logo">
-                    <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
-                </div>
-                <h1>Crie sua conta!</h1>
-                <input type="text" id="nome" placeholder="Nome" required>
-                <input type="email" id="emailCadastro" placeholder="Email" required>
-                <input type="password" id="senhaCadastro" placeholder="Senha" required>
-                <button type="submit">Registrar-se</button>
-            </form>
-        </div>
-
-        <!-- Login -->
-        <div class="login-container logar">
-            <form id="loginForm">
-                <div class="logo">
-                    <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
-                </div>
-                <h1>Login</h1>
-                <input type="email" id="emailLogin"  placeholder="Email" required>
-                <input type="password" id="senhaLogin" placeholder="Senha" required>
-                <button type="submit">Entrar</button>
-                <a href="#">Esqueceu sua senha?</a>
-            </form>
-        </div>
-
-        <!-- Alternância -->
-        <div class="alternar-container">
-            <div class="alternar">
-                <div class="alternar-painel alternar-esquerda">
-                    <h1>Bem-vindo de volta!</h1>
-                    <p>Insira seus dados pessoais para acessar nossos recursos!</p>
-                    <button class="hidden" id="login">Login</button>
-                </div>
-                <div class="alternar-painel alternar-direita">
-                    <h1>Seja bem-vindo!</h1>
-                    <p>Cadastre-se com seus dados pessoais para acessar nossos recursos!</p>
-                    <button class="hidden" id="register">Cadastro</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
-
 </html>
