@@ -1055,35 +1055,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!form) return;
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-    const email = form.email.value.trim();
-    const senha = form.senha.value.trim();
-    const confirmar = form.confirmar.value.trim();
-    const nome = form.nome.value.trim();
-    const role = form.role.value;
-    const codigo = form.codigoEscola.value.trim();
+  const email = form.email?.value.trim();
+  const senha = form.senha?.value.trim();
+  const confirmar = form.confirmar?.value.trim();
+  const nome = form.nome?.value.trim();
+  const role = form.role?.value;
+  const codigo = form.codigoEscola?.value.trim();
 
-    if (senha !== confirmar) {
-      msg.textContent = 'As senhas não conferem!';
-      msg.className = 'text-red-600';
-      return;
-    }
+  if (!email || !email.includes('@')) {
+    msg.textContent = 'Por favor, insira um e-mail válido.';
+    msg.className = 'text-red-600';
+    return;
+  }
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-      const user = userCredential.user;
+  if (senha !== confirmar) {
+    msg.textContent = 'As senhas não conferem!';
+    msg.className = 'text-red-600';
+    return;
+  }
 
-      console.log('Usuário criado com sucesso:', user);
-      msg.textContent = `✅ ${nome} cadastrado com sucesso como ${role}!`;
-      msg.className = 'text-green-600';
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+    const user = userCredential.user;
 
-      form.reset();
-    } catch (error) {
-      console.error('Erro ao criar usuário:', error.message);
-      msg.textContent = 'Erro: ' + error.message;
-      msg.className = 'text-red-600';
-    }
-  });
+    console.log('✅ Usuário criado com sucesso:', user);
+    msg.textContent = `Usuário ${nome || 'sem nome'} cadastrado com sucesso!`;
+    msg.className = 'text-green-600';
+    form.reset();
+  } catch (error) {
+    console.error('Erro ao criar usuário:', error.message);
+    msg.textContent = 'Erro: ' + error.message;
+    msg.className = 'text-red-600';
+  }
+});
+
 });
