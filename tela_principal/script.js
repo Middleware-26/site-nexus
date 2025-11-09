@@ -318,6 +318,10 @@ function fecharMenu() {
   }
 }
 
+window.abrirMenu = abrirMenu;
+window.fecharMenu = fecharMenu;
+
+
 function syncSidebarHeaderHeight() {
   // Sincroniza altura do cabeçalho da sidebar com o principal
   if (!mainHdr || !sbHdr) return;
@@ -356,8 +360,7 @@ function loadTheme() {
 // 
 document.addEventListener('DOMContentLoaded', () => {
    console.log("DOM carregado, iniciando funções");
-  abrirMenu();
-  fecharMenu();
+
   // Inicializa o sistema de chat
   new ChatSystem();
 
@@ -535,6 +538,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === modal) fecharModal();
     });
   }
+
+  
 
   // ======================
   // ABA DE AGENDAMENTOS
@@ -1010,6 +1015,8 @@ if (btnCloseChat) {
 // 
 const fichaModal = document.getElementById('ficha-modal');
 const fecharModalButton = document.getElementById('fechar-modal');
+
+
 
 // Evento de abertura (ícone "chat")
 document.querySelectorAll('button span.material-symbols-outlined').forEach(icon => {
