@@ -1,5 +1,5 @@
-// URL base da sua API (por enquanto rodando localmente)
-const API_BASE = "http://localhost:3001";
+// URL base da sua API
+const API_BASE = "https://backend-site-nexus.onrender.com/";
 
 // Função auxiliar para enviar token (após login)
 function authHeaders() {
@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (caminho.includes("psicologo.html") || caminho.includes("professor.html")) {
     carregarAlunos();
   }
-  
+
   // Inicializa o sistema de chat
   new ChatSystem();
 
