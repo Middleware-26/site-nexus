@@ -1058,15 +1058,38 @@ document.addEventListener('DOMContentLoaded', () => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const email = form.email?.value.trim();
-  const senha = form.senha?.value.trim();
-  const confirmar = form.confirmar?.value.trim();
-  const nome = form.nome?.value.trim();
-  const role = form.role?.value;
-  const codigo = form.codigoEscola?.value.trim();
+  // captura direta por ID (mais confiável em qualquer escopo)
+  const email = document.getElementById('email')?.value?.trim();
+  const senha = document.getElementById('senha')?.value?.trim();
+  const confirmar = document.getElementById('confirmar')?.value?.trim();
+  const nome = document.getElementById('nome')?.value?.trim();
+  const role = document.getElementById('role')?.value;
+  const codigo = document.getElementById('codigoEscola')?.value?.trim();
 
-  if (!email || !email.includes('@')) {
-    msg.textContent = 'Por favor, insira um e-mail válido.';
+  // logs para debugging — verifique no console do navegador
+  console.log('DEBUG: form elements ->', {
+    emailRaw: email,
+    senhaRaw: senha,
+    confirmarRaw: confirmar,
+    nomeRaw: nome,
+    roleRaw: role,
+    codigoRaw: codigo
+  });
+
+  // validações
+  if (!email) {
+    msg.textContent = 'Por favor, informe o e-mail.';
+    msg.className = 'text-red-600';
+    return;
+  }
+  if (!email.includes('@') || !email.includes('.')) {
+    msg.textContent = 'Por favor, insira um e-mail válido (ex: usuario@dominio.com).';
+    msg.className = 'text-red-600';
+    return;
+  }
+
+  if (!senha || senha.length < 6) {
+    msg.textContent = 'A senha deve ter pelo menos 6 caracteres.';
     msg.className = 'text-red-600';
     return;
   }
@@ -1086,10 +1109,11 @@ form.addEventListener('submit', async (e) => {
     msg.className = 'text-green-600';
     form.reset();
   } catch (error) {
-    console.error('Erro ao criar usuário:', error.message);
+    console.error('Erro ao criar usuário:', error.code, error.message);
     msg.textContent = 'Erro: ' + error.message;
     msg.className = 'text-red-600';
   }
 });
+
 
 });

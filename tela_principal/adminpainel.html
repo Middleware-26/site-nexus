@@ -130,26 +130,5 @@
 
 <script type="module" src="script.js"></script>
 
-
-  <script>
-    const form = document.getElementById('formCadastro');
-    const msg = document.getElementById('mensagem');
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const senha = form.senha.value;
-      const confirmar = form.confirmar.value;
-
-      if (senha !== confirmar) {
-        msg.textContent = 'As senhas não conferem!';
-        msg.className = 'text-red-600';
-        return;
-      }
-
-      msg.textContent = 'Usuário cadastrado com sucesso!';
-      msg.className = 'text-green-600';
-      form.reset();
-    });
-  </script>
 </body>
 </html>
