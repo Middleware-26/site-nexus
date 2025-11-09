@@ -1102,3 +1102,63 @@ document.getElementById("formCadastro")?.addEventListener("submit", async (e) =>
   }
 });
 
+// =======================================================
+// 🔥 PERFIL DO USUÁRIO LOGADO (aluno, professor, psicólogo, admin)
+// =======================================================
+
+import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const storage = getStorage(app);
+const authRef = getAuth(app);
+
+const userNameEl = document.getElementById("userName");
+const userAvatarEl = document.getElementById("avatarPreview");
+
+onAuthStateChanged(authRef, async (user) => {
+  if (!user) {
+    console.warn("⚠️ Nenhum usuário logado. Redirecionando...");
+    window.location.href = "../tela_login/login.html";
+    return;
+  }
+
+  // Pega informações do localStorage (definidas no login)
+  const role = localStorage.getItem("role") || "aluno"; // padrão aluno
+  const codigoEscola = localStorage.getItem("codigoEscola");
+  const uid = localStorage.getItem("uid") || user.uid;
+
+  try {
+    const userRef = doc(db, `escolas/${codigoEscola}/${role}s/${uid}`);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const dados = userSnap.data();
+      console.log("✅ Dados do usuário:", dados);
+
+      // Atualiza nome
+      if (userNameEl) userNameEl.textContent = dados.nome || "Usuário";
+
+      // Atualiza imagem de perfil (se existir)
+      if (dados.fotoPerfil) {
+        try {
+          const fotoRef = ref(storage, dados.fotoPerfil);
+          const url = await getDownloadURL(fotoRef);
+          if (userAvatarEl) userAvatarEl.src = url;
+        } catch (error) {
+          console.warn("⚠️ Falha ao carregar imagem:", error);
+        }
+      }
+
+      // Salva em cache
+      localStorage.setItem("nomeUsuario", dados.nome || "");
+      localStorage.setItem("avatarUsuario", userAvatarEl?.src || "");
+    } else {
+      console.warn("⚠️ Documento de usuário não encontrado no Firestore!");
+    }
+  } catch (error) {
+    console.error("Erro ao buscar perfil do usuário:", error);
+  }
+});
+
+
