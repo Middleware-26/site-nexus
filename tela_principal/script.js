@@ -297,22 +297,25 @@ const notifList    = document.getElementById('notifList');
 // FUNÇÕES DE MENU LATERAL
 // 
 function abrirMenu() {
-  if (!sidebar || !mainContent) return;
-
+  // Alterna classes para mostrar/esconder sidebar
   sidebar.classList.toggle('-translate-x-full');
   sidebar.classList.toggle('opacity-0');
   sidebar.classList.toggle('translate-x-0');
   sidebar.classList.toggle('opacity-100');
-
+  
+  // Ajusta margem do conteúdo principal
   const hidden = sidebar.classList.contains('-translate-x-full');
-  mainContent.classList.toggle('ml-64', !hidden);
-  mainContent.classList.toggle('ml-0', hidden);
+  if (mainContent) {
+    mainContent.classList.toggle('ml-64', !hidden);
+    mainContent.classList.toggle('ml-0', hidden);
+  }
 }
 
-// ✅ Função global para fechar o menu (opcional, mas útil)
 function fecharMenu() {
-  if (!sidebar || sidebar.classList.contains('-translate-x-full')) return;
-  abrirMenu(); // reaproveita a lógica de abrirMenu para consistência
+  // Fecha menu usando a função abrirMenu para consistência
+  if (!sidebar.classList.contains('-translate-x-full')) {
+    abrirMenu();
+  }
 }
 
 function syncSidebarHeaderHeight() {
@@ -352,6 +355,9 @@ function loadTheme() {
 // CONFIGURAÇÃO GERAL
 // 
 document.addEventListener('DOMContentLoaded', () => {
+   console.log("DOM carregado, iniciando funções");
+  abrirMenu();
+  fecharMenu();
   // Inicializa o sistema de chat
   new ChatSystem();
 
