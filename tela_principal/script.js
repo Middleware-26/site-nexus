@@ -1077,7 +1077,7 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    // Define subcoleção
+    // Define subcoleção com base no tipo de usuário
     const subcolecao = role.toLowerCase().endsWith("s") 
       ? role.toLowerCase() 
       : role.toLowerCase() + "s";
@@ -1107,6 +1107,7 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha) {
     return false;
   }
 }
+
 
 // =======================================================
 // 🔑 LOGIN E REDIRECIONAMENTO AUTOMÁTICO

@@ -44,7 +44,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     const user = userCredential.user;
 
     // 2️⃣ Busca o usuário em qualquer subcoleção (todas as escolas)
-    const colecoes = ["alunos", "professores", "psicologos", "administradores"]; // Corrigido para usar o nome correto de subcoleções
+    const colecoes = ["alunos", "professores", "psicologos", "administradores"];
     let dadosUsuario = null;
 
     for (const col of colecoes) {
@@ -94,7 +94,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       if (match && match[0]) {
         const url = match[0];
         alert("⚠️ É necessário criar um índice para esta consulta. Vamos abrir o painel do Firebase pra você.");
-        window.open(url, "_blank");
+        window.open(url, "_blank"); // abre automaticamente o link de criação do índice
       } else {
         alert("Erro de índice detectado, mas o link não foi encontrado.");
       }
