@@ -1060,67 +1060,186 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-// =======================
-// 🧩 CADASTRO DE USUÁRIOS POR TIPO
-// =======================
-document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const role = document.getElementById("role").value; // aluno, professor, etc.
-  const codigoEscola = document.getElementById("codigoEscola").value.trim();
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const cpf = document.getElementById("cpf").value.trim();
-  const senha = document.getElementById("senha").value.trim();
-  const confirmar = document.getElementById("confirmar").value.trim();
-  const msg = document.getElementById("mensagem");
-
-  if (!codigoEscola || !role || !nome || !email || !senha) {
-    msg.textContent = "Por favor, preencha todos os campos obrigatórios.";
-    msg.className = "msg erro";
-    return;
-  }
-
-  if (senha !== confirmar) {
-    msg.textContent = "As senhas não conferem!";
-    msg.className = "msg erro";
-    return;
-  }
-
+// =======================================================
+// 🧾 FUNÇÃO DE CADASTRO (Painel do Administrador)
+// =======================================================
+async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha) {
   try {
-    // 🔐 Cria usuário no Authentication
+    // Cria o usuário no Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    // 🔧 Define o nome da subcoleção com base no tipo
-    const subcolecao = role.toLowerCase() + "s"; // aluno -> alunos, professor -> professores etc.
+    // Determina a subcoleção correta
+    let subcolecao = "";
+    switch (role.toLowerCase()) {
+      case "aluno":
+      case "alunos":
+        subcolecao = "alunos";
+        break;
+      case "professor":
+      case "professores":
+        subcolecao = "professores";
+        break;
+      case "psicologo":
+      case "psicologos":
+        subcolecao = "psicologos";
+        break;
+      case "admin":
+      case "administrador":
+      case "administradores":
+        subcolecao = "administradores";
+        break;
+      default:
+        subcolecao = "alunos";
+    }
 
-    // 🏫 Cria o documento dentro da escola e da subcoleção
+    // Salva no Firestore com o tipo e dados
     await setDoc(doc(db, "escolas", codigoEscola, subcolecao, user.uid), {
       nome,
       email,
       cpf,
-      tipo: role,
+      tipo: subcolecao, // ← registra tipo correto
       codigoEscola,
-      criadoEm: new Date().toISOString(),
+      criadoEm: new Date().toISOString()
     });
 
-    msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
-    msg.className = "msg sucesso";
-    e.target.reset();
+    console.log(`✅ Usuário criado: ${nome} (${subcolecao})`);
+
+    return true;
+  } catch (error) {
+    console.error("❌ Erro ao criar usuário:", error);
+    return false;
+  }
+}
+
+// =======================================================
+// 🔥 LOGIN E REDIRECIONAMENTO POR FUNÇÃO
+// =======================================================
+async function loginUsuario(email, senha) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+    const user = userCredential.user;
+    const uid = user.uid;
+
+    // Verifica nas subcoleções o tipo de usuário
+    const colNames = ["alunos", "professores", "psicologos", "administradores"];
+    let dadosUsuario = null;
+    let tipoEncontrado = null;
+    let codigoEscola = null;
+
+    for (const col of colNames) {
+      const escolasSnap = await getDocs(collection(db, "escolas"));
+      for (const escolaDoc of escolasSnap.docs) {
+        const userRef = doc(db, `escolas/${escolaDoc.id}/${col}/${uid}`);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          dadosUsuario = userSnap.data();
+          tipoEncontrado = col;
+          codigoEscola = escolaDoc.id;
+          break;
+        }
+      }
+      if (dadosUsuario) break;
+    }
+
+    if (!dadosUsuario) {
+      alert("Usuário não encontrado no banco de dados.");
+      return;
+    }
+
+    // Salva no localStorage para as próximas páginas
+    localStorage.setItem("uid", uid);
+    localStorage.setItem("role", tipoEncontrado);
+    localStorage.setItem("codigoEscola", codigoEscola);
+    localStorage.setItem("nome", dadosUsuario.nome);
+
+    console.log(`🔐 Login como: ${tipoEncontrado} (${dadosUsuario.nome})`);
+
+    // Redireciona conforme tipo
+    switch (tipoEncontrado) {
+      case "alunos":
+        window.location.href = "/tela_principal/alunos.html";
+        break;
+      case "professores":
+        window.location.href = "/tela_principal/professores.html";
+        break;
+      case "psicologos":
+        window.location.href = "/tela_principal/psicologos.html";
+        break;
+      case "administradores":
+        window.location.href = "/tela_principal/adminpainel.html";
+        break;
+      default:
+        alert("Tipo de usuário desconhecido!");
+    }
 
   } catch (error) {
-    console.error("Erro ao criar usuário:", error);
-    msg.textContent = "Erro: " + error.message;
-    msg.className = "msg erro";
+    console.error("Erro ao fazer login:", error);
+    alert("Erro ao fazer login: " + error.message);
+  }
+}
+
+// =======================================================
+// 👤 CARREGAR PERFIL NA PÁGINA (sidebar, nome, imagem)
+// =======================================================
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+
+  const role = localStorage.getItem("role");
+  const codigoEscola = localStorage.getItem("codigoEscola");
+  const uid = localStorage.getItem("uid");
+
+  if (!role || !codigoEscola) return;
+
+  // Corrige o nome da subcoleção
+  let subcolecao = "";
+  switch (role.toLowerCase()) {
+    case "aluno":
+    case "alunos":
+      subcolecao = "alunos";
+      break;
+    case "professor":
+    case "professores":
+      subcolecao = "professores";
+      break;
+    case "psicologo":
+    case "psicologos":
+      subcolecao = "psicologos";
+      break;
+    case "admin":
+    case "administrador":
+    case "administradores":
+      subcolecao = "administradores";
+      break;
+    default:
+      subcolecao = "alunos";
+  }
+
+  try {
+    const userRef = doc(db, `escolas/${codigoEscola}/${subcolecao}/${uid}`);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      const dados = userSnap.data();
+      const nomeEl = document.getElementById("userName");
+      const avatarEl = document.getElementById("avatarPreview");
+
+      if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
+
+      if (dados.fotoPerfil && avatarEl) {
+        const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
+        avatarEl.src = url;
+      }
+    }
+  } catch (e) {
+    console.error("Erro ao carregar perfil:", e);
   }
 });
 
 // =======================================================
 // 🔥 PERFIL DO USUÁRIO LOGADO (aluno, professor, psicólogo, admin)
 // =======================================================
-const storage = getStorage(app);
 const authRef = getAuth(app);
 
 const userNameEl = document.getElementById("userName");
