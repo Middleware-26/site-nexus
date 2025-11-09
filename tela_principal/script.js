@@ -1105,11 +1105,6 @@ document.getElementById("formCadastro")?.addEventListener("submit", async (e) =>
 // =======================================================
 // 🔥 PERFIL DO USUÁRIO LOGADO (aluno, professor, psicólogo, admin)
 // =======================================================
-
-import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
 const storage = getStorage(app);
 const authRef = getAuth(app);
 
