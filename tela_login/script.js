@@ -1,11 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-  getFirestore, 
-  collectionGroup, 
-  query, 
-  where, 
-  getDocs 
+import {
+  getFirestore,
+  collectionGroup,
+  query,
+  where,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ======================================================
@@ -44,7 +44,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     const user = userCredential.user;
 
     // 2️⃣ Busca o usuário em qualquer subcoleção (todas as escolas)
-    const colecoes = ["alunos", "professores", "psicologos", "admins"];
+    const colecoes = ["alunos", "professores", "psicologos", "administradores"]; // Corrigido para usar o nome correto de subcoleções
     let dadosUsuario = null;
 
     for (const col of colecoes) {
@@ -52,6 +52,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
         dadosUsuario = snapshot.docs[0].data();
+        dadosUsuario.tipo = col; // Salva o tipo de usuário com base na subcoleção
         break;
       }
     }
@@ -65,17 +66,17 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     localStorage.setItem("usuario", JSON.stringify(dadosUsuario));
     alert("Login realizado com sucesso!");
 
-    switch (dadosUsuario.tipo) {
-      case "aluno":
+    switch (dadosUsuario.tipo) {  // Usando o tipo correto
+      case "alunos":
         window.location.href = "../tela_principal/alunos.html";
         break;
-      case "professor":
+      case "professores":
         window.location.href = "../tela_principal/professor.html";
         break;
-      case "psicologo":
+      case "psicologos":
         window.location.href = "../tela_principal/psicologo.html";
         break;
-      case "admin":
+      case "administradores":
         window.location.href = "../tela_principal/adminpainel.html";
         break;
       default:
@@ -93,21 +94,17 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       if (match && match[0]) {
         const url = match[0];
         alert("⚠️ É necessário criar um índice para esta consulta. Vamos abrir o painel do Firebase pra você.");
-        window.open(url, "_blank"); // abre automaticamente o link de criação do índice
+        window.open(url, "_blank");
       } else {
         alert("Erro de índice detectado, mas o link não foi encontrado.");
       }
-    } 
-    else if (error.code === "auth/invalid-email" || error.code === "auth/invalid-credential") {
+    } else if (error.code === "auth/invalid-email" || error.code === "auth/invalid-credential") {
       alert("Email ou senha inválidos.");
-    } 
-    else if (error.code === "auth/user-not-found") {
+    } else if (error.code === "auth/user-not-found") {
       alert("Usuário não encontrado.");
-    } 
-    else if (error.code === "auth/wrong-password") {
+    } else if (error.code === "auth/wrong-password") {
       alert("Senha incorreta.");
-    } 
-    else {
+    } else {
       alert("Erro ao fazer login: " + error.message);
     }
   }
