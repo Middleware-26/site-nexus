@@ -4,8 +4,8 @@
   "description": "Sistema Nexus - Plataforma de comunicação entre psicólogos e professores",
   "main": "api/index.js",
   "scripts": {
-    "start": "node servidor/index.js",
-    "dev": "node servidor/index.js"
+    "start": "node servidor/server.js",
+    "dev": "node servidor/server.js"
   },
   "engines": {
     "node": ">=18.x"
