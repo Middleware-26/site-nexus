@@ -18,27 +18,27 @@
     <div class="container" id="container">
         <!-- Cadastro -->
         <div class="cadastro-container cadastrar">
-            <form id="simpleForm" onsubmit="return validateForm(event)">
+            <form id="registerForm" onsubmit="return validateForm(event)">
                 <div class="logo">
                     <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
                 </div>
                 <h1>Crie sua conta!</h1>
-                <input type="text" id="name" placeholder="Nome" required>
-                <input type="email" id="email" placeholder="Email" required>
-                <input type="password" id="password" placeholder="Senha" required>
+                <input type="text" id="nome" placeholder="Nome" required>
+                <input type="email" id="emailCadastro" placeholder="Email" required>
+                <input type="password" id="senhaCadastro" placeholder="Senha" required>
                 <button type="submit">Registrar-se</button>
             </form>
         </div>
 
         <!-- Login -->
         <div class="login-container logar">
-            <form>
+            <form id="loginForm">
                 <div class="logo">
                     <a href="#"><img src="/logo/espiral sem fundo.png" alt=""></a>
                 </div>
                 <h1>Login</h1>
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Senha" required>
+                <input type="email" id="emailLogin"  placeholder="Email" required>
+                <input type="password" id="senhaLogin" placeholder="Senha" required>
                 <button type="submit">Entrar</button>
                 <a href="#">Esqueceu sua senha?</a>
             </form>
