@@ -23,6 +23,16 @@ const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
+pool.getConnection()
+  .then(conn => {
+    console.log("✅ Conectado ao MySQL com sucesso!");
+    conn.release();
+  })
+  .catch(err => {
+    console.error("❌ Erro ao conectar no MySQL:", err);
+  });
+
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // --- Middleware de autenticação ---
@@ -144,6 +154,16 @@ app.post("/api/alunos", auth, async (req, res) => {
     res.status(500).json({ error: "Erro ao criar aluno" });
   }
 });
+
+app.get("/api/teste-db", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT NOW() AS agora");
+    res.json({ banco: "ok", hora: rows[0].agora });
+  } catch (err) {
+    res.status(500).json({ error: "Erro no banco", detalhes: err.message });
+  }
+});
+
 
 // --- Inicializa o servidor ---
 const port = process.env.PORT || 3001;
