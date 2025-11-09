@@ -1,78 +1,3 @@
-// URL base da sua API
-const API_BASE = "https://backend-site-nexus.onrender.com/api";
-
-// Função auxiliar para enviar token (após login)
-function authHeaders() {
-  const token = localStorage.getItem('token');
-  return token ? { "Authorization": `Bearer ${token}` } : {};
-}
-
-// =========================
-//  Função de Login
-// =========================
-async function fazerLogin() {
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
-  const codigoEscola = document.getElementById("codigoEscola").value;
-
-  const res = await fetch(`${API_BASE}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, senha, codigoEscola })
-  });
-
-  const data = await res.json();
-
-  if (res.ok) {
-    alert("Login realizado com sucesso!");
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("userTipo", data.user.tipo);
-    localStorage.setItem("idEscola", data.user.id_escola);
-    localStorage.setItem("nomeUsuario", data.user.nome);
-
-    // redireciona para a tela certa
-    if (data.user.tipo === "psicologo") {
-      window.location.href = "../tela_principal/psicologo.html";
-    } else if (data.user.tipo === "professor") {
-      window.location.href = "../tela_principal/professor.html";
-    } else {
-      window.location.href = "../tela_principal/alunos.html";
-    }
-  } else {
-    alert(data.error || "Erro ao fazer login");
-  }
-}
-
-// =========================
-//  Listar alunos
-// =========================
-async function carregarAlunos() {
-  const res = await fetch(`${API_BASE}/api/alunos`, {
-    headers: { ...authHeaders() }
-  });
-  if (!res.ok) {
-    console.error("Erro ao carregar alunos:", await res.text());
-    return;
-  }
-
-  const alunos = await res.json();
-  const tabela = document.querySelector("#tabela-alunos tbody");
-  tabela.innerHTML = "";
-
-  alunos.forEach(aluno => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${aluno.nome}</td>
-      <td>${aluno.email}</td>
-      <td>${aluno.foto_url ? `<img src="${aluno.foto_url}" width="40">` : "-"}</td>
-    `;
-    tabela.appendChild(tr);
-  });
-}
-
-
-
-
 // IIFE para aplicar o tema sem flash de tela branca
 (function(){
   // Verifica tema salvo no localStorage
@@ -430,21 +355,6 @@ function loadTheme() {
 // CONFIGURAÇÃO GERAL
 // 
 document.addEventListener('DOMContentLoaded', () => {
-   // Verifica se o usuário está logado
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("Você precisa fazer login primeiro!");
-    window.location.href = "../tela_login/index.html";
-    return;
-  }
-
-  // Detecta qual página está aberta pelo nome do arquivo
-  const caminho = window.location.pathname;
-
-  if (caminho.includes("psicologo.html") || caminho.includes("professor.html")) {
-    carregarAlunos();
-  }
-
   // Inicializa o sistema de chat
   new ChatSystem();
 
@@ -1114,3 +1024,66 @@ if (fecharModalButton) {
     if (fichaModal) fichaModal.classList.add('hidden');
   });
 }
+
+
+// =======================================================
+// 🔥 INTEGRAÇÃO FIREBASE - CADASTRO DE USUÁRIOS ADMIN
+// =======================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
+  authDomain: "nexus-web-c35f1.firebaseapp.com",
+  projectId: "nexus-web-c35f1",
+  storageBucket: "nexus-web-c35f1.firebasestorage.app",
+  messagingSenderId: "387285405125",
+  appId: "1:387285405125:web:96c2d0edb9695b79690fac",
+  measurementId: "G-1E0BGG8323"
+};
+
+// Inicializa o Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// =======================================================
+// 🧩 CADASTRAR USUÁRIO PELO FORMULÁRIO DO ADMIN
+// =======================================================
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('formCadastro');
+  const msg = document.getElementById('mensagem');
+
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = form.email.value.trim();
+    const senha = form.senha.value.trim();
+    const confirmar = form.confirmar.value.trim();
+    const nome = form.nome.value.trim();
+    const role = form.role.value;
+    const codigo = form.codigoEscola.value.trim();
+
+    if (senha !== confirmar) {
+      msg.textContent = 'As senhas não conferem!';
+      msg.className = 'text-red-600';
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+      const user = userCredential.user;
+
+      console.log('Usuário criado com sucesso:', user);
+      msg.textContent = `✅ ${nome} cadastrado com sucesso como ${role}!`;
+      msg.className = 'text-green-600';
+
+      form.reset();
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error.message);
+      msg.textContent = 'Erro: ' + error.message;
+      msg.className = 'text-red-600';
+    }
+  });
+});

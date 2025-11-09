@@ -1,3 +1,27 @@
+// --- Firebase ---
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+
+// Configuração do Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
+  authDomain: "nexus-web-c35f1.firebaseapp.com",
+  projectId: "nexus-web-c35f1",
+  storageBucket: "nexus-web-c35f1.firebasestorage.app",
+  messagingSenderId: "387285405125",
+  appId: "1:387285405125:web:96c2d0edb9695b79690fac",
+  measurementId: "G-1E0BGG8323"
+};
+
+// Inicializa Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// --- Alternância de telas ---
 const container = document.getElementById('container');
 const registerBtn = document.getElementById('register');
 const loginBtn = document.getElementById('login');
@@ -5,44 +29,43 @@ const loginBtn = document.getElementById('login');
 registerBtn.addEventListener('click', () => container.classList.add("active"));
 loginBtn.addEventListener('click', () => container.classList.remove("active"));
 
-// URL da sua API (coloque seu link do Render aqui)
-const API_URL = "https://backend-site-nexus.onrender.com/api";
-
-// === Cadastro ===
+// --- Cadastro ---
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const nome = document.getElementById('nome').value.trim();
     const email = document.getElementById('emailCadastro').value.trim();
     const senha = document.getElementById('senhaCadastro').value.trim();
-    const tipo = document.getElementById('tipoUsuario').value;
+    const tipo = "aluno"; // Você pode pegar de algum input se quiser
 
-    if (!nome || !email || !senha || !tipo) {
+    if (!nome || !email || !senha) {
         alert("Preencha todos os campos!");
         return;
     }
 
     try {
-        const resp = await fetch(`${API_URL}/auth/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome, email, senha, tipo })
+        // Cria usuário no Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+        const user = userCredential.user;
+
+        // Salva dados extras no Firestore
+        await setDoc(doc(db, "usuarios", user.uid), {
+            nome,
+            email,
+            tipo,
+            id_escola: "abc123", // Exemplo, pode alterar conforme necessidade
+            foto_url: "",
         });
 
-        const data = await resp.json();
-        if (resp.ok) {
-            alert("Conta criada com sucesso!");
-            container.classList.remove("active"); // volta pra tela de login
-        } else {
-            alert(data.error || "Erro ao criar conta");
-        }
+        alert("Conta criada com sucesso!");
+        container.classList.remove("active"); // volta pra tela de login
     } catch (err) {
-        alert("Erro de conexão com o servidor");
+        alert(err.message);
         console.error(err);
     }
 });
 
-// === Login ===
+// --- Login ---
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -55,23 +78,25 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     }
 
     try {
-        const resp = await fetch(`${API_URL}/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, senha })
-        });
+        // Login no Firebase Auth
+        const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+        const user = userCredential.user;
 
-        const data = await resp.json();
-        if (resp.ok) {
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("usuario", JSON.stringify(data.user));
-            alert("Login realizado com sucesso!");
-            window.location.href = "alunos.html"; // redireciona para a página dos alunos
-        } else {
-            alert(data.error || "Email ou senha incorretos");
+        // Busca dados extras no Firestore
+        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+        if (!userDoc.exists()) {
+            alert("Usuário não encontrado no banco de dados!");
+            return;
         }
+        const userData = userDoc.data();
+
+        // Salva dados no localStorage
+        localStorage.setItem("usuario", JSON.stringify(userData));
+
+        alert("Login realizado com sucesso!");
+        window.location.href = "alunos.html"; // Redireciona
     } catch (err) {
-        alert("Erro de conexão com o servidor");
+        alert(err.message);
         console.error(err);
     }
 });
