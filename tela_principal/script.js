@@ -1078,8 +1078,8 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha) {
     const user = userCredential.user;
 
     // Define subcoleção
-    const subcolecao = role.toLowerCase().endsWith("s")
-      ? role.toLowerCase()
+    const subcolecao = role.toLowerCase().endsWith("s") 
+      ? role.toLowerCase() 
       : role.toLowerCase() + "s";
 
     // Cria documento no Firestore
@@ -1091,6 +1091,12 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha) {
       codigoEscola,
       criadoEm: new Date().toISOString(),
     });
+
+    // Salva dados no localStorage
+    localStorage.setItem("uid", user.uid);
+    localStorage.setItem("role", subcolecao);
+    localStorage.setItem("codigoEscola", codigoEscola);
+    localStorage.setItem("nomeUsuario", nome);
 
     console.log(`✅ Usuário ${role} criado com sucesso!`);
     alert(`Usuário ${role} criado com sucesso!`);
@@ -1112,11 +1118,9 @@ async function loginUsuario(email, senha) {
     const uid = user.uid;
 
     const tipos = ["alunos", "professores", "psicologos", "administradores"];
-    let dadosUsuario = null,
-      tipoEncontrado = null,
-      codigoEscola = null;
+    let dadosUsuario = null, tipoEncontrado = null, codigoEscola = null;
 
-    // Procura o usuário em todas as escolas e subcoleções
+    // Procura o usuário nas subcoleções de todas as escolas
     const escolasSnap = await getDocs(collection(db, "escolas"));
     for (const escolaDoc of escolasSnap.docs) {
       for (const tipo of tipos) {
@@ -1264,5 +1268,6 @@ document.getElementById("formCadastro")?.addEventListener("submit", async (e) =>
     e.target.reset();
   }
 });
+
 
 
