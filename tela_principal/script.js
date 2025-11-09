@@ -1,5 +1,5 @@
 // URL base da sua API
-const API_BASE = "https://backend-site-nexus.onrender.com/";
+const API_BASE = "https://backend-site-nexus.onrender.com/api";
 
 // Função auxiliar para enviar token (após login)
 function authHeaders() {
