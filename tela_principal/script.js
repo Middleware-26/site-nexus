@@ -1030,8 +1030,23 @@ if (fecharModalButton) {
 // 🔥 INTEGRAÇÃO FIREBASE - CADASTRO DE USUÁRIOS ADMIN
 // =======================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+  getStorage, 
+  ref, 
+  getDownloadURL 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
