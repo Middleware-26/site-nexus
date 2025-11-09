@@ -1030,17 +1030,9 @@ if (fecharModalButton) {
 // 🔥 INTEGRAÇÃO FIREBASE - CADASTRO DE USUÁRIOS ADMIN
 // =======================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-  getFirestore, 
-  doc, 
-  setDoc 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
   authDomain: "nexus-web-c35f1.firebaseapp.com",
@@ -1055,12 +1047,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // =======================
-// 🧩 CADASTRO DE USUÁRIOS
+// 🧩 CADASTRO DE USUÁRIOS POR TIPO
 // =======================
 document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const role = document.getElementById("role").value;
+  const role = document.getElementById("role").value; // aluno, professor, etc.
   const codigoEscola = document.getElementById("codigoEscola").value.trim();
   const nome = document.getElementById("nome").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -1082,23 +1074,27 @@ document.getElementById("formCadastro")?.addEventListener("submit", async (e) =>
   }
 
   try {
-    // Cria o usuário no Authentication
+    // 🔐 Cria usuário no Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    // Cria o documento dentro da subcoleção da escola
-    await setDoc(doc(db, "escolas", codigoEscola, "usuarios", user.uid), {
+    // 🔧 Define o nome da subcoleção com base no tipo
+    const subcolecao = role.toLowerCase() + "s"; // aluno -> alunos, professor -> professores etc.
+
+    // 🏫 Cria o documento dentro da escola e da subcoleção
+    await setDoc(doc(db, "escolas", codigoEscola, subcolecao, user.uid), {
       nome,
       email,
       cpf,
       tipo: role,
       codigoEscola,
-      criadoEm: new Date().toISOString()
+      criadoEm: new Date().toISOString(),
     });
 
-    msg.textContent = "Usuário criado com sucesso!";
+    msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
     msg.className = "msg sucesso";
     e.target.reset();
+
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
     msg.textContent = "Erro: " + error.message;
