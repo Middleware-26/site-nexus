@@ -1,15 +1,18 @@
 # Dependencies
 node_modules/
+servidor/node_modules/
 package-lock.json
 
 # Environment variables
 .env
+servidor/.env
 .env.local
 .env.production
 .env.development
 
 # Vercel
 .vercel
+servidor/.vercel
 
 # Logs
 *.log
@@ -32,7 +35,9 @@ Thumbs.db
 dist/
 build/
 .next/
+servidor/dist/
+servidor/build/
 
-# Sensitive data (tokens, chat IDs)
+# Sensitive data
 config/secrets.js
 secrets.json

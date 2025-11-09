@@ -1,3 +1,78 @@
+// URL base da sua API (por enquanto rodando localmente)
+const API_BASE = "http://localhost:3001";
+
+// Função auxiliar para enviar token (após login)
+function authHeaders() {
+  const token = localStorage.getItem('token');
+  return token ? { "Authorization": `Bearer ${token}` } : {};
+}
+
+// =========================
+//  Função de Login
+// =========================
+async function fazerLogin() {
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+  const codigoEscola = document.getElementById("codigoEscola").value;
+
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, senha, codigoEscola })
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    alert("Login realizado com sucesso!");
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("userTipo", data.user.tipo);
+    localStorage.setItem("idEscola", data.user.id_escola);
+    localStorage.setItem("nomeUsuario", data.user.nome);
+
+    // redireciona para a tela certa
+    if (data.user.tipo === "psicologo") {
+      window.location.href = "../tela_principal/psicologo.html";
+    } else if (data.user.tipo === "professor") {
+      window.location.href = "../tela_principal/professor.html";
+    } else {
+      window.location.href = "../tela_principal/alunos.html";
+    }
+  } else {
+    alert(data.error || "Erro ao fazer login");
+  }
+}
+
+// =========================
+//  Listar alunos
+// =========================
+async function carregarAlunos() {
+  const res = await fetch(`${API_BASE}/api/alunos`, {
+    headers: { ...authHeaders() }
+  });
+  if (!res.ok) {
+    console.error("Erro ao carregar alunos:", await res.text());
+    return;
+  }
+
+  const alunos = await res.json();
+  const tabela = document.querySelector("#tabela-alunos tbody");
+  tabela.innerHTML = "";
+
+  alunos.forEach(aluno => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${aluno.nome}</td>
+      <td>${aluno.email}</td>
+      <td>${aluno.foto_url ? `<img src="${aluno.foto_url}" width="40">` : "-"}</td>
+    `;
+    tabela.appendChild(tr);
+  });
+}
+
+
+
+
 // IIFE para aplicar o tema sem flash de tela branca
 (function(){
   // Verifica tema salvo no localStorage
@@ -355,6 +430,21 @@ function loadTheme() {
 // CONFIGURAÇÃO GERAL
 // 
 document.addEventListener('DOMContentLoaded', () => {
+   // Verifica se o usuário está logado
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Você precisa fazer login primeiro!");
+    window.location.href = "../tela_login/index.html";
+    return;
+  }
+
+  // Detecta qual página está aberta pelo nome do arquivo
+  const caminho = window.location.pathname;
+
+  if (caminho.includes("psicologo.html") || caminho.includes("professor.html")) {
+    carregarAlunos();
+  }
+  
   // Inicializa o sistema de chat
   new ChatSystem();
 
