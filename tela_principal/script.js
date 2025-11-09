@@ -1030,8 +1030,17 @@ if (fecharModalButton) {
 // 🔥 INTEGRAÇÃO FIREBASE - CADASTRO DE USUÁRIOS ADMIN
 // =======================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
   authDomain: "nexus-web-c35f1.firebaseapp.com",
@@ -1039,81 +1048,61 @@ const firebaseConfig = {
   storageBucket: "nexus-web-c35f1.firebasestorage.app",
   messagingSenderId: "387285405125",
   appId: "1:387285405125:web:96c2d0edb9695b79690fac",
-  measurementId: "G-1E0BGG8323"
 };
 
-// Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-// =======================================================
-// 🧩 CADASTRAR USUÁRIO PELO FORMULÁRIO DO ADMIN
-// =======================================================
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('formCadastro');
-  const msg = document.getElementById('mensagem');
-
-  if (!form) return;
-
-form.addEventListener('submit', async (e) => {
+// =======================
+// 🧩 CADASTRO DE USUÁRIOS
+// =======================
+document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // captura direta por ID (mais confiável em qualquer escopo)
-  const email = document.getElementById('email')?.value?.trim();
-  const senha = document.getElementById('senha')?.value?.trim();
-  const confirmar = document.getElementById('confirmar')?.value?.trim();
-  const nome = document.getElementById('nome')?.value?.trim();
-  const role = document.getElementById('role')?.value;
-  const codigo = document.getElementById('codigoEscola')?.value?.trim();
+  const role = document.getElementById("role").value;
+  const codigoEscola = document.getElementById("codigoEscola").value.trim();
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const cpf = document.getElementById("cpf").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+  const confirmar = document.getElementById("confirmar").value.trim();
+  const msg = document.getElementById("mensagem");
 
-  // logs para debugging — verifique no console do navegador
-  console.log('DEBUG: form elements ->', {
-    emailRaw: email,
-    senhaRaw: senha,
-    confirmarRaw: confirmar,
-    nomeRaw: nome,
-    roleRaw: role,
-    codigoRaw: codigo
-  });
-
-  // validações
-  if (!email) {
-    msg.textContent = 'Por favor, informe o e-mail.';
-    msg.className = 'text-red-600';
-    return;
-  }
-  if (!email.includes('@') || !email.includes('.')) {
-    msg.textContent = 'Por favor, insira um e-mail válido (ex: usuario@dominio.com).';
-    msg.className = 'text-red-600';
-    return;
-  }
-
-  if (!senha || senha.length < 6) {
-    msg.textContent = 'A senha deve ter pelo menos 6 caracteres.';
-    msg.className = 'text-red-600';
+  if (!codigoEscola || !role || !nome || !email || !senha) {
+    msg.textContent = "Por favor, preencha todos os campos obrigatórios.";
+    msg.className = "msg erro";
     return;
   }
 
   if (senha !== confirmar) {
-    msg.textContent = 'As senhas não conferem!';
-    msg.className = 'text-red-600';
+    msg.textContent = "As senhas não conferem!";
+    msg.className = "msg erro";
     return;
   }
 
   try {
+    // Cria o usuário no Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    console.log('✅ Usuário criado com sucesso:', user);
-    msg.textContent = `Usuário ${nome || 'sem nome'} cadastrado com sucesso!`;
-    msg.className = 'text-green-600';
-    form.reset();
+    // Cria o documento dentro da subcoleção da escola
+    await setDoc(doc(db, "escolas", codigoEscola, "usuarios", user.uid), {
+      nome,
+      email,
+      cpf,
+      tipo: role,
+      codigoEscola,
+      criadoEm: new Date().toISOString()
+    });
+
+    msg.textContent = "Usuário criado com sucesso!";
+    msg.className = "msg sucesso";
+    e.target.reset();
   } catch (error) {
-    console.error('Erro ao criar usuário:', error.code, error.message);
-    msg.textContent = 'Erro: ' + error.message;
-    msg.className = 'text-red-600';
+    console.error("Erro ao criar usuário:", error);
+    msg.textContent = "Erro: " + error.message;
+    msg.className = "msg erro";
   }
 });
 
-
-});
