@@ -1027,27 +1027,33 @@ if (fecharModalButton) {
 
 
 // =======================================================
-// 🔥 INTEGRAÇÃO FIREBASE - CADASTRO DE USUÁRIOS ADMIN
+// 🔥 INTEGRAÇÃO FIREBASE - NEXUS
 // =======================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  onAuthStateChanged 
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-  getFirestore, 
-  doc, 
-  setDoc, 
-  getDoc 
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  collection,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { 
-  getStorage, 
-  ref, 
-  getDownloadURL 
+import {
+  getStorage,
+  ref,
+  getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-
+// =======================================================
+// ⚙️ CONFIGURAÇÃO DO FIREBASE
+// =======================================================
 const firebaseConfig = {
   apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
   authDomain: "nexus-web-c35f1.firebaseapp.com",
@@ -1063,59 +1069,41 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 // =======================================================
-// 🧾 FUNÇÃO DE CADASTRO (Painel do Administrador)
+// 🧾 CADASTRO PELO ADMINISTRADOR
 // =======================================================
 async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha) {
   try {
-    // Cria o usuário no Auth
+    // Cria usuário no Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    // Determina a subcoleção correta
-    let subcolecao = "";
-    switch (role.toLowerCase()) {
-      case "aluno":
-      case "alunos":
-        subcolecao = "alunos";
-        break;
-      case "professor":
-      case "professores":
-        subcolecao = "professores";
-        break;
-      case "psicologo":
-      case "psicologos":
-        subcolecao = "psicologos";
-        break;
-      case "admin":
-      case "administrador":
-      case "administradores":
-        subcolecao = "administradores";
-        break;
-      default:
-        subcolecao = "alunos";
-    }
+    // Define subcoleção
+    const subcolecao = role.toLowerCase().endsWith("s")
+      ? role.toLowerCase()
+      : role.toLowerCase() + "s";
 
-    // Salva no Firestore com o tipo e dados
+    // Cria documento no Firestore
     await setDoc(doc(db, "escolas", codigoEscola, subcolecao, user.uid), {
       nome,
       email,
       cpf,
-      tipo: subcolecao, // ← registra tipo correto
+      tipo: subcolecao,
       codigoEscola,
-      criadoEm: new Date().toISOString()
+      criadoEm: new Date().toISOString(),
     });
 
-    console.log(`✅ Usuário criado: ${nome} (${subcolecao})`);
-
+    console.log(`✅ Usuário ${role} criado com sucesso!`);
+    alert(`Usuário ${role} criado com sucesso!`);
     return true;
   } catch (error) {
     console.error("❌ Erro ao criar usuário:", error);
+    alert("Erro ao criar usuário: " + error.message);
     return false;
   }
 }
 
 // =======================================================
-// 🔥 LOGIN E REDIRECIONAMENTO POR FUNÇÃO
+// 🔑 LOGIN E REDIRECIONAMENTO AUTOMÁTICO
 // =======================================================
 async function loginUsuario(email, senha) {
   try {
@@ -1123,20 +1111,20 @@ async function loginUsuario(email, senha) {
     const user = userCredential.user;
     const uid = user.uid;
 
-    // Verifica nas subcoleções o tipo de usuário
-    const colNames = ["alunos", "professores", "psicologos", "administradores"];
-    let dadosUsuario = null;
-    let tipoEncontrado = null;
-    let codigoEscola = null;
+    const tipos = ["alunos", "professores", "psicologos", "administradores"];
+    let dadosUsuario = null,
+      tipoEncontrado = null,
+      codigoEscola = null;
 
-    for (const col of colNames) {
-      const escolasSnap = await getDocs(collection(db, "escolas"));
-      for (const escolaDoc of escolasSnap.docs) {
-        const userRef = doc(db, `escolas/${escolaDoc.id}/${col}/${uid}`);
+    // Procura o usuário em todas as escolas e subcoleções
+    const escolasSnap = await getDocs(collection(db, "escolas"));
+    for (const escolaDoc of escolasSnap.docs) {
+      for (const tipo of tipos) {
+        const userRef = doc(db, `escolas/${escolaDoc.id}/${tipo}/${uid}`);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           dadosUsuario = userSnap.data();
-          tipoEncontrado = col;
+          tipoEncontrado = tipo;
           codigoEscola = escolaDoc.id;
           break;
         }
@@ -1145,28 +1133,28 @@ async function loginUsuario(email, senha) {
     }
 
     if (!dadosUsuario) {
-      alert("Usuário não encontrado no banco de dados.");
+      alert("Usuário não encontrado no banco de dados!");
       return;
     }
 
-    // Salva no localStorage para as próximas páginas
+    // Salva dados no localStorage
     localStorage.setItem("uid", uid);
     localStorage.setItem("role", tipoEncontrado);
     localStorage.setItem("codigoEscola", codigoEscola);
-    localStorage.setItem("nome", dadosUsuario.nome);
+    localStorage.setItem("nomeUsuario", dadosUsuario.nome);
 
-    console.log(`🔐 Login como: ${tipoEncontrado} (${dadosUsuario.nome})`);
+    console.log(`🔐 Login como ${tipoEncontrado} - ${dadosUsuario.nome}`);
 
-    // Redireciona conforme tipo
+    // Redireciona conforme o tipo de usuário
     switch (tipoEncontrado) {
       case "alunos":
         window.location.href = "/tela_principal/alunos.html";
         break;
       case "professores":
-        window.location.href = "/tela_principal/professores.html";
+        window.location.href = "/tela_principal/professor.html";
         break;
       case "psicologos":
-        window.location.href = "/tela_principal/psicologos.html";
+        window.location.href = "/tela_principal/psicologo.html";
         break;
       case "administradores":
         window.location.href = "/tela_principal/adminpainel.html";
@@ -1174,7 +1162,6 @@ async function loginUsuario(email, senha) {
       default:
         alert("Tipo de usuário desconhecido!");
     }
-
   } catch (error) {
     console.error("Erro ao fazer login:", error);
     alert("Erro ao fazer login: " + error.message);
@@ -1182,111 +1169,99 @@ async function loginUsuario(email, senha) {
 }
 
 // =======================================================
-// 👤 CARREGAR PERFIL NA PÁGINA (sidebar, nome, imagem)
+// 👤 CARREGAR PERFIL DO USUÁRIO LOGADO
 // =======================================================
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
 
   const role = localStorage.getItem("role");
   const codigoEscola = localStorage.getItem("codigoEscola");
-  const uid = localStorage.getItem("uid");
+  const uid = user.uid;
 
   if (!role || !codigoEscola) return;
 
-  // Corrige o nome da subcoleção
-  let subcolecao = "";
-  switch (role.toLowerCase()) {
-    case "aluno":
-    case "alunos":
-      subcolecao = "alunos";
-      break;
-    case "professor":
-    case "professores":
-      subcolecao = "professores";
-      break;
-    case "psicologo":
-    case "psicologos":
-      subcolecao = "psicologos";
-      break;
-    case "admin":
-    case "administrador":
-    case "administradores":
-      subcolecao = "administradores";
-      break;
-    default:
-      subcolecao = "alunos";
-  }
-
   try {
-    const userRef = doc(db, `escolas/${codigoEscola}/${subcolecao}/${uid}`);
+    const userRef = doc(db, `escolas/${codigoEscola}/${role}/${uid}`);
     const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-      const dados = userSnap.data();
-      const nomeEl = document.getElementById("userName");
-      const avatarEl = document.getElementById("avatarPreview");
 
-      if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
-
-      if (dados.fotoPerfil && avatarEl) {
-        const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
-        avatarEl.src = url;
-      }
+    if (!userSnap.exists()) {
+      console.warn("⚠️ Documento de usuário não encontrado no Firestore!");
+      return;
     }
-  } catch (e) {
-    console.error("Erro ao carregar perfil:", e);
+
+    const dados = userSnap.data();
+    const nomeEl = document.getElementById("userName");
+    const avatarEl = document.getElementById("avatarPreview");
+
+    if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
+
+    if (dados.fotoPerfil && avatarEl) {
+      const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
+      avatarEl.src = url;
+    }
+  } catch (err) {
+    console.error("Erro ao carregar perfil:", err);
   }
 });
 
 // =======================================================
-// 🔥 PERFIL DO USUÁRIO LOGADO (aluno, professor, psicólogo, admin)
+// 🚪 LOGOUT (SAIR DA CONTA)
 // =======================================================
-const authRef = getAuth(app);
+async function logoutUsuario() {
+  try {
+    await signOut(auth);
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = "/tela_login/login.html";
+  } catch (error) {
+    console.error("Erro ao sair:", error);
+    alert("Erro ao sair da conta: " + error.message);
+  }
+}
 
-const userNameEl = document.getElementById("userName");
-const userAvatarEl = document.getElementById("avatarPreview");
+// =======================================================
+// 🧩 BOTÃO DE LOGOUT FUNCIONAL NA SIDEBAR
+// =======================================================
+const btnLogout = document.querySelector(".logout-btn");
+if (btnLogout) {
+  btnLogout.addEventListener("click", (e) => {
+    e.preventDefault();
+    logoutUsuario();
+  });
+}
 
-onAuthStateChanged(authRef, async (user) => {
-  if (!user) {
-    console.warn("⚠️ Nenhum usuário logado. Redirecionando...");
-    window.location.href = "../tela_login/login.html";
+// =======================================================
+// 🧩 FORM DE CADASTRO (PAINEL ADMIN)
+// =======================================================
+document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const role = document.getElementById("role").value;
+  const codigoEscola = document.getElementById("codigoEscola").value.trim();
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const cpf = document.getElementById("cpf").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+  const confirmar = document.getElementById("confirmar").value.trim();
+  const msg = document.getElementById("mensagem");
+
+  if (!role || !codigoEscola || !nome || !email || !senha) {
+    msg.textContent = "Preencha todos os campos obrigatórios.";
+    msg.className = "msg erro";
     return;
   }
 
-  // Pega informações do localStorage (definidas no login)
-  const role = localStorage.getItem("role") || "aluno"; // padrão aluno
-  const codigoEscola = localStorage.getItem("codigoEscola");
-  const uid = localStorage.getItem("uid") || user.uid;
+  if (senha !== confirmar) {
+    msg.textContent = "As senhas não conferem!";
+    msg.className = "msg erro";
+    return;
+  }
 
-  try {
-    const userRef = doc(db, `escolas/${codigoEscola}/${role}s/${uid}`);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      const dados = userSnap.data();
-      console.log("✅ Dados do usuário:", dados);
-
-      // Atualiza nome
-      if (userNameEl) userNameEl.textContent = dados.nome || "Usuário";
-
-      // Atualiza imagem de perfil (se existir)
-      if (dados.fotoPerfil) {
-        try {
-          const fotoRef = ref(storage, dados.fotoPerfil);
-          const url = await getDownloadURL(fotoRef);
-          if (userAvatarEl) userAvatarEl.src = url;
-        } catch (error) {
-          console.warn("⚠️ Falha ao carregar imagem:", error);
-        }
-      }
-
-      // Salva em cache
-      localStorage.setItem("nomeUsuario", dados.nome || "");
-      localStorage.setItem("avatarUsuario", userAvatarEl?.src || "");
-    } else {
-      console.warn("⚠️ Documento de usuário não encontrado no Firestore!");
-    }
-  } catch (error) {
-    console.error("Erro ao buscar perfil do usuário:", error);
+  const sucesso = await cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha);
+  if (sucesso) {
+    msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
+    msg.className = "msg sucesso";
+    e.target.reset();
   }
 });
 
