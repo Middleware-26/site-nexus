@@ -1182,6 +1182,11 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
 // =======================================================
 // 🧩 FORM DE CADASTRO - EVENTO DE SUBMISSÃO
 // =======================================================
+if (window.formCadastroInicializado) {
+  console.log("⚠️ Script já foi inicializado, ignorando duplicata.");
+} else {
+ 
+
 document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -1223,6 +1228,7 @@ document.getElementById("formCadastro")?.addEventListener("submit", async (e) =>
     msg.className = "text-red-600";
   }
 });
+}
 
 
 // =======================================================
