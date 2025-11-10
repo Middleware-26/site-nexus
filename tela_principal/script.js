@@ -1182,6 +1182,82 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
 // =======================================================
 // 🧩 FORM DE CADASTRO - EVENTO DE SUBMISSÃO
 // =======================================================
+// Proteção: evita instalar o listener mais de uma vez
+if (window.formCadastroInicializado) {
+  console.log("⚠️ formCadastro já inicializado — ignorando duplicata.");
+} else {
+  window.formCadastroInicializado = true;
+
+  // flag global para evitar chamadas paralelas
+  let cadastroEmProgresso = false;
+
+  const form = document.getElementById("formCadastro");
+  const submitBtn = form?.querySelector('button[type="submit"]');
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // se já estiver processando, ignora
+    if (cadastroEmProgresso) {
+      console.log("⚠️ Cadastro já em progresso — ignorando novo submit.");
+      return;
+    }
+
+    cadastroEmProgresso = true;
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      console.log("🧠 Evento de cadastro disparado (único).");
+
+      const role = document.getElementById("role").value.trim();
+      const codigoEscola = document.getElementById("codigoEscola").value.trim();
+      const nome = document.getElementById("nome").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const cpf = document.getElementById("cpf").value.trim();
+      const telefone = document.getElementById("telefone").value.trim();
+      const senha = document.getElementById("senha").value.trim();
+      const confirmar = document.getElementById("confirmar").value.trim();
+      const file = document.getElementById("fotoPerfil").files[0];
+      const msg = document.getElementById("mensagem");
+
+      // logs de debug (remova em produção)
+      console.log("🧩 Dados enviados para o cadastro:", { role, codigoEscola, nome, email, cpf, telefone, senha, file });
+
+      if (!role || !codigoEscola || !nome || !email || !senha) {
+        msg.textContent = "⚠️ Preencha todos os campos obrigatórios.";
+        msg.className = "text-red-600";
+        return;
+      }
+
+      if (senha !== confirmar) {
+        msg.textContent = "⚠️ As senhas não conferem!";
+        msg.className = "text-red-600";
+        return;
+      }
+
+      msg.textContent = "⏳ Criando usuário...";
+      msg.className = "text-blue-600";
+
+      const sucesso = await cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file);
+
+      if (sucesso) {
+        msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
+        msg.className = "text-green-600";
+        e.target.reset();
+      } else {
+        msg.textContent = "❌ Erro ao cadastrar usuário.";
+        msg.className = "text-red-600";
+      }
+
+    } catch (err) {
+      console.error("Erro no handler de submit:", err);
+    } finally {
+      cadastroEmProgresso = false;
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+}
+
 if (window.formCadastroInicializado) {
   console.log("⚠️ Script já foi inicializado, ignorando duplicata.");
 } else {
