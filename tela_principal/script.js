@@ -1059,6 +1059,7 @@ import {
   getStorage,
   ref,
   getDownloadURL,
+  uploadBytes
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // =======================================================
@@ -1068,9 +1069,10 @@ const firebaseConfig = {
   apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
   authDomain: "nexus-web-c35f1.firebaseapp.com",
   projectId: "nexus-web-c35f1",
-  storageBucket: "nexus-web-c35f1.firebasestorage.app",
+  storageBucket: "nexus-web-c35f1.appspot.com",
   messagingSenderId: "387285405125",
   appId: "1:387285405125:web:96c2d0edb9695b79690fac",
+  measurementId: "G-1E0BGG8323"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -1078,50 +1080,155 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// 👉 Torna acessível no console para testes
+window.auth = auth;
+window.db = db;
+
 // =======================================================
 // 🧾 CADASTRO PELO ADMINISTRADOR
 // =======================================================
-async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha) {
+async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file) {
   try {
-    // Cria usuário no Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-    const user = userCredential.user;
+    console.log("📦 Dados recebidos para cadastro:", { email, senha });
 
-    // Define subcoleção com base no tipo de usuário
-    const subcolecao = role.toLowerCase().endsWith("s") 
-      ? role.toLowerCase() 
+    // Cria app secundário (se ainda não existir)
+    let secondaryApp;
+    try {
+      secondaryApp = initializeApp(firebaseConfig, "Secondary");
+    } catch (err) {
+      secondaryApp = getApp("Secondary");
+    }
+
+    const secondaryAuth = getAuth(secondaryApp);
+
+    console.log("📡 App secundário:", secondaryApp.name);
+
+    // Cria o usuário no app secundário
+    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, senha);
+    const user = userCredential.user;
+    const uid = user.uid;
+
+    console.log("✅ Usuário criado no Auth:", uid);
+
+    // Subcoleção (ex: alunos, professores etc.)
+    const subcolecao = role.toLowerCase().endsWith("s")
+      ? role.toLowerCase()
       : role.toLowerCase() + "s";
 
-    // Cria documento no Firestore
-    await setDoc(doc(db, "escolas", codigoEscola, subcolecao, user.uid), {
+    // Cria a escola, se não existir
+    const escolaRef = doc(db, "escolas", codigoEscola);
+    const escolaSnap = await getDoc(escolaRef);
+    if (!escolaSnap.exists()) {
+      await setDoc(escolaRef, {
+        nome: `Escola ${codigoEscola}`,
+        criadoEm: new Date().toISOString(),
+      });
+      console.log(`🏫 Nova escola criada: ${codigoEscola}`);
+    }
+
+    // Upload da foto de perfil
+    let fotoPerfilURL = "";
+    if (file) {
+      const storageRef = ref(storage, `usuarios/${uid}/fotoPerfil.jpg`);
+      await uploadBytes(storageRef, file);
+      fotoPerfilURL = await getDownloadURL(storageRef);
+    }
+
+    // Salva dados no Firestore
+    await setDoc(doc(db, "escolas", codigoEscola, subcolecao, uid), {
+      uid,
       nome,
       email,
       cpf,
-      tipo: subcolecao,
+      telefone: telefone || "",
+      tipo: role,
       codigoEscola,
+      ativo: true,
       criadoEm: new Date().toISOString(),
+      fotoPerfil: fotoPerfilURL || "",
     });
 
-    // Salva dados no localStorage
-    localStorage.setItem("uid", user.uid);
-    localStorage.setItem("role", subcolecao);
-    localStorage.setItem("codigoEscola", codigoEscola);
-    localStorage.setItem("nomeUsuario", nome);
+    await setDoc(doc(db, "usuarios", uid), {
+      uid,
+      nome,
+      email,
+      tipo: role,
+      codigoEscola,
+      referenciaFirestore: `escolas/${codigoEscola}/${subcolecao}/${uid}`,
+    });
 
-    console.log(`✅ Usuário ${role} criado com sucesso!`);
-    alert(`Usuário ${role} criado com sucesso!`);
+    // Sai do app secundário para não interferir
+    await signOut(secondaryAuth);
+
+    alert(`✅ ${role} cadastrado com sucesso na escola ${codigoEscola}!`);
     return true;
+
   } catch (error) {
     console.error("❌ Erro ao criar usuário:", error);
-    alert("Erro ao criar usuário: " + error.message);
+    if (error.code === "auth/email-already-in-use") {
+      alert("⚠️ Este e-mail já está cadastrado. Use outro ou redefina a senha.");
+    } else if (error.code === "auth/missing-password") {
+      alert("⚠️ A senha não foi recebida pelo Firebase. Isso pode ocorrer se houver conflito de apps.");
+    } else {
+      alert("❌ Erro ao criar usuário: " + error.message);
+    }
     return false;
   }
 }
 
 
+
+
+// =======================================================
+// 🧩 FORM DE CADASTRO - EVENTO DE SUBMISSÃO
+// =======================================================
+document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const role = document.getElementById("role").value.trim();
+  const codigoEscola = document.getElementById("codigoEscola").value.trim();
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const cpf = document.getElementById("cpf").value.trim();
+  const telefone = document.getElementById("telefone").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+  const confirmar = document.getElementById("confirmar").value.trim();
+  const file = document.getElementById("fotoPerfil").files[0];
+  const msg = document.getElementById("mensagem");
+
+  if (!role || !codigoEscola || !nome || !email || !senha) {
+    msg.textContent = "⚠️ Preencha todos os campos obrigatórios.";
+    msg.className = "text-red-600";
+    return;
+  }
+
+  if (senha !== confirmar) {
+    msg.textContent = "⚠️ As senhas não conferem!";
+    msg.className = "text-red-600";
+    return;
+  }
+
+  msg.textContent = "⏳ Criando usuário...";
+  msg.className = "text-blue-600";
+
+  const sucesso = await cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file);
+  
+
+  if (sucesso) {
+    msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
+    msg.className = "text-green-600";
+    e.target.reset();
+  } else {
+    msg.textContent = "❌ Erro ao cadastrar usuário.";
+    msg.className = "text-red-600";
+  }
+});
+
+
 // =======================================================
 // 🔑 LOGIN E REDIRECIONAMENTO AUTOMÁTICO
 // =======================================================
+
 async function loginUsuario(email, senha) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
@@ -1152,27 +1259,21 @@ async function loginUsuario(email, senha) {
       return;
     }
 
-    // Salva dados no localStorage
-    localStorage.setItem("uid", uid);
-    localStorage.setItem("role", tipoEncontrado);
-    localStorage.setItem("codigoEscola", codigoEscola);
-    localStorage.setItem("nomeUsuario", dadosUsuario.nome);
-
     console.log(`🔐 Login como ${tipoEncontrado} - ${dadosUsuario.nome}`);
 
     // Redireciona conforme o tipo de usuário
     switch (tipoEncontrado) {
       case "alunos":
-        window.location.href = "/tela_principal/alunos.html";
+        window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
         break;
       case "professores":
-        window.location.href = "/tela_principal/professor.html";
+        window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
         break;
       case "psicologos":
-        window.location.href = "/tela_principal/psicologo.html";
+        window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
         break;
       case "administradores":
-        window.location.href = "/tela_principal/adminpainel.html";
+        window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
         break;
       default:
         alert("Tipo de usuário desconhecido!");
@@ -1183,17 +1284,27 @@ async function loginUsuario(email, senha) {
   }
 }
 
+
 // =======================================================
 // 👤 CARREGAR PERFIL DO USUÁRIO LOGADO
 // =======================================================
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return;
 
-  const role = localStorage.getItem("role");
-  const codigoEscola = localStorage.getItem("codigoEscola");
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "/tela_login/login.html";
+    return;
+  }
+
+  // Pega dados da URL (ex: ?escola=123&role=psicologos)
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get("role");
+  const codigoEscola = params.get("escola");
   const uid = user.uid;
 
-  if (!role || !codigoEscola) return;
+  if (!role || !codigoEscola) {
+    console.warn("⚠️ Parâmetros da URL ausentes!");
+    return;
+  }
 
   try {
     const userRef = doc(db, `escolas/${codigoEscola}/${role}/${uid}`);
@@ -1206,9 +1317,11 @@ onAuthStateChanged(auth, async (user) => {
 
     const dados = userSnap.data();
     const nomeEl = document.getElementById("userName");
+    const colEl = document.querySelector("#sidebar p:nth-of-type(3)");
     const avatarEl = document.getElementById("avatarPreview");
 
     if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
+    if (colEl) colEl.textContent = `Colégio: ${dados.codigoEscola || "Não informado"}`;
 
     if (dados.fotoPerfil && avatarEl) {
       const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
@@ -1219,13 +1332,13 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+
 // =======================================================
 // 🚪 LOGOUT (SAIR DA CONTA)
 // =======================================================
 async function logoutUsuario() {
   try {
     await signOut(auth);
-    localStorage.clear();
     sessionStorage.clear();
     window.location.href = "/tela_login/login.html";
   } catch (error) {

@@ -103,23 +103,53 @@
           <option value="admin">Administrador</option>
         </select>
 
-        <label class="font-medium">Código da Escola:</label>
-        <input id="codigoEscola" name="codigoEscola" type="text" class="p-2 border rounded-lg dark:bg-gray-700" required>
+              <!-- Código da escola -->
+      <div>
+        <label for="codigoEscola" class="block font-medium text-gray-700">Código da Escola</label>
+        <input id="codigoEscola" type="text" placeholder="Ex: ABC123" required class="w-full border p-2 rounded" />
+      </div>
 
-        <label class="font-medium">Nome Completo:</label>
-        <input id="nome" name="nome" type="text" class="p-2 border rounded-lg dark:bg-gray-700" required>
+      <!-- Nome -->
+      <div>
+        <label for="nome" class="block font-medium text-gray-700">Nome completo</label>
+        <input id="nome" type="text" placeholder="Digite o nome" required class="w-full border p-2 rounded" />
+      </div>
 
-        <label class="font-medium">E-mail:</label>
-        <input id="email" name="email" type="email" class="p-2 border rounded-lg dark:bg-gray-700" required>
+      <!-- E-mail -->
+      <div>
+        <label for="email" class="block font-medium text-gray-700">E-mail</label>
+        <input id="email" type="email" placeholder="Digite o e-mail" required class="w-full border p-2 rounded" />
+      </div>
 
-        <label class="font-medium">CPF (opcional):</label>
-        <input id="cpf" name="cpf" type="text" class="p-2 border rounded-lg dark:bg-gray-700">
+      <!-- CPF -->
+      <div>
+        <label for="cpf" class="block font-medium text-gray-700">CPF</label>
+        <input id="cpf" type="text" placeholder="Digite o CPF" required class="w-full border p-2 rounded" />
+      </div>
 
-        <label class="font-medium">Senha:</label>
-        <input id="senha" name="senha" type="password" class="p-2 border rounded-lg dark:bg-gray-700" required>
+      <!-- Telefone -->
+      <div>
+        <label for="telefone" class="block font-medium text-gray-700">Telefone</label>
+        <input id="telefone" type="text" placeholder="(00) 00000-0000" class="w-full border p-2 rounded" />
+      </div>
 
-        <label class="font-medium">Confirmar Senha:</label>
-        <input id="confirmar" name="confirmar" type="password" class="p-2 border rounded-lg dark:bg-gray-700" required>
+      <!-- Foto de perfil -->
+      <div>
+        <label for="fotoPerfil" class="block font-medium text-gray-700">Foto de Perfil (opcional)</label>
+        <input id="fotoPerfil" type="file" accept="image/*" class="w-full border p-2 rounded" />
+      </div>
+
+      <!-- Senha -->
+      <div>
+        <label for="senha" class="block font-medium text-gray-700">Senha</label>
+        <input id="senha" type="password" placeholder="Digite a senha" required class="w-full border p-2 rounded" />
+      </div>
+
+      <!-- Confirmar senha -->
+      <div>
+        <label for="confirmar" class="block font-medium text-gray-700">Confirmar senha</label>
+        <input id="confirmar" type="password" placeholder="Confirme a senha" required class="w-full border p-2 rounded" />
+      </div>
 
         <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 rounded-lg transition">Criar Conta</button>
         <div id="mensagem" class="text-center mt-2 font-medium"></div>
