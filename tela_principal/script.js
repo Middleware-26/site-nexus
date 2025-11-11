@@ -1036,25 +1036,32 @@ if (fecharModalButton) {
 }
 
 
-// =======================================================
-// 🔥 INTEGRAÇÃO FIREBASE - NEXUS
-// =======================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+// ----------------------
+// IMPORTS (substitua os seus imports atuais por estes)
+// ----------------------
+import {
+  initializeApp,
+  getApp,
+  getApps,
+  deleteApp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
 import {
   getFirestore,
   doc,
   setDoc,
   getDoc,
   getDocs,
-  collection,
+  collection
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 import {
   getStorage,
   ref,
@@ -1062,11 +1069,11 @@ import {
   uploadBytes
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-// =======================================================
-// ⚙️ CONFIGURAÇÃO DO FIREBASE
-// =======================================================
+// ----------------------
+// Firebase config (use sua config padrão)
+// ----------------------
 const firebaseConfig = {
-  apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
+  apiKey: "...", // mantenha seu valor
   authDomain: "nexus-web-c35f1.firebaseapp.com",
   projectId: "nexus-web-c35f1",
   storageBucket: "nexus-web-c35f1.appspot.com",
@@ -1080,23 +1087,24 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// 👉 Torna acessível no console para testes
 window.auth = auth;
 window.db = db;
 
-// =======================================================
-// 🧾 CADASTRO PELO ADMINISTRADOR
-// =======================================================
+// ----------------------
+// Função cadastrarUsuario (corrigida, usa getApps() para checar app secundário)
+// ----------------------
 async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file) {
   try {
     console.log("📦 Dados recebidos para cadastro:", { email, senha });
 
-    // Cria app secundário (se ainda não existir)
+    // Cria/obtém app secundário com checagem segura
     let secondaryApp;
-    try {
-      secondaryApp = initializeApp(firebaseConfig, "Secondary");
-    } catch (err) {
+    const apps = getApps(); // retorna array de apps inicializados
+    const existe = apps.some(a => a.name === "Secondary");
+    if (existe) {
       secondaryApp = getApp("Secondary");
+    } else {
+      secondaryApp = initializeApp(firebaseConfig, "Secondary");
     }
 
     const secondaryAuth = getAuth(secondaryApp);
@@ -1126,7 +1134,7 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
       console.log(`🏫 Nova escola criada: ${codigoEscola}`);
     }
 
-    // Upload da foto de perfil
+    // Upload da foto de perfil (se houver)
     let fotoPerfilURL = "";
     if (file) {
       const storageRef = ref(storage, `usuarios/${uid}/fotoPerfil.jpg`);
@@ -1157,8 +1165,14 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
       referenciaFirestore: `escolas/${codigoEscola}/${subcolecao}/${uid}`,
     });
 
-    // Sai do app secundário para não interferir
-    await signOut(secondaryAuth);
+    // Termina a sessão do app secundário e remove-o (limpeza)
+    try {
+      await signOut(secondaryAuth);
+      // deleteApp pode falhar em alguns ambientes (ex: se já for default), tentar e ignorar erro
+      await deleteApp(secondaryApp);
+    } catch (cleanupErr) {
+      console.warn("⚠️ Erro ao limpar app secundário (não crítico):", cleanupErr);
+    }
 
     alert(`✅ ${role} cadastrado com sucesso na escola ${codigoEscola}!`);
     return true;
@@ -1168,41 +1182,31 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
     if (error.code === "auth/email-already-in-use") {
       alert("⚠️ Este e-mail já está cadastrado. Use outro ou redefina a senha.");
     } else if (error.code === "auth/missing-password") {
-      alert("⚠️ A senha não foi recebida pelo Firebase. Isso pode ocorrer se houver conflito de apps.");
+      alert("⚠️ A senha não foi recebida pelo Firebase. Isso pode ocorrer se houver duplicidade de handlers.");
     } else {
-      alert("❌ Erro ao criar usuário: " + error.message);
+      alert("❌ Erro ao criar usuário: " + (error.message || error));
     }
     return false;
   }
 }
 
-
-
-
-// =======================================================
-// 🧩 FORM DE CADASTRO - EVENTO DE SUBMISSÃO
-// =======================================================
-// Proteção: evita instalar o listener mais de uma vez
-if (window.formCadastroInicializado) {
-  console.log("⚠️ formCadastro já inicializado — ignorando duplicata.");
-} else {
+// ----------------------
+// Único listener do formulário (substitui todos os outros listeners duplicados)
+// ----------------------
+if (!window.formCadastroInicializado) {
   window.formCadastroInicializado = true;
 
-  // flag global para evitar chamadas paralelas
   let cadastroEmProgresso = false;
-
   const form = document.getElementById("formCadastro");
   const submitBtn = form?.querySelector('button[type="submit"]');
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // se já estiver processando, ignora
     if (cadastroEmProgresso) {
-      console.log("⚠️ Cadastro já em progresso — ignorando novo submit.");
+      console.log("⚠️ Cadastro já em andamento — ignorando novo submit.");
       return;
     }
-
     cadastroEmProgresso = true;
     if (submitBtn) submitBtn.disabled = true;
 
@@ -1220,7 +1224,6 @@ if (window.formCadastroInicializado) {
       const file = document.getElementById("fotoPerfil").files[0];
       const msg = document.getElementById("mensagem");
 
-      // logs de debug (remova em produção)
       console.log("🧩 Dados enviados para o cadastro:", { role, codigoEscola, nome, email, cpf, telefone, senha, file });
 
       if (!role || !codigoEscola || !nome || !email || !senha) {
@@ -1256,58 +1259,9 @@ if (window.formCadastroInicializado) {
       if (submitBtn) submitBtn.disabled = false;
     }
   });
-}
-
-if (window.formCadastroInicializado) {
-  console.log("⚠️ Script já foi inicializado, ignorando duplicata.");
 } else {
- 
-
-document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const role = document.getElementById("role").value.trim();
-  const codigoEscola = document.getElementById("codigoEscola").value.trim();
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const cpf = document.getElementById("cpf").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-  const senha = document.getElementById("senha").value.trim();
-  const confirmar = document.getElementById("confirmar").value.trim();
-  const file = document.getElementById("fotoPerfil").files[0];
-  const msg = document.getElementById("mensagem");
-
-  if (!role || !codigoEscola || !nome || !email || !senha) {
-    msg.textContent = "⚠️ Preencha todos os campos obrigatórios.";
-    msg.className = "text-red-600";
-    return;
-  }
-
-  if (senha !== confirmar) {
-    msg.textContent = "⚠️ As senhas não conferem!";
-    msg.className = "text-red-600";
-    return;
-  }
-
-  msg.textContent = "⏳ Criando usuário...";
-  msg.className = "text-blue-600";
-
-  const sucesso = await cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file);
-  
-
-  if (sucesso) {
-    msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
-    msg.className = "text-green-600";
-    
-  } else {
-    msg.textContent = "❌ Erro ao cadastrar usuário.";
-    msg.className = "text-red-600";
-  }
-
-  e.target.reset();
-});
+  console.log("⚠️ formCadastro já inicializado — ignorando duplicata.");
 }
-
 
 // =======================================================
 // 🔑 LOGIN E REDIRECIONAMENTO AUTOMÁTICO
