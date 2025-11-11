@@ -1440,37 +1440,3 @@ if (btnLogout) {
   });
 }
 
-// =======================================================
-// 🧩 FORM DE CADASTRO (PAINEL ADMIN)
-// =======================================================
-document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const role = document.getElementById("role").value;
-  const codigoEscola = document.getElementById("codigoEscola").value.trim();
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const cpf = document.getElementById("cpf").value.trim();
-  const senha = document.getElementById("senha").value.trim();
-  const confirmar = document.getElementById("confirmar").value.trim();
-  const msg = document.getElementById("mensagem");
-
-  if (!role || !codigoEscola || !nome || !email || !senha) {
-    msg.textContent = "Preencha todos os campos obrigatórios.";
-    msg.className = "msg erro";
-    return;
-  }
-
-  if (senha !== confirmar) {
-    msg.textContent = "As senhas não conferem!";
-    msg.className = "msg erro";
-    return;
-  }
-
-  const sucesso = await cadastrarUsuario(role, codigoEscola, nome, email, cpf, senha);
-  if (sucesso) {
-    msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
-    msg.className = "msg sucesso";
-    e.target.reset();
-  }
-});
