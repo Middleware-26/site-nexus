@@ -1036,33 +1036,25 @@ if (fecharModalButton) {
 }
 
 
-// ----------------------
-// IMPORTS (substitua os seus imports atuais por estes)
-// ----------------------
-import {
-  initializeApp,
-  getApp,
-  getApps,
-  deleteApp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-
+// =======================================================
+// 🔥 INTEGRAÇÃO FIREBASE - NEXUS
+// =======================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
 import {
   getFirestore,
   doc,
   setDoc,
   getDoc,
   getDocs,
-  collection
+  collection,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
 import {
   getStorage,
   ref,
@@ -1070,11 +1062,11 @@ import {
   uploadBytes
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-// ----------------------
-// Firebase config (use sua config padrão)
-// ----------------------
+// =======================================================
+// ⚙️ CONFIGURAÇÃO DO FIREBASE
+// =======================================================
 const firebaseConfig = {
-  apiKey: "...", // mantenha seu valor
+  apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
   authDomain: "nexus-web-c35f1.firebaseapp.com",
   projectId: "nexus-web-c35f1",
   storageBucket: "nexus-web-c35f1.appspot.com",
@@ -1088,24 +1080,23 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// 👉 Torna acessível no console para testes
 window.auth = auth;
 window.db = db;
 
-// ----------------------
-// Função cadastrarUsuario (corrigida, usa getApps() para checar app secundário)
-// ----------------------
+// =======================================================
+// 🧾 CADASTRO PELO ADMINISTRADOR
+// =======================================================
 async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file) {
   try {
     console.log("📦 Dados recebidos para cadastro:", { email, senha });
 
-    // Cria/obtém app secundário com checagem segura
+    // Cria app secundário (se ainda não existir)
     let secondaryApp;
-    const apps = getApps(); // retorna array de apps inicializados
-    const existe = apps.some(a => a.name === "Secondary");
-    if (existe) {
-      secondaryApp = getApp("Secondary");
-    } else {
+    try {
       secondaryApp = initializeApp(firebaseConfig, "Secondary");
+    } catch (err) {
+      secondaryApp = getApp("Secondary");
     }
 
     const secondaryAuth = getAuth(secondaryApp);
@@ -1135,7 +1126,7 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
       console.log(`🏫 Nova escola criada: ${codigoEscola}`);
     }
 
-    // Upload da foto de perfil (se houver)
+    // Upload da foto de perfil
     let fotoPerfilURL = "";
     if (file) {
       const storageRef = ref(storage, `usuarios/${uid}/fotoPerfil.jpg`);
@@ -1166,14 +1157,8 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
       referenciaFirestore: `escolas/${codigoEscola}/${subcolecao}/${uid}`,
     });
 
-    // Termina a sessão do app secundário e remove-o (limpeza)
-    try {
-      await signOut(secondaryAuth);
-      // deleteApp pode falhar em alguns ambientes (ex: se já for default), tentar e ignorar erro
-      await deleteApp(secondaryApp);
-    } catch (cleanupErr) {
-      console.warn("⚠️ Erro ao limpar app secundário (não crítico):", cleanupErr);
-    }
+    // Sai do app secundário para não interferir
+    await signOut(secondaryAuth);
 
     alert(`✅ ${role} cadastrado com sucesso na escola ${codigoEscola}!`);
     return true;
@@ -1183,31 +1168,41 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
     if (error.code === "auth/email-already-in-use") {
       alert("⚠️ Este e-mail já está cadastrado. Use outro ou redefina a senha.");
     } else if (error.code === "auth/missing-password") {
-      alert("⚠️ A senha não foi recebida pelo Firebase. Isso pode ocorrer se houver duplicidade de handlers.");
+      alert("⚠️ A senha não foi recebida pelo Firebase. Isso pode ocorrer se houver conflito de apps.");
     } else {
-      alert("❌ Erro ao criar usuário: " + (error.message || error));
+      alert("❌ Erro ao criar usuário: " + error.message);
     }
     return false;
   }
 }
 
-// ----------------------
-// Único listener do formulário (substitui todos os outros listeners duplicados)
-// ----------------------
-if (!window.formCadastroInicializado) {
+
+
+
+// =======================================================
+// 🧩 FORM DE CADASTRO - EVENTO DE SUBMISSÃO
+// =======================================================
+// Proteção: evita instalar o listener mais de uma vez
+if (window.formCadastroInicializado) {
+  console.log("⚠️ formCadastro já inicializado — ignorando duplicata.");
+} else {
   window.formCadastroInicializado = true;
 
+  // flag global para evitar chamadas paralelas
   let cadastroEmProgresso = false;
+
   const form = document.getElementById("formCadastro");
   const submitBtn = form?.querySelector('button[type="submit"]');
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    // se já estiver processando, ignora
     if (cadastroEmProgresso) {
-      console.log("⚠️ Cadastro já em andamento — ignorando novo submit.");
+      console.log("⚠️ Cadastro já em progresso — ignorando novo submit.");
       return;
     }
+
     cadastroEmProgresso = true;
     if (submitBtn) submitBtn.disabled = true;
 
@@ -1225,6 +1220,7 @@ if (!window.formCadastroInicializado) {
       const file = document.getElementById("fotoPerfil").files[0];
       const msg = document.getElementById("mensagem");
 
+      // logs de debug (remova em produção)
       console.log("🧩 Dados enviados para o cadastro:", { role, codigoEscola, nome, email, cpf, telefone, senha, file });
 
       if (!role || !codigoEscola || !nome || !email || !senha) {
@@ -1260,9 +1256,56 @@ if (!window.formCadastroInicializado) {
       if (submitBtn) submitBtn.disabled = false;
     }
   });
-} else {
-  console.log("⚠️ formCadastro já inicializado — ignorando duplicata.");
 }
+
+if (window.formCadastroInicializado) {
+  console.log("⚠️ Script já foi inicializado, ignorando duplicata.");
+} else {
+ 
+
+document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const role = document.getElementById("role").value.trim();
+  const codigoEscola = document.getElementById("codigoEscola").value.trim();
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const cpf = document.getElementById("cpf").value.trim();
+  const telefone = document.getElementById("telefone").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+  const confirmar = document.getElementById("confirmar").value.trim();
+  const file = document.getElementById("fotoPerfil").files[0];
+  const msg = document.getElementById("mensagem");
+
+  if (!role || !codigoEscola || !nome || !email || !senha) {
+    msg.textContent = "⚠️ Preencha todos os campos obrigatórios.";
+    msg.className = "text-red-600";
+    return;
+  }
+
+  if (senha !== confirmar) {
+    msg.textContent = "⚠️ As senhas não conferem!";
+    msg.className = "text-red-600";
+    return;
+  }
+
+  msg.textContent = "⏳ Criando usuário...";
+  msg.className = "text-blue-600";
+
+  const sucesso = await cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file);
+  
+
+  if (sucesso) {
+    msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
+    msg.className = "text-green-600";
+    e.target.reset();
+  } else {
+    msg.textContent = "❌ Erro ao cadastrar usuário.";
+    msg.className = "text-red-600";
+  }
+});
+}
+
 
 // =======================================================
 // 🔑 LOGIN E REDIRECIONAMENTO AUTOMÁTICO
@@ -1303,17 +1346,17 @@ async function loginUsuario(email, senha) {
     // Redireciona conforme o tipo de usuário
     switch (tipoEncontrado) {
       case "alunos":
-    window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-      break;
-    case "professores":
-    window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-      break;
-    case "psicologos":
-    window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-      break;
-    case "administradores":
-    window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-      break;
+        window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
+        break;
+      case "professores":
+        window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
+        break;
+      case "psicologos":
+        window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
+        break;
+      case "administradores":
+        window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
+        break;
       default:
         alert("Tipo de usuário desconhecido!");
     }
@@ -1327,61 +1370,33 @@ async function loginUsuario(email, senha) {
 // =======================================================
 // 👤 CARREGAR PERFIL DO USUÁRIO LOGADO
 // =======================================================
+
 onAuthStateChanged(auth, async (user) => {
-  // usuário deslogado -> manda para a tela de login
   if (!user) {
-    // só redireciona se realmente estivermos em uma página protegida
-    if (!/\/tela_login\/login\.html$/.test(window.location.pathname)) {
-      window.location.href = "/tela_login/login.html";
-    }
+    window.location.href = "/tela_login/login.html";
     return;
   }
 
-  const uid = user.uid;
+  // Pega dados da URL (ex: ?escola=123&role=psicologos)
   const params = new URLSearchParams(window.location.search);
-  let role = params.get("role");        // ex: "psicologos"
-  let codigoEscola = params.get("escola");
+  const role = params.get("role");
+  const codigoEscola = params.get("escola");
+  const uid = user.uid;
 
-  // 1) tenta pegar de localStorage (mais confiável quando login fez setItem)
   if (!role || !codigoEscola) {
-    role = localStorage.getItem("role") || role;
-    codigoEscola = localStorage.getItem("codigoEscola") || codigoEscola;
-  }
-
-  // 2) se ainda não tem, tenta buscar o documento "usuarios/<uid>" no Firestore
-  if (!role || !codigoEscola) {
-    try {
-      const userDocRef = doc(db, "usuarios", uid);
-      const userSnap = await getDoc(userDocRef);
-      if (userSnap.exists()) {
-        const u = userSnap.data();
-        // normaliza: sua coleção usa "psicologos" e no 'usuarios' você pode ter 'tipo' = 'psicologo'
-        if (u.tipo) {
-          // normaliza para forma plural esperada pelas coleções
-          const tipoLower = String(u.tipo).toLowerCase();
-          role = tipoLower.endsWith("s") ? tipoLower : tipoLower + "s";
-        }
-        codigoEscola = u.codigoEscola || codigoEscola;
-      }
-    } catch (err) {
-      console.warn("Erro ao buscar 'usuarios' no Firestore:", err);
-    }
-  }
-
-  // Se ainda não tiver role/codigo — não redireciona; apenas deixa a página carregar em modo seguro.
-  if (!role || !codigoEscola) {
-    console.warn("⚠️ role/escola não detectados; mantendo acesso em modo seguro. role=", role, "escola=", codigoEscola);
+    console.warn("⚠️ Parâmetros da URL ausentes!");
     return;
   }
 
-  // Carrega dados do documento correto (por exemplo para mostrar nome e avatar)
   try {
     const userRef = doc(db, `escolas/${codigoEscola}/${role}/${uid}`);
     const userSnap = await getDoc(userRef);
+
     if (!userSnap.exists()) {
-      console.warn("⚠️ Documento de usuário não existe:", `escolas/${codigoEscola}/${role}/${uid}`);
+      console.warn("⚠️ Documento de usuário não encontrado no Firestore!");
       return;
     }
+
     const dados = userSnap.data();
     const nomeEl = document.getElementById("userName");
     const colEl = document.querySelector("#sidebar p:nth-of-type(3)");
@@ -1459,6 +1474,3 @@ document.getElementById("formCadastro")?.addEventListener("submit", async (e) =>
     e.target.reset();
   }
 });
-
-
-
