@@ -1049,6 +1049,7 @@ import {
 import {
   getAuth,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -1302,17 +1303,17 @@ async function loginUsuario(email, senha) {
     // Redireciona conforme o tipo de usuário
     switch (tipoEncontrado) {
       case "alunos":
-        window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-        break;
-      case "professores":
-        window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-        break;
-      case "psicologos":
-        window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-        break;
-      case "administradores":
-        window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-        break;
+    window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
+      break;
+    case "professores":
+    window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
+      break;
+    case "psicologos":
+    window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
+      break;
+    case "administradores":
+    window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
+      break;
       default:
         alert("Tipo de usuário desconhecido!");
     }
@@ -1326,53 +1327,61 @@ async function loginUsuario(email, senha) {
 // =======================================================
 // 👤 CARREGAR PERFIL DO USUÁRIO LOGADO
 // =======================================================
-
 onAuthStateChanged(auth, async (user) => {
+  // usuário deslogado -> manda para a tela de login
   if (!user) {
-    window.location.href = "/tela_login/login.html";
+    // só redireciona se realmente estivermos em uma página protegida
+    if (!/\/tela_login\/login\.html$/.test(window.location.pathname)) {
+      window.location.href = "/tela_login/login.html";
+    }
     return;
   }
 
-  const params = new URLSearchParams(window.location.search);
-  let role = params.get("role");
-  let codigoEscola = params.get("escola");
   const uid = user.uid;
+  const params = new URLSearchParams(window.location.search);
+  let role = params.get("role");        // ex: "psicologos"
+  let codigoEscola = params.get("escola");
 
-  // Se o admin entrou sem parâmetros, usa o papel "administradores"
+  // 1) tenta pegar de localStorage (mais confiável quando login fez setItem)
   if (!role || !codigoEscola) {
-    console.warn("⚠️ Parâmetros ausentes, tentando buscar no Firestore...");
-    try {
-      const usuariosRef = doc(db, "usuarios", uid);
-      const userSnap = await getDoc(usuariosRef);
+    role = localStorage.getItem("role") || role;
+    codigoEscola = localStorage.getItem("codigoEscola") || codigoEscola;
+  }
 
+  // 2) se ainda não tem, tenta buscar o documento "usuarios/<uid>" no Firestore
+  if (!role || !codigoEscola) {
+    try {
+      const userDocRef = doc(db, "usuarios", uid);
+      const userSnap = await getDoc(userDocRef);
       if (userSnap.exists()) {
-        const dados = userSnap.data();
-        role = dados.tipo?.toLowerCase() + "s";
-        codigoEscola = dados.codigoEscola;
-        console.log("🔍 Dados recuperados do Firestore:", { role, codigoEscola });
-      } else {
-        console.warn("⚠️ Usuário não encontrado na coleção 'usuarios'.");
+        const u = userSnap.data();
+        // normaliza: sua coleção usa "psicologos" e no 'usuarios' você pode ter 'tipo' = 'psicologo'
+        if (u.tipo) {
+          // normaliza para forma plural esperada pelas coleções
+          const tipoLower = String(u.tipo).toLowerCase();
+          role = tipoLower.endsWith("s") ? tipoLower : tipoLower + "s";
+        }
+        codigoEscola = u.codigoEscola || codigoEscola;
       }
     } catch (err) {
-      console.error("Erro ao buscar dados do usuário:", err);
+      console.warn("Erro ao buscar 'usuarios' no Firestore:", err);
     }
   }
 
-  // Se mesmo assim não achar, apenas carrega o painel sem redirecionar
+  // Se ainda não tiver role/codigo — não redireciona; apenas deixa a página carregar em modo seguro.
   if (!role || !codigoEscola) {
-    console.warn("⚠️ Ainda sem parâmetros, mas mantendo o acesso (modo seguro).");
+    console.warn("⚠️ role/escola não detectados; mantendo acesso em modo seguro. role=", role, "escola=", codigoEscola);
     return;
   }
 
-   try {
+  // Carrega dados do documento correto (por exemplo para mostrar nome e avatar)
+  try {
     const userRef = doc(db, `escolas/${codigoEscola}/${role}/${uid}`);
     const userSnap = await getDoc(userRef);
-
     if (!userSnap.exists()) {
-      console.warn("⚠️ Documento de usuário não encontrado no Firestore!");
+      console.warn("⚠️ Documento de usuário não existe:", `escolas/${codigoEscola}/${role}/${uid}`);
       return;
     }
-
     const dados = userSnap.data();
     const nomeEl = document.getElementById("userName");
     const colEl = document.querySelector("#sidebar p:nth-of-type(3)");
@@ -1388,8 +1397,8 @@ onAuthStateChanged(auth, async (user) => {
   } catch (err) {
     console.error("Erro ao carregar perfil:", err);
   }
-  
 });
+
 
 // =======================================================
 // 🚪 LOGOUT (SAIR DA CONTA)
