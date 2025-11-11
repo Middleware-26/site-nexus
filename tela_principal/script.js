@@ -1333,18 +1333,38 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Pega dados da URL (ex: ?escola=123&role=psicologos)
   const params = new URLSearchParams(window.location.search);
-  const role = params.get("role");
-  const codigoEscola = params.get("escola");
+  let role = params.get("role");
+  let codigoEscola = params.get("escola");
   const uid = user.uid;
 
+  // Se o admin entrou sem parâmetros, usa o papel "administradores"
   if (!role || !codigoEscola) {
-    console.warn("⚠️ Parâmetros da URL ausentes!");
+    console.warn("⚠️ Parâmetros ausentes, tentando buscar no Firestore...");
+    try {
+      const usuariosRef = doc(db, "usuarios", uid);
+      const userSnap = await getDoc(usuariosRef);
+
+      if (userSnap.exists()) {
+        const dados = userSnap.data();
+        role = dados.tipo?.toLowerCase() + "s";
+        codigoEscola = dados.codigoEscola;
+        console.log("🔍 Dados recuperados do Firestore:", { role, codigoEscola });
+      } else {
+        console.warn("⚠️ Usuário não encontrado na coleção 'usuarios'.");
+      }
+    } catch (err) {
+      console.error("Erro ao buscar dados do usuário:", err);
+    }
+  }
+
+  // Se mesmo assim não achar, apenas carrega o painel sem redirecionar
+  if (!role || !codigoEscola) {
+    console.warn("⚠️ Ainda sem parâmetros, mas mantendo o acesso (modo seguro).");
     return;
   }
 
-  try {
+   try {
     const userRef = doc(db, `escolas/${codigoEscola}/${role}/${uid}`);
     const userSnap = await getDoc(userRef);
 
@@ -1368,8 +1388,8 @@ onAuthStateChanged(auth, async (user) => {
   } catch (err) {
     console.error("Erro ao carregar perfil:", err);
   }
+  
 });
-
 
 // =======================================================
 // 🚪 LOGOUT (SAIR DA CONTA)
