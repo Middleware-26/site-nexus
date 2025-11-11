@@ -1298,11 +1298,13 @@ document.getElementById("formCadastro")?.addEventListener("submit", async (e) =>
   if (sucesso) {
     msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
     msg.className = "text-green-600";
-    e.target.reset();
+    
   } else {
     msg.textContent = "❌ Erro ao cadastrar usuário.";
     msg.className = "text-red-600";
   }
+
+  e.target.reset();
 });
 }
 
