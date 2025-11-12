@@ -1080,31 +1080,18 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// 👉 Torna acessível no console para testes
 window.auth = auth;
 window.db = db;
 
 // =======================================================
-// 🧾 CADASTRO PELO ADMINISTRADOR
+// 🧾 CADASTRO PELO ADMINISTRADOR (sem secondaryApp)
 // =======================================================
 async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file) {
   try {
     console.log("📦 Dados recebidos para cadastro:", { email, senha });
 
-    // Cria app secundário (se ainda não existir)
-    let secondaryApp;
-    try {
-      secondaryApp = initializeApp(firebaseConfig, "Secondary");
-    } catch (err) {
-      secondaryApp = getApp("Secondary");
-    }
-
-    const secondaryAuth = getAuth(secondaryApp);
-
-    console.log("📡 App secundário:", secondaryApp.name);
-
-    // Cria o usuário no app secundário
-    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, senha);
+    // Cria o usuário diretamente no app principal
+    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
     const uid = user.uid;
 
@@ -1157,9 +1144,6 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
       referenciaFirestore: `escolas/${codigoEscola}/${subcolecao}/${uid}`,
     });
 
-    // Sai do app secundário para não interferir
-    await signOut(secondaryAuth);
-
     alert(`✅ ${role} cadastrado com sucesso na escola ${codigoEscola}!`);
     return true;
 
@@ -1168,7 +1152,7 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
     if (error.code === "auth/email-already-in-use") {
       alert("⚠️ Este e-mail já está cadastrado. Use outro ou redefina a senha.");
     } else if (error.code === "auth/missing-password") {
-      alert("⚠️ A senha não foi recebida pelo Firebase. Isso pode ocorrer se houver conflito de apps.");
+      alert("⚠️ A senha não foi recebida pelo Firebase. Tente novamente.");
     } else {
       alert("❌ Erro ao criar usuário: " + error.message);
     }
@@ -1176,19 +1160,11 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
   }
 }
 
-
-
-
 // =======================================================
-// 🧩 FORM DE CADASTRO - EVENTO DE SUBMISSÃO
+// 🧩 FORM DE CADASTRO - EVENTO DE SUBMISSÃO (único)
 // =======================================================
-// Proteção: evita instalar o listener mais de uma vez
-if (window.formCadastroInicializado) {
-  console.log("⚠️ formCadastro já inicializado — ignorando duplicata.");
-} else {
+if (!window.formCadastroInicializado) {
   window.formCadastroInicializado = true;
-
-  // flag global para evitar chamadas paralelas
   let cadastroEmProgresso = false;
 
   const form = document.getElementById("formCadastro");
@@ -1197,7 +1173,6 @@ if (window.formCadastroInicializado) {
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // se já estiver processando, ignora
     if (cadastroEmProgresso) {
       console.log("⚠️ Cadastro já em progresso — ignorando novo submit.");
       return;
@@ -1220,8 +1195,7 @@ if (window.formCadastroInicializado) {
       const file = document.getElementById("fotoPerfil").files[0];
       const msg = document.getElementById("mensagem");
 
-      // logs de debug (remova em produção)
-      console.log("🧩 Dados enviados para o cadastro:", { role, codigoEscola, nome, email, cpf, telefone, senha, file });
+      console.log("🧩 Dados enviados para o cadastro:", { role, codigoEscola, nome, email, cpf, telefone, senha });
 
       if (!role || !codigoEscola || !nome || !email || !senha) {
         msg.textContent = "⚠️ Preencha todos os campos obrigatórios.";
@@ -1256,54 +1230,6 @@ if (window.formCadastroInicializado) {
       if (submitBtn) submitBtn.disabled = false;
     }
   });
-}
-
-if (window.formCadastroInicializado) {
-  console.log("⚠️ Script já foi inicializado, ignorando duplicata.");
-} else {
- 
-
-document.getElementById("formCadastro")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const role = document.getElementById("role").value.trim();
-  const codigoEscola = document.getElementById("codigoEscola").value.trim();
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const cpf = document.getElementById("cpf").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-  const senha = document.getElementById("senha").value.trim();
-  const confirmar = document.getElementById("confirmar").value.trim();
-  const file = document.getElementById("fotoPerfil").files[0];
-  const msg = document.getElementById("mensagem");
-
-  if (!role || !codigoEscola || !nome || !email || !senha) {
-    msg.textContent = "⚠️ Preencha todos os campos obrigatórios.";
-    msg.className = "text-red-600";
-    return;
-  }
-
-  if (senha !== confirmar) {
-    msg.textContent = "⚠️ As senhas não conferem!";
-    msg.className = "text-red-600";
-    return;
-  }
-
-  msg.textContent = "⏳ Criando usuário...";
-  msg.className = "text-blue-600";
-
-  const sucesso = await cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file);
-  
-
-  if (sucesso) {
-    msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
-    msg.className = "text-green-600";
-    e.target.reset();
-  } else {
-    msg.textContent = "❌ Erro ao cadastrar usuário.";
-    msg.className = "text-red-600";
-  }
-});
 }
 
 
