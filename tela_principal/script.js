@@ -43,6 +43,15 @@ const firebaseConfig = {
   measurementId: "G-1E0BGG8323"
 };
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+window.auth = auth;
+window.db = db;
+
+
 // Normalização dos tipos / subcoleções
 const ROLE_TO_COLLECTION = {
   aluno: "alunos",
@@ -65,18 +74,6 @@ function normalizeRoleToCollection(role) {
   if (Object.values(ROLE_TO_COLLECTION).includes(k)) return k;
   return null;
 }
-
-
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-window.auth = auth;
-window.db = db;
-
-
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
