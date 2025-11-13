@@ -1474,75 +1474,102 @@ if (!window.formCadastroInicializado) {
 // =======================================================
 
 async function loginUsuario(email, senha) {
+  const auth = getAuth();
+  const db = getFirestore();
+
   try {
+    // Faz login no Firebase Auth
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
     const uid = user.uid;
 
-    // 1) tenta buscar documento central em usuarios/{uid}
-    const userDoc = await getDoc(doc(db, "usuarios", uid));
-    if (userDoc.exists()) {
-      const dadosUsuario = userDoc.data();
-      const tipo = dadosUsuario.tipo || null;        // ex: "professores"
-      const ref = dadosUsuario.referenciaFirestore || null;
-      const codigoEscola = dadosUsuario.codigoEscola || null;
+    console.log("✅ Usuário autenticado:", user.email);
 
-      console.log("🔐 Login via usuarios/:", tipo, codigoEscola, ref);
+    // =========================================
+    // 1️⃣ Tenta buscar em /usuarios/{uid}
+    // =========================================
+    const userDocRef = doc(db, "usuarios", uid);
+    const userDocSnap = await getDoc(userDocRef);
 
-      // redireciona conforme tipo (garanta que use os mesmos caminhos)
+    if (userDocSnap.exists()) {
+      const dados = userDocSnap.data();
+      const tipo = dados.tipo;
+      const codigoEscola = dados.codigoEscola;
+
+      console.log("📄 Dados do usuário encontrados em /usuarios:", dados);
+
+      // Redirecionamento conforme tipo
       switch (tipo) {
         case "alunos":
-          window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}&role=${tipo}`;
+          window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}`;
           return;
         case "professores":
-          window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}&role=${tipo}`;
+          window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}`;
           return;
         case "psicologos":
-          window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}&role=${tipo}`;
+          window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}`;
           return;
         case "administradores":
-          window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}&role=${tipo}`;
+          window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}`;
           return;
         default:
-          console.warn("Tipo desconhecido no documento usuarios/:", tipo);
-          break;
+          console.warn("⚠️ Tipo desconhecido:", tipo);
+          alert("Tipo de usuário desconhecido. Contate o suporte.");
+          return;
       }
     }
 
-    // 2) fallback — se nao existir doc 'usuarios', procura nas subcolecoes de escolas (compatibilidade retroativa)
-    const tipos = ["alunos", "professores", "psicologos", "administradores"];
+    // =========================================
+    // 2️⃣ Fallback — busca nas subcoleções das escolas
+    // =========================================
+    console.warn("⚠️ Usuário não encontrado em /usuarios. Procurando nas escolas...");
+    const colecoes = ["alunos", "professores", "psicologos", "administradores"];
+
     const escolasSnap = await getDocs(collection(db, "escolas"));
-    for (const escolaDoc of escolasSnap.docs) {
-      for (const tipo of tipos) {
-        const userRef = doc(db, `escolas/${escolaDoc.id}/${tipo}/${uid}`);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const dadosUsuario = userSnap.data();
-          console.log(`🔐 Login via escolas/${escolaDoc.id}/${tipo}:`, dadosUsuario.nome);
-          // redireciona
+    for (const escola of escolasSnap.docs) {
+      const escolaId = escola.id;
+
+      for (const tipo of colecoes) {
+        const refUser = doc(db, `escolas/${escolaId}/${tipo}/${uid}`);
+        const snapUser = await getDoc(refUser);
+        if (snapUser.exists()) {
+          console.log(`📚 Usuário encontrado em escolas/${escolaId}/${tipo}`);
           switch (tipo) {
             case "alunos":
-              window.location.href = `/tela_principal/alunos.html?escola=${escolaDoc.id}&role=${tipo}`;
+              window.location.href = `/tela_principal/alunos.html?escola=${escolaId}`;
               return;
             case "professores":
-              window.location.href = `/tela_principal/professor.html?escola=${escolaDoc.id}&role=${tipo}`;
+              window.location.href = `/tela_principal/professor.html?escola=${escolaId}`;
               return;
             case "psicologos":
-              window.location.href = `/tela_principal/psicologo.html?escola=${escolaDoc.id}&role=${tipo}`;
+              window.location.href = `/tela_principal/psicologo.html?escola=${escolaId}`;
               return;
             case "administradores":
-              window.location.href = `/tela_principal/adminpainel.html?escola=${escolaDoc.id}&role=${tipo}`;
+              window.location.href = `/tela_principal/adminpainel.html?escola=${escolaId}`;
               return;
           }
         }
       }
     }
 
-    // se chegou até aqui: não foi encontrado
-    alert("Usuário não encontrado no banco de dados!");
+    // =========================================
+    // 3️⃣ Se nada encontrado
+    // =========================================
+    console.error("❌ Usuário autenticado, mas não encontrado no Firestore.");
+    alert("⚠️ Usuário autenticado, mas não encontrado no banco de dados.");
+
   } catch (error) {
-    console.error("Erro ao fazer login:", error);
-    alert("Erro ao fazer login: " + error.message);
+    console.error("❌ Erro no login:", error);
+
+    if (error.code === "auth/invalid-email" || error.code === "auth/invalid-credential") {
+      alert("Email ou senha incorretos.");
+    } else if (error.code === "auth/user-not-found") {
+      alert("Usuário não encontrado.");
+    } else if (error.code === "auth/wrong-password") {
+      alert("Senha incorreta.");
+    } else {
+      alert("Erro ao fazer login: " + error.message);
+    }
   }
 }
 
