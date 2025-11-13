@@ -15,6 +15,8 @@ import {
   setDoc,
   getDoc,
   getDocs,
+  query,
+  where,
   collection,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import {
@@ -922,6 +924,10 @@ if (closeModalBtn) closeModalBtn.addEventListener('click', resetHorario);
 if (cancelModalBtn) cancelModalBtn.addEventListener('click', resetHorario);
 if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) resetHorario(); });
 
+// chama carregamento de alunos após todo o init do DOM
+carregarAlunosPsicologo();
+
+
 
 });
 
@@ -931,7 +937,6 @@ if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) rese
 // =======================================================
 // 🔹 CARREGAR ALUNOS NA TABELA (Tela do Psicólogo)
 // =======================================================
-const db = getFirestore();
 
 // Função para carregar os alunos da escola do psicólogo logado
 async function carregarAlunosPsicologo() {
@@ -1024,9 +1029,6 @@ async function carregarAlunosPsicologo() {
     console.error("❌ Erro ao carregar alunos:", error);
   }
 }
-
-// Executa assim que a página terminar de carregar
-document.addEventListener("DOMContentLoaded", carregarAlunosPsicologo);
 
 
 
@@ -1184,6 +1186,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const storage = getStorage(app);
 
 window.auth = auth;
