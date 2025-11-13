@@ -99,8 +99,11 @@ onAuthStateChanged(auth, async (user) => {
   // Atualiza os indicadores do painel
   atualizarIndicadores(user.uid, dados.codigoEscola);
   // Carrega os alunos da escola com paginação
-  carregarAlunosPaginado(dados.codigoEscola);
+  const userSchoolCode = dados.codigoEscola;
+  // Carrega a primeira página de alunos assim que loga
+  carregarAlunosPaginado(userSchoolCode);
 
+  // Configura botões de navegação
   document.getElementById("btnProximo")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "proximo"));
   document.getElementById("btnAnterior")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "anterior"));
 
@@ -185,74 +188,72 @@ async function atualizarIndicadores(uid, codigoEscola) {
 // ============================
 // 👩‍🏫 PAGINAÇÃO DE ALUNOS 
 // ============================
-let alunosPorPagina = 6;
+let paginaAtual = 1;
 let ultimoDoc = null;
 let primeiroDoc = null;
-let paginaAtual = 1;
-let stackPaginas = [];
+const alunosPorPagina = 10;
 
-async function carregarAlunosPaginado(codigoEscola, direcao = "inicio") {
+async function carregarAlunosPaginado(codigoEscola, direcao) {
   try {
     const alunosRef = collection(db, "usuarios");
-    let qBase = query(
-      alunosRef,
-      where("codigoEscola", "==", codigoEscola),
-      where("tipo", "==", "aluno"),
-      orderBy("nome"),
-      limit(alunosPorPagina)
-    );
+    let q;
 
     if (direcao === "proximo" && ultimoDoc) {
-      qBase = query(qBase, startAfter(ultimoDoc));
-      stackPaginas.push(primeiroDoc);
+      q = query(alunosRef, where("role", "==", "aluno"),
+        where("codigoEscola", "==", codigoEscola),
+        orderBy("nome"),
+        startAfter(ultimoDoc),
+        limit(alunosPorPagina)
+      );
       paginaAtual++;
-    } else if (direcao === "anterior" && stackPaginas.length > 0) {
-      const prev = stackPaginas.pop();
-      qBase = query(qBase, startAt(prev));
-      paginaAtual--;
+    } else if (direcao === "anterior" && primeiroDoc) {
+      q = query(alunosRef, where("role", "==", "aluno"),
+        where("codigoEscola", "==", codigoEscola),
+        orderBy("nome"),
+        endBefore(primeiroDoc),
+        limitToLast(alunosPorPagina)
+      );
+      paginaAtual = Math.max(1, paginaAtual - 1);
+    } else {
+      q = query(alunosRef, where("role", "==", "aluno"),
+        where("codigoEscola", "==", codigoEscola),
+        orderBy("nome"),
+        limit(alunosPorPagina)
+      );
+      paginaAtual = 1;
     }
 
-    const snap = await getDocs(qBase);
-    if (snap.empty) return;
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return;
 
-    primeiroDoc = snap.docs[0];
-    ultimoDoc = snap.docs[snap.docs.length - 1];
+    // Define os limites para paginação
+    primeiroDoc = snapshot.docs[0];
+    ultimoDoc = snapshot.docs[snapshot.docs.length - 1];
 
+    // Atualiza número da página
+    const paginaEl = document.getElementById("paginaAtual");
+    if (paginaEl) paginaEl.textContent = paginaAtual;
+
+    // Renderiza alunos na tabela
     const tbody = document.getElementById("alunosContainer");
     tbody.innerHTML = "";
-
-    snap.forEach(doc => {
+    snapshot.forEach((doc) => {
       const aluno = doc.data();
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-          ${aluno.nome}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-          ${aluno.serie || "—"}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-            ${aluno.status || "Ativo"}
-          </span>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-          ${aluno.ultimaSessao || "—"}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-          <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
-            <span class="material-symbols-outlined">visibility</span>
-          </button>
-        </td>
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="px-6 py-4">${aluno.nome}</td>
+        <td class="px-6 py-4">${aluno.anoTurma || "—"}</td>
+        <td class="px-6 py-4">${aluno.status || "—"}</td>
+        <td class="px-6 py-4">${aluno.ultimaSessao || "—"}</td>
       `;
-      tbody.appendChild(linha);
+      tbody.appendChild(tr);
     });
 
-    document.getElementById("paginaAtual")?.textContent = paginaAtual;
-  } catch (err) {
-    console.error("Erro ao paginar alunos:", err);
+  } catch (error) {
+    console.error("❌ Erro na paginação:", error);
   }
 }
+
 
 
 
@@ -1154,8 +1155,6 @@ if (closeModalBtn) closeModalBtn.addEventListener('click', resetHorario);
 if (cancelModalBtn) cancelModalBtn.addEventListener('click', resetHorario);
 if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) resetHorario(); });
 
-// chama carregamento de alunos após todo o init do DOM
-carregarAlunosPsicologo();
 
 });
 
