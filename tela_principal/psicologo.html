@@ -293,7 +293,7 @@
         <div class="flex justify-between items-start">
           <div>
             <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total de Alunos</p>
-            <h3 class="text-2xl font-bold mt-1">247</h3>
+            <h3 id="totalAlunos" class="text-2xl font-bold mt-1">247</h3>
           </div>
           <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
             <span class="material-symbols-outlined text-blue-500 dark:text-blue-400">group</span>
@@ -306,7 +306,7 @@
         <div class="flex justify-between items-start">
           <div>
             <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Sessões Hoje</p>
-            <h3 class="text-2xl font-bold mt-1">8</h3>
+            <h3 id="totalSessoes" class="text-2xl font-bold mt-1">8</h3>
           </div>
           <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
             <span class="material-symbols-outlined text-green-500 dark:text-green-400">calendar_month</span>
@@ -319,7 +319,7 @@
         <div class="flex justify-between items-start">
           <div>
             <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Acompanhamentos</p>
-            <h3 class="text-2xl font-bold mt-1">32</h3>
+            <h3 id="totalAcomp" class="text-2xl font-bold mt-1">32</h3>
           </div>
           <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
             <span class="material-symbols-outlined text-purple-500 dark:text-purple-400">monitoring</span>
@@ -332,7 +332,7 @@
         <div class="flex justify-between items-start">
           <div>
             <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Novos Casos</p>
-            <h3 class="text-2xl font-bold mt-1">4</h3>  
+            <h3 id="novosCasos" class="text-2xl font-bold mt-1">4</h3>  
           </div>
           <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
             <span class="material-symbols-outlined text-red-500 dark:text-red-400">add_alert</span>
@@ -401,7 +401,7 @@
           </div>
           <div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <a id="btnAnterior" href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <span class="sr-only">Anterior</span>
                 <span class="material-symbols-outlined">chevron_left</span>
               </a>
@@ -414,7 +414,7 @@
               <a href="#" class="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                 3
               </a>
-              <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <a id="btnProximo" href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <span class="sr-only">Próximo</span>
                 <span class="material-symbols-outlined">chevron_right</span>
               </a>

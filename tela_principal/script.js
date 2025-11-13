@@ -94,6 +94,13 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     const dados = userDocSnap.data();
+
+  // Atualiza os indicadores do painel
+  atualizarIndicadores(user.uid, dados.codigoEscola);
+
+  // Carrega os alunos da escola com paginação
+  carregarAlunosPaginado(dados.codigoEscola);
+
     console.log("📦 Dados do usuário:", dados);
 
     // Atualiza informações na sidebar
@@ -130,6 +137,123 @@ onAuthStateChanged(auth, async (user) => {
     console.error("❌ Erro ao carregar dados do usuário:", error);
   }
 });
+
+// =======================================================
+// 📊 ATUALIZAÇÃO DOS INDICADORES DO DASHBOARD
+// =======================================================
+async function atualizarIndicadores(uid, codigoEscola) {
+  try {
+    const alunosRef = collection(db, "usuarios");
+    const sessoesRef = collection(db, "agendamentos");
+    const acompanhamentosRef = collection(db, "acompanhamentos");
+
+    const qAlunos = query(alunosRef, where("codigoEscola", "==", codigoEscola), where("tipo", "==", "aluno"));
+    const alunosSnap = await getDocs(qAlunos);
+    const totalAlunos = alunosSnap.size;
+
+    const qSessoes = query(sessoesRef, where("codigoEscola", "==", codigoEscola));
+    const sessoesSnap = await getDocs(qSessoes);
+    const totalSessoes = sessoesSnap.size;
+
+    const qAcomp = query(acompanhamentosRef, where("codigoEscola", "==", codigoEscola));
+    const acompSnap = await getDocs(qAcomp);
+    const totalAcomp = acompSnap.size;
+
+    const agora = new Date();
+    const seteDiasAtras = new Date(agora);
+    seteDiasAtras.setDate(agora.getDate() - 7);
+    const novosCasos = alunosSnap.docs.filter(doc => {
+      const dataCadastro = doc.data().criadoEm?.toDate?.() || null;
+      return dataCadastro && dataCadastro >= seteDiasAtras;
+    }).length;
+
+    document.getElementById("totalAlunos").textContent = totalAlunos;
+    document.getElementById("totalSessoes").textContent = totalSessoes;
+    document.getElementById("totalAcomp").textContent = totalAcomp;
+    document.getElementById("novosCasos").textContent = novosCasos;
+  } catch (error) {
+    console.error("❌ Erro ao atualizar indicadores:", error);
+  }
+}
+
+
+
+// ============================
+// 👩‍🏫 PAGINAÇÃO DE ALUNOS 
+// ============================
+let alunosPorPagina = 6;
+let ultimoDoc = null;
+let primeiroDoc = null;
+let paginaAtual = 1;
+let stackPaginas = [];
+
+async function carregarAlunosPaginado(codigoEscola, direcao = "inicio") {
+  try {
+    const alunosRef = collection(db, "usuarios");
+    let qBase = query(
+      alunosRef,
+      where("codigoEscola", "==", codigoEscola),
+      where("tipo", "==", "aluno"),
+      orderBy("nome"),
+      limit(alunosPorPagina)
+    );
+
+    if (direcao === "proximo" && ultimoDoc) {
+      qBase = query(qBase, startAfter(ultimoDoc));
+      stackPaginas.push(primeiroDoc);
+      paginaAtual++;
+    } else if (direcao === "anterior" && stackPaginas.length > 0) {
+      const prev = stackPaginas.pop();
+      qBase = query(qBase, startAt(prev));
+      paginaAtual--;
+    }
+
+    const snap = await getDocs(qBase);
+    if (snap.empty) return;
+
+    primeiroDoc = snap.docs[0];
+    ultimoDoc = snap.docs[snap.docs.length - 1];
+
+    const tbody = document.getElementById("alunosContainer");
+    tbody.innerHTML = "";
+
+    snap.forEach(doc => {
+      const aluno = doc.data();
+      const linha = document.createElement("tr");
+      linha.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+          ${aluno.nome}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+          ${aluno.serie || "—"}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+            ${aluno.status || "Ativo"}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+          ${aluno.ultimaSessao || "—"}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+          <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(linha);
+    });
+
+    document.getElementById("paginaAtual")?.textContent = paginaAtual;
+  } catch (err) {
+    console.error("Erro ao paginar alunos:", err);
+  }
+}
+
+document.getElementById("btnProximo")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "proximo"));
+document.getElementById("btnAnterior")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "anterior"));
+
+
 
 // IIFE para aplicar o tema sem flash de tela branca
 (function(){
