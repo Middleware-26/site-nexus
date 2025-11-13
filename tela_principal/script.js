@@ -230,7 +230,7 @@ async function carregarAlunosPaginado(codigoEscola, direcao) {
         q = query(
           alunosRef,
           where("codigoEscola", "==", codigoEscola),
-          where("tipo", "==", "alunos"),
+          where("tipo", "==", "aluno"),
           orderBy("nome"),
           limit(alunosPorPagina)
         );
@@ -239,7 +239,7 @@ async function carregarAlunosPaginado(codigoEscola, direcao) {
         q = query(
           alunosRef,
           where("codigoEscola", "==", codigoEscola),
-          where("tipo", "==", "alunos"),
+          where("tipo", "==", "aluno"),
           orderBy("nome"),
           startAfter(ultimoDoc),
           limit(alunosPorPagina)
@@ -257,7 +257,7 @@ async function carregarAlunosPaginado(codigoEscola, direcao) {
         q = query(
           alunosRef,
           where("codigoEscola", "==", codigoEscola),
-          where("tipo", "==", "alunos"),
+          where("tipo", "==", "aluno"),
           orderBy("nome"),
           endBefore(primeiroDoc),
           limitToLast(alunosPorPagina)
@@ -276,13 +276,22 @@ async function carregarAlunosPaginado(codigoEscola, direcao) {
       return;
     }
 
-    // atualiza cursores
+if (snapshot.docs.length > 0) {
+  if (direcao === "proximo") {
     primeiroDoc = snapshot.docs[0];
     ultimoDoc = snapshot.docs[snapshot.docs.length - 1];
+  } else if (direcao === "anterior") {
+    // Inverte os cursores quando retrocede
+    ultimoDoc = snapshot.docs[snapshot.docs.length - 1];
+    primeiroDoc = snapshot.docs[0];
+  } else {
+    // Página inicial
+    primeiroDoc = snapshot.docs[0];
+    ultimoDoc = snapshot.docs[snapshot.docs.length - 1];
+  }
+}
 
-    // atualiza pagina atual no DOM
-    const paginaEl = document.getElementById("paginaAtual");
-    if (paginaEl) paginaEl.textContent = paginaAtual;
+
 
     // renderiza tabela
     const tbody = document.getElementById("alunosContainer");
@@ -333,6 +342,10 @@ async function carregarAlunosPaginado(codigoEscola, direcao) {
     });
 
     console.log(`carregarAlunosPaginado: renderizadas ${snapshot.size} linhas (página ${paginaAtual}).`);
+
+    const paginaEl = document.getElementById("paginaAtual");
+    if (paginaEl) paginaEl.textContent = paginaAtual;
+
 
   } catch (error) {
     console.error("❌ Erro na paginação:", error);
