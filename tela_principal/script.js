@@ -18,6 +18,10 @@ import {
   query,
   where,
   collection,
+  orderBy,
+  limit,
+  startAfter,
+  startAt
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import {
   getStorage,
@@ -97,9 +101,12 @@ onAuthStateChanged(auth, async (user) => {
 
   // Atualiza os indicadores do painel
   atualizarIndicadores(user.uid, dados.codigoEscola);
-
   // Carrega os alunos da escola com paginação
   carregarAlunosPaginado(dados.codigoEscola);
+
+  document.getElementById("btnProximo")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "proximo"));
+  document.getElementById("btnAnterior")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "anterior"));
+
 
     console.log("📦 Dados do usuário:", dados);
 
@@ -249,9 +256,6 @@ async function carregarAlunosPaginado(codigoEscola, direcao = "inicio") {
     console.error("Erro ao paginar alunos:", err);
   }
 }
-
-document.getElementById("btnProximo")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "proximo"));
-document.getElementById("btnAnterior")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "anterior"));
 
 
 
