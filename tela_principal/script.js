@@ -194,9 +194,12 @@ async function atualizarIndicadores(uid, codigoEscola) {
 // ============================
 // 👩‍🏫 PAGINAÇÃO DE ALUNOS 
 // ============================
+
 let paginaAtual = 1;
-const alunosPorPagina = 10;
-let cursores = []; 
+let alunosPorPagina = 5;
+let primeiroDoc = null;
+let ultimoDoc = null;
+
 
 async function carregarAlunosPaginado(codigoEscola, direcao) {
   try {
