@@ -106,13 +106,26 @@ onAuthStateChanged(auth, async (user) => {
   // Carrega a primeira página
   carregarAlunosPaginado(userSchoolCode);
 
-  // Configura botões de paginação
-  document.getElementById("btnProximo")?.addEventListener("click", () => 
-    carregarAlunosPaginado(userSchoolCode, "proximo")
-  );
-  document.getElementById("btnAnterior")?.addEventListener("click", () => 
-    carregarAlunosPaginado(userSchoolCode, "anterior")
-  );
+const btnProximo = document.getElementById("btnProximo");
+const btnAnterior = document.getElementById("btnAnterior");
+
+if (btnProximo) {
+  btnProximo.addEventListener("click", (e) => {
+    e.preventDefault();
+    carregarAlunosPaginado(userSchoolCode, "proximo");
+    // opcional: manter o foco/scroll na lista de alunos
+    document.getElementById('alunosContainer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+if (btnAnterior) {
+  btnAnterior.addEventListener("click", (e) => {
+    e.preventDefault();
+    carregarAlunosPaginado(userSchoolCode, "anterior");
+    document.getElementById('alunosContainer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
 
     console.log("📦 Dados do usuário:", dados);
 
@@ -200,6 +213,11 @@ let alunosPorPagina = 5;
 let primeiroDoc = null;
 let ultimoDoc = null;
 
+// Array que guarda os cursores (lastVisible) por página.
+// cursores[0] => cursor da página 1, cursores[1] => cursor da página 2, etc.
+let cursores = [];
+
+
 
 async function carregarAlunosPaginado(codigoEscola, direcao) {
   try {
@@ -245,7 +263,7 @@ async function carregarAlunosPaginado(codigoEscola, direcao) {
     // Página anterior
     else if (direcao === "anterior") {
       if (paginaAtual > 1) {
-        const anterior = cursores[paginaAtual - 3]; // volta 1 página
+        const anterior = cursores[paginaAtual - 2]; // volta 1 página
         q = anterior
           ? query(
               alunosRef,
