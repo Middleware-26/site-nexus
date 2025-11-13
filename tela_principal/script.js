@@ -1295,20 +1295,41 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
   try {
     console.log("📦 Dados recebidos para cadastro:", { role, codigoEscola, nome, email });
 
-    // normaliza a subcoleção
-    const subcolecao = normalizeRoleToCollection(role);
+    // Normaliza o nome da subcoleção (garante plural correto)
+    const subcolecaoMap = {
+      aluno: "alunos",
+      alunos: "alunos",
+      professor: "professores",
+      professores: "professores",
+      psicologo: "psicologos",
+      psicologos: "psicologos",
+      administrador: "administradores",
+      administradores: "administradores",
+    };
+
+    const subcolecao = subcolecaoMap[role.toLowerCase()];
     if (!subcolecao) {
-      alert("Tipo inválido: " + role);
+      alert("⚠️ Tipo de usuário inválido: " + role);
       return false;
     }
 
-    // cria usuário no Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+    // ================================================
+    // 🔹 Cria um app secundário para o cadastro
+    // ================================================
+    const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+    const secondaryAuth = getAuth(secondaryApp);
+    const db = getFirestore();
+
+    // Cria o usuário sem afetar a sessão do admin
+    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, senha);
     const user = userCredential.user;
     const uid = user.uid;
+
     console.log("✅ Usuário criado no Auth:", uid);
 
-    // cria documento da escola se necessário
+    // ================================================
+    // 🏫 Garante que a escola exista
+    // ================================================
     const escolaRef = doc(db, "escolas", codigoEscola);
     const escolaSnap = await getDoc(escolaRef);
     if (!escolaSnap.exists()) {
@@ -1319,39 +1340,49 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
       console.log(`🏫 Nova escola criada: ${codigoEscola}`);
     }
 
-    // upload da foto (se quiser ativar, o código já estava comentado)
-    let fotoPerfilPath = "";
-    // if (file) { ... upload e atribuir path no storage ... }
-
-    // salva no subdocumento correto: escolas/{codigoEscola}/{subcolecao}/{uid}
+    // ================================================
+    // 📂 Cria documento do usuário na subcoleção
+    // ================================================
     await setDoc(doc(db, "escolas", codigoEscola, subcolecao, uid), {
       uid,
       nome,
       email,
       cpf,
       telefone: telefone || "",
-      tipo: subcolecao,           // SALVA aqui o tipo NORMALIZADO (ex: "professores")
+      tipo: subcolecao,
       codigoEscola,
       ativo: true,
       criadoEm: new Date().toISOString(),
-      fotoPerfil: fotoPerfilPath || "",
+      fotoPerfil: "",
     });
 
-    // salva também no documento central usuarios/{uid} com campo tipo normalizado
+    // ================================================
+    // 📘 Cria documento central em /usuarios
+    // ================================================
     await setDoc(doc(db, "usuarios", uid), {
       uid,
       nome,
       email,
-      tipo: subcolecao,   // importante: manter o mesmo valor usado na consulta
+      tipo: subcolecao,
       codigoEscola,
       referenciaFirestore: `escolas/${codigoEscola}/${subcolecao}/${uid}`,
-      criadoEm: new Date().toISOString()
+      criadoEm: new Date().toISOString(),
     });
+
+    console.log(`✅ ${role} cadastrado com sucesso no Firestore.`);
+
+    // ================================================
+    // 🚪 Desloga o app secundário (mantém admin logado)
+    // ================================================
+    await signOut(secondaryAuth);
+    console.log("🔒 App secundário desconectado (admin permanece logado).");
 
     alert(`✅ ${role} cadastrado com sucesso na escola ${codigoEscola}!`);
     return true;
+
   } catch (error) {
     console.error("❌ Erro ao criar usuário:", error);
+
     if (error.code === "auth/email-already-in-use") {
       alert("⚠️ Este e-mail já está cadastrado. Use outro ou redefina a senha.");
     } else if (error.code === "auth/missing-password") {
@@ -1359,6 +1390,7 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
     } else {
       alert("❌ Erro ao criar usuário: " + error.message);
     }
+
     return false;
   }
 }
