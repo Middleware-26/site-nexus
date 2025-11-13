@@ -934,101 +934,114 @@ carregarAlunosPsicologo();
 
 
 
-// =======================================================
-// 🔹 CARREGAR ALUNOS NA TABELA (Tela do Psicólogo)
-// =======================================================
+// =============================================
+// 🔹 LISTAR ALUNOS DA MESMA ESCOLA DO PSICÓLOGO
+// =============================================
 
-// Função para carregar os alunos da escola do psicólogo logado
 async function carregarAlunosPsicologo() {
   const tabela = document.getElementById('alunosContainer');
-  if (!tabela) return console.warn("⚠️ Elemento alunosContainer não encontrado.");
+  if (!tabela) return console.warn("⚠️ Tabela alunosContainer não encontrada.");
 
   try {
-    // Pega o ID do usuário logado (salvo no localStorage)
-    const uid = localStorage.getItem('uidUsuario');
-    if (!uid) {
-      console.warn("⚠️ Nenhum usuário logado encontrado no localStorage.");
-      return;
-    }
+    // Espera o Firebase confirmar quem está logado
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        console.warn("⚠️ Nenhum psicólogo logado. Redirecionando...");
+        window.location.href = "/tela_login/login.html";
+        return;
+      }
 
-    // Busca os dados do psicólogo no Firestore
-    const userDoc = await getDoc(doc(db, "usuarios", uid));
-    if (!userDoc.exists()) {
-      console.warn("⚠️ Documento do usuário não encontrado no Firestore.");
-      return;
-    }
+      // 🔹 Pega o documento do psicólogo no Firestore
+      const psicologoRef = doc(db, "usuarios", user.uid);
+      const psicologoSnap = await getDoc(psicologoRef);
 
-    const dadosUsuario = userDoc.data();
-    const codigoEscola = dadosUsuario.codigoEscola;
-    if (!codigoEscola) {
-      console.warn("⚠️ Usuário sem código de escola definido.");
-      return;
-    }
+      if (!psicologoSnap.exists()) {
+        console.warn("⚠️ Psicólogo não encontrado no Firestore.");
+        return;
+      }
 
-    // Busca os alunos dessa escola
-    const alunosRef = collection(db, "usuarios");
-    const alunosQuery = query(alunosRef, where("tipo", "==", "aluno"), where("codigoEscola", "==", codigoEscola));
-    const snapshot = await getDocs(alunosQuery);
+      const psicologo = psicologoSnap.data();
+      const codigoEscola = psicologo.codigoEscola;
 
-    tabela.innerHTML = "";
+      console.log("🏫 Código da escola do psicólogo:", codigoEscola);
 
-    if (snapshot.empty) {
-      tabela.innerHTML = `
-        <tr>
-          <td colspan="5" class="text-center py-4 text-gray-500">
-            Nenhum aluno cadastrado nesta escola.
+      if (!codigoEscola) {
+        console.warn("⚠️ Psicólogo sem código de escola definido.");
+        return;
+      }
+
+      // 🔹 Busca todos os alunos com o mesmo código de escola
+      const alunosRef = collection(db, "usuarios");
+      const alunosQuery = query(
+        alunosRef,
+        where("tipo", "==", "aluno"),
+        where("codigoEscola", "==", codigoEscola)
+      );
+
+      const snapshot = await getDocs(alunosQuery);
+
+      tabela.innerHTML = "";
+
+      if (snapshot.empty) {
+        tabela.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-4 text-gray-500">
+              Nenhum aluno encontrado nesta escola.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      // 🔹 Monta a tabela dinamicamente
+      snapshot.forEach((docSnap) => {
+        const aluno = docSnap.data();
+
+        const row = document.createElement("tr");
+        row.className = "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-10 w-10">
+                <img class="h-10 w-10 rounded-full object-cover"
+                     src="${aluno.fotoPerfil || 'imagens/padrao.jpg'}"
+                     alt="Foto de ${aluno.nome}">
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${aluno.nome}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">${aluno.idade || ''}</div>
+              </div>
+            </div>
           </td>
-        </tr>`;
-      return;
-    }
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900 dark:text-gray-100">${aluno.serie || '—'} - ${aluno.turma || '—'}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+              ${aluno.status || 'Em acompanhamento'}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+            ${aluno.ultimaSessao || '—'}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 mr-3">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+            <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+              <span class="material-symbols-outlined">chat</span>
+            </button>
+          </td>
+        `;
+        tabela.appendChild(row);
+      });
 
-    // Monta as linhas dinamicamente
-    snapshot.forEach((docSnap) => {
-      const aluno = docSnap.data();
-      const row = document.createElement("tr");
-      row.className = "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
-      row.innerHTML = `
-        <td class="px-6 py-4 whitespace-nowrap">
-          <div class="flex items-center">
-            <div class="flex-shrink-0 h-10 w-10">
-              <img class="h-10 w-10 rounded-full object-cover"
-                   src="${aluno.fotoPerfil || 'imagens/padrao.jpg'}"
-                   alt="Foto de ${aluno.nome}">
-            </div>
-            <div class="ml-4">
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${aluno.nome}</div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">${aluno.idade || ''}</div>
-            </div>
-          </div>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-          <div class="text-sm text-gray-900 dark:text-gray-100">${aluno.serie || '—'} - ${aluno.turma || '—'}</div>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-            ${aluno.status || 'Em acompanhamento'}
-          </span>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-          ${aluno.ultimaSessao || '—'}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-          <button class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 mr-3">
-            <span class="material-symbols-outlined">visibility</span>
-          </button>
-          <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
-            <span class="material-symbols-outlined">chat</span>
-          </button>
-        </td>
-      `;
-      tabela.appendChild(row);
+      console.log("✅ Alunos carregados com sucesso.");
     });
-
-    console.log("✅ Alunos carregados com sucesso.");
   } catch (error) {
     console.error("❌ Erro ao carregar alunos:", error);
   }
 }
+
 
 
 
