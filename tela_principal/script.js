@@ -938,6 +938,7 @@ carregarAlunosPsicologo();
 // 🔹 LISTAR ALUNOS DA MESMA ESCOLA DO PSICÓLOGO
 // =============================================
 
+
 async function carregarAlunosPsicologo() {
   const tabela = document.getElementById('alunosContainer');
   if (!tabela) return console.warn("⚠️ Tabela alunosContainer não encontrada.");
@@ -1447,11 +1448,13 @@ onAuthStateChanged(auth, async (user) => {
 
     const dados = userSnap.data();
     const nomeEl = document.getElementById("userName");
-    const colEl = document.querySelector("#sidebar p:nth-of-type(3)");
+    const colEl = document.querySelector("userSchool");
+    const roleEl = document.getElementById("userRole");
     const avatarEl = document.getElementById("avatarPreview");
 
-    if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
-    if (colEl) colEl.textContent = `Colégio: ${dados.codigoEscola || "Não informado"}`;
+if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
+if (colEl) colEl.textContent = `Colégio: ${dados.codigoEscola || "Não informado"}`;
+if (roleEl) roleEl.textContent = dados.tipo || "Usuário";
 
     if (dados.fotoPerfil && avatarEl) {
       const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
