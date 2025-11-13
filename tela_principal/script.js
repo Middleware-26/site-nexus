@@ -923,74 +923,114 @@ if (cancelModalBtn) cancelModalBtn.addEventListener('click', resetHorario);
 if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) resetHorario(); });
 
 
+});
 
-// ======================
-// CARREGAR ALUNOS DA ESCOLA
-// ======================
+
+
+
+// =======================================================
+// 🔹 CARREGAR ALUNOS NA TABELA (Tela do Psicólogo)
+// =======================================================
 const db = getFirestore();
 
-// Função para carregar os alunos da escola do usuário logado
-async function carregarAlunosPorEscola() {
-  const userId = localStorage.getItem('uidUsuario');
-  if (!userId) return console.error('Usuário não autenticado');
+// Função para carregar os alunos da escola do psicólogo logado
+async function carregarAlunosPsicologo() {
+  const tabela = document.getElementById('alunosContainer');
+  if (!tabela) return console.warn("⚠️ Elemento alunosContainer não encontrado.");
 
   try {
-    // Busca o documento do usuário logado
-    const userDoc = await getDoc(doc(db, "usuarios", userId));
-    if (!userDoc.exists()) return console.error("Documento do usuário não encontrado");
-
-    const codigoEscola = userDoc.data().codigoEscola;
-    if (!codigoEscola) return console.error("Usuário sem código de escola");
-
-    console.log("🔍 Buscando alunos da escola:", codigoEscola);
-
-    // Busca alunos com o mesmo código de escola
-    const alunosRef = collection(db, "usuarios");
-    const alunosQuery = query(alunosRef, where("role", "==", "aluno"), where("codigoEscola", "==", codigoEscola));
-    const snapshot = await getDocs(alunosQuery);
-
-    const container = document.getElementById("alunosContainer");
-    container.innerHTML = ""; // Limpa o conteúdo anterior
-
-    if (snapshot.empty) {
-      container.innerHTML = `<p class="text-gray-500">Nenhum aluno cadastrado nesta escola.</p>`;
+    // Pega o ID do usuário logado (salvo no localStorage)
+    const uid = localStorage.getItem('uidUsuario');
+    if (!uid) {
+      console.warn("⚠️ Nenhum usuário logado encontrado no localStorage.");
       return;
     }
 
-    snapshot.forEach(docSnap => {
+    // Busca os dados do psicólogo no Firestore
+    const userDoc = await getDoc(doc(db, "usuarios", uid));
+    if (!userDoc.exists()) {
+      console.warn("⚠️ Documento do usuário não encontrado no Firestore.");
+      return;
+    }
+
+    const dadosUsuario = userDoc.data();
+    const codigoEscola = dadosUsuario.codigoEscola;
+    if (!codigoEscola) {
+      console.warn("⚠️ Usuário sem código de escola definido.");
+      return;
+    }
+
+    // Busca os alunos dessa escola
+    const alunosRef = collection(db, "usuarios");
+    const alunosQuery = query(alunosRef, where("tipo", "==", "aluno"), where("codigoEscola", "==", codigoEscola));
+    const snapshot = await getDocs(alunosQuery);
+
+    tabela.innerHTML = "";
+
+    if (snapshot.empty) {
+      tabela.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center py-4 text-gray-500">
+            Nenhum aluno cadastrado nesta escola.
+          </td>
+        </tr>`;
+      return;
+    }
+
+    // Monta as linhas dinamicamente
+    snapshot.forEach((docSnap) => {
       const aluno = docSnap.data();
-
-      const card = document.createElement("div");
-      card.className = "card-aluno bg-white dark:bg-gray-800 p-4 rounded-lg shadow cursor-pointer transition hover:bg-blue-50 dark:hover:bg-gray-700";
-      card.dataset.nome = aluno.nome || "";
-      card.dataset.serie = aluno.serie || "";
-      card.dataset.turma = aluno.turma || "";
-
-      card.innerHTML = `
-        <div class="flex items-center space-x-4">
-          <img src="${aluno.fotoPerfil || 'assets/default-avatar.png'}" alt="Foto de ${aluno.nome}" class="w-12 h-12 rounded-full object-cover">
-          <div>
-            <h5 class="font-semibold text-gray-800 dark:text-white">${aluno.nome}</h5>
-            <p class="text-sm text-gray-500">${aluno.serie || 'Sem série'} • ${aluno.turma || 'Sem turma'}</p>
+      const row = document.createElement("tr");
+      row.className = "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
+      row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 h-10 w-10">
+              <img class="h-10 w-10 rounded-full object-cover"
+                   src="${aluno.fotoPerfil || 'imagens/padrao.jpg'}"
+                   alt="Foto de ${aluno.nome}">
+            </div>
+            <div class="ml-4">
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${aluno.nome}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">${aluno.idade || ''}</div>
+            </div>
           </div>
-        </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm text-gray-900 dark:text-gray-100">${aluno.serie || '—'} - ${aluno.turma || '—'}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+            ${aluno.status || 'Em acompanhamento'}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+          ${aluno.ultimaSessao || '—'}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+          <button class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 mr-3">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
+          <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+            <span class="material-symbols-outlined">chat</span>
+          </button>
+        </td>
       `;
-
-      card.addEventListener("click", () => selecionarAluno(card));
-
-      container.appendChild(card);
+      tabela.appendChild(row);
     });
 
-    console.log("✅ Alunos carregados com sucesso!");
+    console.log("✅ Alunos carregados com sucesso.");
   } catch (error) {
-    console.error("Erro ao carregar alunos:", error);
+    console.error("❌ Erro ao carregar alunos:", error);
   }
 }
 
-// Chama a função ao carregar a página
-carregarAlunosPorEscola();
+// Executa assim que a página terminar de carregar
+document.addEventListener("DOMContentLoaded", carregarAlunosPsicologo);
 
-});
+
+
+
 
 // 
 // EVENTOS SECUNDÁRIOS
@@ -1144,7 +1184,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
 const storage = getStorage(app);
 
 window.auth = auth;
