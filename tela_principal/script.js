@@ -1115,11 +1115,11 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
 
     // Upload da foto de perfil
     let fotoPerfilURL = "";
-    if (file) {
-      const storageRef = ref(storage, `usuarios/${uid}/fotoPerfil.jpg`);
-      await uploadBytes(storageRef, file);
-      fotoPerfilURL = await getDownloadURL(storageRef);
-    }
+   // if (file) {
+     // const storageRef = ref(storage, `usuarios/${uid}/fotoPerfil.jpg`);
+     // await uploadBytes(storageRef, file);
+    //  fotoPerfilURL = await getDownloadURL(storageRef);
+  //  }
 
     // Salva dados no Firestore
     await setDoc(doc(db, "escolas", codigoEscola, subcolecao, uid), {
