@@ -4,7 +4,8 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
   getFirestore,
@@ -31,18 +32,16 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // ======================================================
-// 🧠 GARANTE QUE TODAS AS ABAS FIQUEM SINCRONIZADAS
+// 🔄 SINCRONIZAÇÃO ENTRE ABAS (Login / Logout)
 // ======================================================
 setPersistence(auth, browserLocalPersistence);
 
-// ======================================================
-// 🔄 MONITORAMENTO GLOBAL DE LOGIN ENTRE ABAS
-// ======================================================
+// Monitora qualquer mudança no estado de autenticação
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     console.log("✅ Usuário autenticado:", user.email);
 
-    // Verifica o tipo de usuário no Firestore
+    // Verifica o tipo e a escola do usuário
     const colecoes = ["alunos", "professores", "psicologos", "administradores"];
     let dadosUsuario = null;
 
@@ -59,6 +58,7 @@ onAuthStateChanged(auth, async (user) => {
     if (dadosUsuario) {
       localStorage.setItem("usuario", JSON.stringify(dadosUsuario));
 
+      // Redireciona de acordo com o tipo
       switch (dadosUsuario.tipo) {
         case "alunos":
           window.location.href = "../tela_principal/alunos.html";
@@ -76,10 +76,14 @@ onAuthStateChanged(auth, async (user) => {
           window.location.href = "../tela_principal/adminpainel.html";
       }
     } else {
-      console.warn("⚠️ Usuário não encontrado no banco de dados Firestore.");
+      console.warn("⚠️ Usuário não encontrado no Firestore.");
     }
   } else {
     console.log("🚪 Nenhum usuário autenticado — aguardando login...");
+    // Se o usuário saiu, garante que volta à tela de login
+    if (!window.location.pathname.includes("login.html")) {
+      window.location.href = "../tela_login/login.html";
+    }
   }
 });
 
@@ -98,20 +102,36 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   }
 
   try {
-    // 🔐 Login via Firebase Auth
     await signInWithEmailAndPassword(auth, email, senha);
-    // Não precisa redirecionar aqui — o onAuthStateChanged cuidará disso
+    // Redirecionamento será feito automaticamente via onAuthStateChanged
   } catch (error) {
     console.error("❌ Erro no login:", error);
-
-    if (error.code === "auth/invalid-email" || error.code === "auth/invalid-credential") {
-      alert("Email ou senha inválidos.");
-    } else if (error.code === "auth/user-not-found") {
-      alert("Usuário não encontrado.");
-    } else if (error.code === "auth/wrong-password") {
-      alert("Senha incorreta.");
+    if (error.code === "auth/invalid-credential") {
+      alert("Email ou senha incorretos.");
     } else {
       alert("Erro ao fazer login: " + error.message);
     }
   }
 });
+
+// ======================================================
+// 🚪 SINCRONIZAÇÃO DE LOGOUT ENTRE ABAS
+// ======================================================
+
+// Escuta evento de logout em qualquer aba
+window.addEventListener("storage", (event) => {
+  if (event.key === "logout" && event.newValue === "true") {
+    console.log("🔁 Logout detectado em outra aba. Redirecionando...");
+    signOut(auth).finally(() => {
+      localStorage.removeItem("logout");
+      window.location.href = "../tela_login/login.html";
+    });
+  }
+});
+
+// Função de logout global (chame essa em qualquer página)
+window.logoutGlobal = async () => {
+  await signOut(auth);
+  localStorage.setItem("logout", "true"); // dispara evento em todas as abas
+  window.location.href = "../tela_login/login.html";
+};
