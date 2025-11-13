@@ -26,6 +26,84 @@ import {
   uploadBytes
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+// =======================================================
+// ⚙️ CONFIGURAÇÃO DO FIREBASE
+// =======================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
+  authDomain: "nexus-web-c35f1.firebaseapp.com",
+  projectId: "nexus-web-c35f1",
+  storageBucket: "nexus-web-c35f1.appspot.com",
+  messagingSenderId: "387285405125",
+  appId: "1:387285405125:web:96c2d0edb9695b79690fac",
+  measurementId: "G-1E0BGG8323"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+window.auth = auth;
+window.db = db;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    console.warn("⚠️ Nenhum usuário autenticado. Redirecionando...");
+    window.location.href = "/tela_login/login.html";
+    return;
+  }
+
+  try {
+    console.log("🔹 Usuário autenticado:", user.email);
+
+    // Buscar dados do usuário no Firestore
+    const userDocRef = doc(db, "usuarios", user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+      console.warn("⚠️ Usuário não encontrado no Firestore.");
+      return;
+    }
+
+    const dados = userDocSnap.data();
+    console.log("📦 Dados do usuário:", dados);
+
+    // Atualiza informações na sidebar
+    const nomeEl = document.getElementById("userName");
+    const roleEl = document.getElementById("userRole");
+    const escolaEl = document.getElementById("userSchool");
+    const avatarEl = document.getElementById("avatarPreview");
+    const userNameTop = document.getElementById("userNameTop");
+
+    if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
+    if (roleEl) {
+      const cargo =
+        dados.tipo === "aluno" ? "Aluno" :
+        dados.tipo === "professor" ? "Professor" :
+        dados.tipo === "psicologo" ? "Psicólogo Educacional" :
+        dados.tipo || "Usuário";
+      roleEl.textContent = cargo;
+    }
+    if (userNameTop) userNameTop.textContent = dados.nome || "Usuário";
+    if (escolaEl) escolaEl.textContent = `Colégio: ${dados.codigoEscola || "Não informado"}`;
+
+    // Atualiza foto de perfil
+    if (dados.fotoPerfil && avatarEl) {
+      try {
+        const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
+        avatarEl.src = url;
+      } catch (error) {
+        console.warn("⚠️ Erro ao carregar imagem de perfil:", error);
+      }
+    }
+
+    console.log("✅ Sidebar atualizada com sucesso.");
+  } catch (error) {
+    console.error("❌ Erro ao carregar dados do usuário:", error);
+  }
+});
+
 // IIFE para aplicar o tema sem flash de tela branca
 (function(){
   // Verifica tema salvo no localStorage
@@ -927,8 +1005,6 @@ if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) rese
 // chama carregamento de alunos após todo o init do DOM
 carregarAlunosPsicologo();
 
-
-
 });
 
 
@@ -937,8 +1013,6 @@ carregarAlunosPsicologo();
 // =============================================
 // 🔹 LISTAR ALUNOS DA MESMA ESCOLA DO PSICÓLOGO
 // =============================================
-
-
 async function carregarAlunosPsicologo() {
   const tabela = document.getElementById('alunosContainer');
   if (!tabela) return console.warn("⚠️ Tabela alunosContainer não encontrada.");
@@ -1185,30 +1259,11 @@ if (fecharModalButton) {
   });
 }
 
-// =======================================================
-// ⚙️ CONFIGURAÇÃO DO FIREBASE
-// =======================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyADnCSz9_kJCJQp1simuF52eZ9yz4MawgE",
-  authDomain: "nexus-web-c35f1.firebaseapp.com",
-  projectId: "nexus-web-c35f1",
-  storageBucket: "nexus-web-c35f1.appspot.com",
-  messagingSenderId: "387285405125",
-  appId: "1:387285405125:web:96c2d0edb9695b79690fac",
-  measurementId: "G-1E0BGG8323"
-};
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
 
-window.auth = auth;
-window.db = db;
-
-// =======================================================
-// 🧾 CADASTRO PELO ADMINISTRADOR (sem secondaryApp)
-// =======================================================
+// ==================================
+// 🧾 CADASTRO PELO ADMINISTRADOR 
+// ==================================
 async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file) {
   try {
     console.log("📦 Dados recebidos para cadastro:", { email, senha });
@@ -1414,73 +1469,6 @@ async function loginUsuario(email, senha) {
     alert("Erro ao fazer login: " + error.message);
   }
 }
-
-
-// =======================================================
-// 👤 CARREGAR PERFIL DO USUÁRIO LOGADO
-// =======================================================
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    console.warn("⚠️ Nenhum usuário autenticado. Redirecionando...");
-    window.location.href = "/tela_login/login.html";
-    return;
-  }
-
-  try {
-    console.log("🔹 Usuário autenticado:", user.email);
-
-    // Buscar dados do usuário no Firestore
-    const userDocRef = doc(db, "usuarios", user.uid);
-    const userDocSnap = await getDoc(userDocRef);
-
-    if (!userDocSnap.exists()) {
-      console.warn("⚠️ Usuário não encontrado no Firestore.");
-      return;
-    }
-
-    const dados = userDocSnap.data();
-    console.log("📦 Dados do usuário:", dados);
-
-    // Pega os elementos do HTML
-    const nomeEl = document.getElementById("userName");
-    const roleEl = document.getElementById("userRole");
-    const escolaEl = document.getElementById("userSchool");
-    const avatarEl = document.getElementById("avatarPreview");
-    const userNameTop = document.getElementById("userNameTop");
-
-
-    // Atualiza as informações na sidebar
-    if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
-    if (roleEl) {
-      const cargo =
-        dados.tipo === "aluno" ? "Aluno" :
-        dados.tipo === "professor" ? "Professor" :
-        dados.tipo === "psicologo" ? "Psicólogo Educacional" :
-        dados.tipo || "Usuário";
-      roleEl.textContent = cargo;
-    }
-     if (userNameTop) {
-      userNameTop.textContent = dados.nome || "Usuário";
-    }
-    if (escolaEl) escolaEl.textContent = `Colégio: ${dados.codigoEscola || "Não informado"}`;
-
-    // Atualiza foto de perfil
-    if (dados.fotoPerfil && avatarEl) {
-      try {
-        const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
-        avatarEl.src = url;
-      } catch (error) {
-        console.warn("⚠️ Erro ao carregar imagem de perfil:", error);
-      }
-    }
-
-    console.log("✅ Sidebar atualizada com sucesso.");
-  } catch (error) {
-    console.error("❌ Erro ao carregar dados do usuário:", error);
-  }
-});
-
 
 // =======================================================
 // 🚪 LOGOUT (SAIR DA CONTA)
