@@ -39,6 +39,31 @@ const firebaseConfig = {
   measurementId: "G-1E0BGG8323"
 };
 
+// Normalização dos tipos / subcoleções
+const ROLE_TO_COLLECTION = {
+  aluno: "alunos",
+  aluno_singular: "aluno",          // opcional se precisar singular
+  professor: "professores",
+  psicologo: "psicologos",
+  administrador: "administradores"
+};
+
+// Converte um valor informado (ex: "Professor" ou "professores") para a chave de coleção esperada
+function normalizeRoleToCollection(role) {
+  if (!role) return null;
+  const k = role.toString().trim().toLowerCase();
+  // mapeamentos simples: aceita 'professor', 'professores', 'Professor' etc.
+  if (k.startsWith("prof")) return ROLE_TO_COLLECTION.professor;
+  if (k.startsWith("psic")) return ROLE_TO_COLLECTION.psicologo;
+  if (k.startsWith("admin")) return ROLE_TO_COLLECTION.administrador;
+  if (k.startsWith("alun")) return ROLE_TO_COLLECTION.aluno;
+  // fallback: se já for um dos valores mapeados, retorna direto
+  if (Object.values(ROLE_TO_COLLECTION).includes(k)) return k;
+  return null;
+}
+
+
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -46,6 +71,8 @@ const storage = getStorage(app);
 
 window.auth = auth;
 window.db = db;
+
+
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -1266,21 +1293,22 @@ if (fecharModalButton) {
 // ==================================
 async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, senha, file) {
   try {
-    console.log("📦 Dados recebidos para cadastro:", { email, senha });
+    console.log("📦 Dados recebidos para cadastro:", { role, codigoEscola, nome, email });
 
-    // Cria o usuário diretamente no app principal
+    // normaliza a subcoleção
+    const subcolecao = normalizeRoleToCollection(role);
+    if (!subcolecao) {
+      alert("Tipo inválido: " + role);
+      return false;
+    }
+
+    // cria usuário no Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
     const uid = user.uid;
-
     console.log("✅ Usuário criado no Auth:", uid);
 
-    // Subcoleção (ex: alunos, professores etc.)
-    const subcolecao = role.toLowerCase().endsWith("s")
-      ? role.toLowerCase()
-      : role.toLowerCase() + "s";
-
-    // Cria a escola, se não existir
+    // cria documento da escola se necessário
     const escolaRef = doc(db, "escolas", codigoEscola);
     const escolaSnap = await getDoc(escolaRef);
     if (!escolaSnap.exists()) {
@@ -1291,40 +1319,37 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
       console.log(`🏫 Nova escola criada: ${codigoEscola}`);
     }
 
-    // Upload da foto de perfil
-    let fotoPerfilURL = "";
-   // if (file) {
-     // const storageRef = ref(storage, `usuarios/${uid}/fotoPerfil.jpg`);
-     // await uploadBytes(storageRef, file);
-    //  fotoPerfilURL = await getDownloadURL(storageRef);
-  //  }
+    // upload da foto (se quiser ativar, o código já estava comentado)
+    let fotoPerfilPath = "";
+    // if (file) { ... upload e atribuir path no storage ... }
 
-    // Salva dados no Firestore
+    // salva no subdocumento correto: escolas/{codigoEscola}/{subcolecao}/{uid}
     await setDoc(doc(db, "escolas", codigoEscola, subcolecao, uid), {
       uid,
       nome,
       email,
       cpf,
       telefone: telefone || "",
-      tipo: role,
+      tipo: subcolecao,           // SALVA aqui o tipo NORMALIZADO (ex: "professores")
       codigoEscola,
       ativo: true,
       criadoEm: new Date().toISOString(),
-      fotoPerfil: fotoPerfilURL || "",
+      fotoPerfil: fotoPerfilPath || "",
     });
 
+    // salva também no documento central usuarios/{uid} com campo tipo normalizado
     await setDoc(doc(db, "usuarios", uid), {
       uid,
       nome,
       email,
-      tipo: role,
+      tipo: subcolecao,   // importante: manter o mesmo valor usado na consulta
       codigoEscola,
       referenciaFirestore: `escolas/${codigoEscola}/${subcolecao}/${uid}`,
+      criadoEm: new Date().toISOString()
     });
 
     alert(`✅ ${role} cadastrado com sucesso na escola ${codigoEscola}!`);
     return true;
-
   } catch (error) {
     console.error("❌ Erro ao criar usuário:", error);
     if (error.code === "auth/email-already-in-use") {
@@ -1337,6 +1362,7 @@ async function cadastrarUsuario(role, codigoEscola, nome, email, cpf, telefone, 
     return false;
   }
 }
+
 
 // =======================================================
 // 🧩 FORM DE CADASTRO - EVENTO DE SUBMISSÃO (único)
@@ -1421,54 +1447,73 @@ async function loginUsuario(email, senha) {
     const user = userCredential.user;
     const uid = user.uid;
 
-    const tipos = ["alunos", "professores", "psicologos", "administradores"];
-    let dadosUsuario = null, tipoEncontrado = null, codigoEscola = null;
+    // 1) tenta buscar documento central em usuarios/{uid}
+    const userDoc = await getDoc(doc(db, "usuarios", uid));
+    if (userDoc.exists()) {
+      const dadosUsuario = userDoc.data();
+      const tipo = dadosUsuario.tipo || null;        // ex: "professores"
+      const ref = dadosUsuario.referenciaFirestore || null;
+      const codigoEscola = dadosUsuario.codigoEscola || null;
 
-    // Procura o usuário nas subcoleções de todas as escolas
+      console.log("🔐 Login via usuarios/:", tipo, codigoEscola, ref);
+
+      // redireciona conforme tipo (garanta que use os mesmos caminhos)
+      switch (tipo) {
+        case "alunos":
+          window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}&role=${tipo}`;
+          return;
+        case "professores":
+          window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}&role=${tipo}`;
+          return;
+        case "psicologos":
+          window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}&role=${tipo}`;
+          return;
+        case "administradores":
+          window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}&role=${tipo}`;
+          return;
+        default:
+          console.warn("Tipo desconhecido no documento usuarios/:", tipo);
+          break;
+      }
+    }
+
+    // 2) fallback — se nao existir doc 'usuarios', procura nas subcolecoes de escolas (compatibilidade retroativa)
+    const tipos = ["alunos", "professores", "psicologos", "administradores"];
     const escolasSnap = await getDocs(collection(db, "escolas"));
     for (const escolaDoc of escolasSnap.docs) {
       for (const tipo of tipos) {
         const userRef = doc(db, `escolas/${escolaDoc.id}/${tipo}/${uid}`);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
-          dadosUsuario = userSnap.data();
-          tipoEncontrado = tipo;
-          codigoEscola = escolaDoc.id;
-          break;
+          const dadosUsuario = userSnap.data();
+          console.log(`🔐 Login via escolas/${escolaDoc.id}/${tipo}:`, dadosUsuario.nome);
+          // redireciona
+          switch (tipo) {
+            case "alunos":
+              window.location.href = `/tela_principal/alunos.html?escola=${escolaDoc.id}&role=${tipo}`;
+              return;
+            case "professores":
+              window.location.href = `/tela_principal/professor.html?escola=${escolaDoc.id}&role=${tipo}`;
+              return;
+            case "psicologos":
+              window.location.href = `/tela_principal/psicologo.html?escola=${escolaDoc.id}&role=${tipo}`;
+              return;
+            case "administradores":
+              window.location.href = `/tela_principal/adminpainel.html?escola=${escolaDoc.id}&role=${tipo}`;
+              return;
+          }
         }
       }
-      if (dadosUsuario) break;
     }
 
-    if (!dadosUsuario) {
-      alert("Usuário não encontrado no banco de dados!");
-      return;
-    }
-
-    console.log(`🔐 Login como ${tipoEncontrado} - ${dadosUsuario.nome}`);
-
-    // Redireciona conforme o tipo de usuário
-    switch (tipoEncontrado) {
-      case "alunos":
-        window.location.href = `/tela_principal/alunos.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-        break;
-      case "professores":
-        window.location.href = `/tela_principal/professor.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-        break;
-      case "psicologos":
-        window.location.href = `/tela_principal/psicologo.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-        break;
-      case "administradores":
-        window.location.href = `/tela_principal/adminpainel.html?escola=${codigoEscola}&role=${tipoEncontrado}`;
-        break;
-      default:
-        alert("Tipo de usuário desconhecido!");
-    }
+    // se chegou até aqui: não foi encontrado
+    alert("Usuário não encontrado no banco de dados!");
   } catch (error) {
     console.error("Erro ao fazer login:", error);
     alert("Erro ao fazer login: " + error.message);
   }
 }
+
 
 // =======================================================
 // 🚪 LOGOUT (SAIR DA CONTA)
