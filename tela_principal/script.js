@@ -195,9 +195,8 @@ async function atualizarIndicadores(uid, codigoEscola) {
 // 👩‍🏫 PAGINAÇÃO DE ALUNOS 
 // ============================
 let paginaAtual = 1;
-let ultimoDoc = null;
-let primeiroDoc = null;
 const alunosPorPagina = 10;
+let cursores = []; 
 
 async function carregarAlunosPaginado(codigoEscola, direcao) {
   try {
@@ -219,62 +218,64 @@ async function carregarAlunosPaginado(codigoEscola, direcao) {
         limit(alunosPorPagina)
       );
       paginaAtual = 1;
-      // reset cursors ao carregar início
-      primeiroDoc = null;
-      ultimoDoc = null;
+      cursores = [];
+    }
 
     // Próxima página
-    } else if (direcao === "proximo") {
-      if (!ultimoDoc) {
-        // se não houver cursor, carrega a primeira página
+    else if (direcao === "proximo") {
+      const ultimo = cursores[paginaAtual - 1];
+      if (ultimo) {
         q = query(
           alunosRef,
           where("codigoEscola", "==", codigoEscola),
           where("tipo", "==", "aluno"),
           orderBy("nome"),
-          limit(alunosPorPagina)
-        );
-        paginaAtual = 1;
-      } else {
-        q = query(
-          alunosRef,
-          where("codigoEscola", "==", codigoEscola),
-          where("tipo", "==", "aluno"),
-          orderBy("nome"),
-          startAfter(ultimoDoc),
+          startAfter(ultimo),
           limit(alunosPorPagina)
         );
         paginaAtual++;
-      }
-
-    // Página anterior
-    } else if (direcao === "anterior") {
-      if (!primeiroDoc) {
-        // já está na primeira página
-        return;
       } else {
-        // Para voltar, buscamos os documentos anteriores usando endBefore + limitToLast
-        q = query(
-          alunosRef,
-          where("codigoEscola", "==", codigoEscola),
-          where("tipo", "==", "aluno"),
-          orderBy("nome"),
-          endBefore(primeiroDoc),
-          limitToLast(alunosPorPagina)
-        );
-        paginaAtual = Math.max(1, paginaAtual - 1);
+        return;
       }
     }
+
+    // Página anterior
+    else if (direcao === "anterior") {
+      if (paginaAtual > 1) {
+        const anterior = cursores[paginaAtual - 3]; // volta 1 página
+        q = anterior
+          ? query(
+              alunosRef,
+              where("codigoEscola", "==", codigoEscola),
+              where("tipo", "==", "aluno"),
+              orderBy("nome"),
+              startAfter(anterior),
+              limit(alunosPorPagina)
+            )
+          : query(
+              alunosRef,
+              where("codigoEscola", "==", codigoEscola),
+              where("tipo", "==", "aluno"),
+              orderBy("nome"),
+              limit(alunosPorPagina)
+            );
+        paginaAtual--;
+      } else {
+        return;
+      }
+    }
+
 
     const snapshot = await getDocs(q);
 
     // se vazio e foi tentativa de próxima página, não incrementa
-    if (snapshot.empty) {
-      console.log("carregarAlunosPaginado: snapshot vazio para", { codigoEscola, direcao });
-      // ajustar paginaAtual caso tenha sido incrementado
-      if (direcao === "proximo") paginaAtual = Math.max(1, paginaAtual - 1);
-      return;
-    }
+    if (!snapshot.empty) {
+  const lastVisible = snapshot.docs[snapshot.docs.length - 1];
+  if (!cursores[paginaAtual - 1]) {
+    cursores[paginaAtual - 1] = lastVisible;
+  }
+}
+
 
 if (snapshot.docs.length > 0) {
   if (direcao === "proximo") {
