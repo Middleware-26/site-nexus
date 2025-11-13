@@ -1422,46 +1422,57 @@ async function loginUsuario(email, senha) {
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
+    console.warn("⚠️ Nenhum usuário autenticado. Redirecionando...");
     window.location.href = "/tela_login/login.html";
     return;
   }
 
-  // Pega dados da URL (ex: ?escola=123&role=psicologos)
-  const params = new URLSearchParams(window.location.search);
-  const role = params.get("role");
-  const codigoEscola = params.get("escola");
-  const uid = user.uid;
-
-  if (!role || !codigoEscola) {
-    console.warn("⚠️ Parâmetros da URL ausentes!");
-    return;
-  }
-
   try {
-    const userRef = doc(db, `escolas/${codigoEscola}/${role}/${uid}`);
-    const userSnap = await getDoc(userRef);
+    console.log("🔹 Usuário autenticado:", user.email);
 
-    if (!userSnap.exists()) {
-      console.warn("⚠️ Documento de usuário não encontrado no Firestore!");
+    // Buscar dados do usuário no Firestore
+    const userDocRef = doc(db, "usuarios", user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+      console.warn("⚠️ Usuário não encontrado no Firestore.");
       return;
     }
 
-    const dados = userSnap.data();
+    const dados = userDocSnap.data();
+    console.log("📦 Dados do usuário:", dados);
+
+    // Pega os elementos do HTML
     const nomeEl = document.getElementById("userName");
-    const colEl = document.querySelector("userSchool");
     const roleEl = document.getElementById("userRole");
+    const escolaEl = document.getElementById("userSchool");
     const avatarEl = document.getElementById("avatarPreview");
 
-if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
-if (colEl) colEl.textContent = `Colégio: ${dados.codigoEscola || "Não informado"}`;
-if (roleEl) roleEl.textContent = dados.tipo || "Usuário";
-
-    if (dados.fotoPerfil && avatarEl) {
-      const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
-      avatarEl.src = url;
+    // Atualiza as informações na sidebar
+    if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
+    if (roleEl) {
+      const cargo =
+        dados.tipo === "aluno" ? "Aluno" :
+        dados.tipo === "professor" ? "Professor" :
+        dados.tipo === "psicologo" ? "Psicólogo Educacional" :
+        dados.tipo || "Usuário";
+      roleEl.textContent = cargo;
     }
-  } catch (err) {
-    console.error("Erro ao carregar perfil:", err);
+    if (escolaEl) escolaEl.textContent = `Colégio: ${dados.codigoEscola || "Não informado"}`;
+
+    // Atualiza foto de perfil
+    if (dados.fotoPerfil && avatarEl) {
+      try {
+        const url = await getDownloadURL(ref(storage, dados.fotoPerfil));
+        avatarEl.src = url;
+      } catch (error) {
+        console.warn("⚠️ Erro ao carregar imagem de perfil:", error);
+      }
+    }
+
+    console.log("✅ Sidebar atualizada com sucesso.");
+  } catch (error) {
+    console.error("❌ Erro ao carregar dados do usuário:", error);
   }
 });
 
