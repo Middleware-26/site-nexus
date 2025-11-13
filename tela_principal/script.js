@@ -1447,6 +1447,8 @@ onAuthStateChanged(auth, async (user) => {
     const roleEl = document.getElementById("userRole");
     const escolaEl = document.getElementById("userSchool");
     const avatarEl = document.getElementById("avatarPreview");
+    const userNameTop = document.getElementById("userNameTop");
+
 
     // Atualiza as informações na sidebar
     if (nomeEl) nomeEl.textContent = dados.nome || "Usuário";
@@ -1457,6 +1459,9 @@ onAuthStateChanged(auth, async (user) => {
         dados.tipo === "psicologo" ? "Psicólogo Educacional" :
         dados.tipo || "Usuário";
       roleEl.textContent = cargo;
+    }
+     if (userNameTop) {
+      userNameTop.textContent = dados.nome || "Usuário";
     }
     if (escolaEl) escolaEl.textContent = `Colégio: ${dados.codigoEscola || "Não informado"}`;
 
