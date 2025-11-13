@@ -1,3 +1,29 @@
+// =======================================================
+// 🔥 INTEGRAÇÃO FIREBASE - NEXUS
+// =======================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  collection,
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+  getStorage,
+  ref,
+  getDownloadURL,
+  uploadBytes
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
 // IIFE para aplicar o tema sem flash de tela branca
 (function(){
   // Verifica tema salvo no localStorage
@@ -896,6 +922,74 @@ if (closeModalBtn) closeModalBtn.addEventListener('click', resetHorario);
 if (cancelModalBtn) cancelModalBtn.addEventListener('click', resetHorario);
 if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) resetHorario(); });
 
+
+
+// ======================
+// CARREGAR ALUNOS DA ESCOLA
+// ======================
+const db = getFirestore();
+
+// Função para carregar os alunos da escola do usuário logado
+async function carregarAlunosPorEscola() {
+  const userId = localStorage.getItem('uidUsuario');
+  if (!userId) return console.error('Usuário não autenticado');
+
+  try {
+    // Busca o documento do usuário logado
+    const userDoc = await getDoc(doc(db, "usuarios", userId));
+    if (!userDoc.exists()) return console.error("Documento do usuário não encontrado");
+
+    const codigoEscola = userDoc.data().codigoEscola;
+    if (!codigoEscola) return console.error("Usuário sem código de escola");
+
+    console.log("🔍 Buscando alunos da escola:", codigoEscola);
+
+    // Busca alunos com o mesmo código de escola
+    const alunosRef = collection(db, "usuarios");
+    const alunosQuery = query(alunosRef, where("role", "==", "aluno"), where("codigoEscola", "==", codigoEscola));
+    const snapshot = await getDocs(alunosQuery);
+
+    const container = document.getElementById("alunosContainer");
+    container.innerHTML = ""; // Limpa o conteúdo anterior
+
+    if (snapshot.empty) {
+      container.innerHTML = `<p class="text-gray-500">Nenhum aluno cadastrado nesta escola.</p>`;
+      return;
+    }
+
+    snapshot.forEach(docSnap => {
+      const aluno = docSnap.data();
+
+      const card = document.createElement("div");
+      card.className = "card-aluno bg-white dark:bg-gray-800 p-4 rounded-lg shadow cursor-pointer transition hover:bg-blue-50 dark:hover:bg-gray-700";
+      card.dataset.nome = aluno.nome || "";
+      card.dataset.serie = aluno.serie || "";
+      card.dataset.turma = aluno.turma || "";
+
+      card.innerHTML = `
+        <div class="flex items-center space-x-4">
+          <img src="${aluno.fotoPerfil || 'assets/default-avatar.png'}" alt="Foto de ${aluno.nome}" class="w-12 h-12 rounded-full object-cover">
+          <div>
+            <h5 class="font-semibold text-gray-800 dark:text-white">${aluno.nome}</h5>
+            <p class="text-sm text-gray-500">${aluno.serie || 'Sem série'} • ${aluno.turma || 'Sem turma'}</p>
+          </div>
+        </div>
+      `;
+
+      card.addEventListener("click", () => selecionarAluno(card));
+
+      container.appendChild(card);
+    });
+
+    console.log("✅ Alunos carregados com sucesso!");
+  } catch (error) {
+    console.error("Erro ao carregar alunos:", error);
+  }
+}
+
+// Chama a função ao carregar a página
+carregarAlunosPorEscola();
+
 });
 
 // 
@@ -1034,33 +1128,6 @@ if (fecharModalButton) {
     if (fichaModal) fichaModal.classList.add('hidden');
   });
 }
-
-
-// =======================================================
-// 🔥 INTEGRAÇÃO FIREBASE - NEXUS
-// =======================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  collection,
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import {
-  getStorage,
-  ref,
-  getDownloadURL,
-  uploadBytes
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // =======================================================
 // ⚙️ CONFIGURAÇÃO DO FIREBASE
