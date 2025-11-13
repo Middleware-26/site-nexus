@@ -21,7 +21,9 @@ import {
   orderBy,
   limit,
   startAfter,
-  startAt
+  startAt,
+  endBefore,
+  limitToLast
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import {
   getStorage,
@@ -98,15 +100,19 @@ onAuthStateChanged(auth, async (user) => {
 
   // Atualiza os indicadores do painel
   atualizarIndicadores(user.uid, dados.codigoEscola);
-  // Carrega os alunos da escola com paginação
+
   const userSchoolCode = dados.codigoEscola;
-  // Carrega a primeira página de alunos assim que loga
+
+  // Carrega a primeira página
   carregarAlunosPaginado(userSchoolCode);
 
-  // Configura botões de navegação
-  document.getElementById("btnProximo")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "proximo"));
-  document.getElementById("btnAnterior")?.addEventListener("click", () => carregarAlunosPaginado(userSchoolCode, "anterior"));
-
+  // Configura botões de paginação
+  document.getElementById("btnProximo")?.addEventListener("click", () => 
+    carregarAlunosPaginado(userSchoolCode, "proximo")
+  );
+  document.getElementById("btnAnterior")?.addEventListener("click", () => 
+    carregarAlunosPaginado(userSchoolCode, "anterior")
+  );
 
     console.log("📦 Dados do usuário:", dados);
 
@@ -195,64 +201,144 @@ const alunosPorPagina = 10;
 
 async function carregarAlunosPaginado(codigoEscola, direcao) {
   try {
+    if (!codigoEscola) {
+      console.warn("carregarAlunosPaginado: codigoEscola não fornecido.");
+      return;
+    }
+
     const alunosRef = collection(db, "usuarios");
     let q;
 
-    if (direcao === "proximo" && ultimoDoc) {
-      q = query(alunosRef, where("role", "==", "aluno"),
+    // Página inicial
+    if (!direcao) {
+      q = query(
+        alunosRef,
         where("codigoEscola", "==", codigoEscola),
-        orderBy("nome"),
-        startAfter(ultimoDoc),
-        limit(alunosPorPagina)
-      );
-      paginaAtual++;
-    } else if (direcao === "anterior" && primeiroDoc) {
-      q = query(alunosRef, where("role", "==", "aluno"),
-        where("codigoEscola", "==", codigoEscola),
-        orderBy("nome"),
-        endBefore(primeiroDoc),
-        limitToLast(alunosPorPagina)
-      );
-      paginaAtual = Math.max(1, paginaAtual - 1);
-    } else {
-      q = query(alunosRef, where("role", "==", "aluno"),
-        where("codigoEscola", "==", codigoEscola),
+        where("tipo", "==", "aluno"),
         orderBy("nome"),
         limit(alunosPorPagina)
       );
       paginaAtual = 1;
+      // reset cursors ao carregar início
+      primeiroDoc = null;
+      ultimoDoc = null;
+
+    // Próxima página
+    } else if (direcao === "proximo") {
+      if (!ultimoDoc) {
+        // se não houver cursor, carrega a primeira página
+        q = query(
+          alunosRef,
+          where("codigoEscola", "==", codigoEscola),
+          where("tipo", "==", "alunos"),
+          orderBy("nome"),
+          limit(alunosPorPagina)
+        );
+        paginaAtual = 1;
+      } else {
+        q = query(
+          alunosRef,
+          where("codigoEscola", "==", codigoEscola),
+          where("tipo", "==", "alunos"),
+          orderBy("nome"),
+          startAfter(ultimoDoc),
+          limit(alunosPorPagina)
+        );
+        paginaAtual++;
+      }
+
+    // Página anterior
+    } else if (direcao === "anterior") {
+      if (!primeiroDoc) {
+        // já está na primeira página
+        return;
+      } else {
+        // Para voltar, buscamos os documentos anteriores usando endBefore + limitToLast
+        q = query(
+          alunosRef,
+          where("codigoEscola", "==", codigoEscola),
+          where("tipo", "==", "alunos"),
+          orderBy("nome"),
+          endBefore(primeiroDoc),
+          limitToLast(alunosPorPagina)
+        );
+        paginaAtual = Math.max(1, paginaAtual - 1);
+      }
     }
 
     const snapshot = await getDocs(q);
-    if (snapshot.empty) return;
 
-    // Define os limites para paginação
+    // se vazio e foi tentativa de próxima página, não incrementa
+    if (snapshot.empty) {
+      console.log("carregarAlunosPaginado: snapshot vazio para", { codigoEscola, direcao });
+      // ajustar paginaAtual caso tenha sido incrementado
+      if (direcao === "proximo") paginaAtual = Math.max(1, paginaAtual - 1);
+      return;
+    }
+
+    // atualiza cursores
     primeiroDoc = snapshot.docs[0];
     ultimoDoc = snapshot.docs[snapshot.docs.length - 1];
 
-    // Atualiza número da página
+    // atualiza pagina atual no DOM
     const paginaEl = document.getElementById("paginaAtual");
     if (paginaEl) paginaEl.textContent = paginaAtual;
 
-    // Renderiza alunos na tabela
+    // renderiza tabela
     const tbody = document.getElementById("alunosContainer");
+    if (!tbody) {
+      console.warn("carregarAlunosPaginado: tbody #alunosContainer não encontrado.");
+      return;
+    }
     tbody.innerHTML = "";
-    snapshot.forEach((doc) => {
-      const aluno = doc.data();
+
+    snapshot.forEach((docSnap) => {
+      const aluno = docSnap.data();
       const tr = document.createElement("tr");
+      tr.className = "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
+      tr.dataset.email = aluno.email || "";
       tr.innerHTML = `
-        <td class="px-6 py-4">${aluno.nome}</td>
-        <td class="px-6 py-4">${aluno.anoTurma || "—"}</td>
-        <td class="px-6 py-4">${aluno.status || "—"}</td>
-        <td class="px-6 py-4">${aluno.ultimaSessao || "—"}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 h-10 w-10">
+              <img class="h-10 w-10 rounded-full object-cover" src="${aluno.fotoPerfil || 'imagens/padrao.jpg'}" alt="">
+            </div>
+            <div class="ml-4">
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${aluno.nome || '—'}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">${aluno.idade || ''}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm text-gray-900 dark:text-gray-100">${aluno.serie || '—'} - ${aluno.turma || '—'}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+            ${aluno.status || 'Em acompanhamento'}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+          ${aluno.ultimaSessao || '—'}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+          <button class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 mr-3">
+            <span class="material-symbols-outlined">visibility</span>
+          </button>
+          <button class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+            <span class="material-symbols-outlined">chat</span>
+          </button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
+
+    console.log(`carregarAlunosPaginado: renderizadas ${snapshot.size} linhas (página ${paginaAtual}).`);
 
   } catch (error) {
     console.error("❌ Erro na paginação:", error);
   }
 }
+
 
 
 
