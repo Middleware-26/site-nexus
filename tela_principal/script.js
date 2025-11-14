@@ -193,7 +193,7 @@ async function atualizarIndicadores(uid, codigoEscola) {
       return dataCadastro && dataCadastro >= seteDiasAtras;
     }).length;
 
-    document.getElementById("totalAlunos").textContent = totalAlunos;
+   // document.getElementById("totalAlunos").textContent = totalAlunos;
     document.getElementById("totalSessoes").textContent = totalSessoes;
     document.getElementById("totalAcomp").textContent = totalAcomp;
     document.getElementById("novosCasos").textContent = novosCasos;
@@ -1697,6 +1697,18 @@ if (!window.formCadastroInicializado) {
 
       if (sucesso) {
         msg.textContent = `✅ Usuário ${role} criado com sucesso!`;
+
+        // Se for um aluno, atualiza os indicadores para refletir a nova contagem
+        if (role.toLowerCase() === 'aluno') {
+          // As variáveis db e auth não estão no escopo do evento, mas foram exportadas para window.
+          const userDocRef = doc(window.db, "usuarios", window.auth.currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const dados = userDocSnap.data();
+            // A função atualizarIndicadores está no escopo global
+            atualizarIndicadores(window.auth.currentUser.uid, dados.codigoEscola);
+          }
+        }
         msg.className = "text-green-600";
         e.target.reset();
       } else {
@@ -1843,4 +1855,46 @@ if (btnLogout) {
     logoutUsuario();
   });
 }
+
+async function exibirTotalAlunos(escolaId) {
+  try {
+    // Referência para a escola específica
+    const escolaRef = doc(db, 'escolas', escolaId);
+    
+    // Referência para a subcollection de alunos da escola
+    const alunosRef = collection(escolaRef, 'alunos');
+    
+    // Busca todos os documentos da subcollection alunos
+    const alunosSnapshot = await getDocs(alunosRef);
+    
+    // Seleciona o elemento HTML e atualiza o conteúdo
+    const elementoTotalAlunos = document.getElementById('totalAlunos');
+    
+    if (elementoTotalAlunos) {
+      elementoTotalAlunos.textContent = alunosSnapshot.size;
+    } else {
+      console.error('Elemento com ID "totalAlunos" não encontrado');
+    }
+    
+    return alunosSnapshot.size;
+    
+  } catch (error) {
+    console.error('Erro ao carregar total de alunos:', error);
+    
+    // Exibe mensagem de erro no elemento
+    const elementoTotalAlunos = document.getElementById('totalAlunos');
+    if (elementoTotalAlunos) {
+      elementoTotalAlunos.textContent = '0';
+      elementoTotalAlunos.style.color = 'red';
+    }
+    
+    throw error;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const escolaId = '44054-249'; // Substitua pelo ID real da escola
+  exibirTotalAlunos(escolaId);
+});
+
 
